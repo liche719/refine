@@ -6,10 +6,9 @@ public class Constants {
 
     public final static String TRACE_ID = "traceId";
 
-    // 验证码缓存键前缀
-    public static final String CACHE_KEY_PREFIX = "user:verify:code:";
-
-    public static final String SEND_RECORD_PREFIX = "user:verify:record:";
+    // 验证码缓存键
+    public static final String REDIS_EMAIL_KEY = "user:verify:code:";
+    public static final String REDIS_EMAIL_RECORD_KEY = "user:verify:record:";
 
     // 验证码发送间隔
     public static final int SEND_INTERVAL_SECONDS = 60;
@@ -19,4 +18,7 @@ public class Constants {
 
     public static final String USER_TOKEN_KEY_PREFIX = "user:token:";
     public static final String USER_ID_KEY_PREFIX = "user:id:";
+
+    public static final String REGEX_PASSWORD = "^(?=.*\\d)(?=.*[a-zA-Z])[\\da-zA-Z~!@#$%^&*_]{8,18}$";
+
 }

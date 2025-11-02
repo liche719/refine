@@ -1,12 +1,10 @@
 package com.achobeta.domain.user.service.impl;
 
 import com.achobeta.domain.IRedisService;
-import com.achobeta.domain.user.adapter.repository.IUserRepository;
 import com.achobeta.domain.user.service.IEmailVerificationService;
 import com.achobeta.types.enums.GlobalServiceStatusCode;
 import com.achobeta.types.exception.AppException;
 import com.achobeta.types.support.util.StringTools;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import jakarta.mail.MessagingException;
@@ -53,7 +51,7 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
         }
 
         // 检查发送频率
-        String sendRecordKey = SEND_RECORD_PREFIX + userEmail;
+        String sendRecordKey = REDIS_EMAIL_RECORD_KEY + userEmail;
         String lastSendTime = redis.getValue(sendRecordKey);
         if (lastSendTime != null) {
             LocalDateTime lastTime = LocalDateTime.parse(lastSendTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -66,7 +64,7 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
         String code = generateSecureCode();
 
         // 缓存验证码（设置过期时间，与有效期一致）
-        String codeKey = CACHE_KEY_PREFIX + userEmail;
+        String codeKey = REDIS_EMAIL_KEY + userEmail;
         redis.setValue(codeKey, code, CODE_EXPIRE_MINUTES * 60L);
 
         // 记录发送时间（用于频率限制）
@@ -91,14 +89,14 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
      * 验证注册验证码
      */
     @Override
-    public boolean verifyCode(String userEmail, String checkCode) {
+    public void verifyCode(String userEmail, String checkCode) {
         // 1. 校验邮箱格式（二次校验，避免无效请求）
         if (!StringTools.isEmail(userEmail)) {
-            throw new AppException("无效的邮箱格式");
+            throw new AppException(GlobalServiceStatusCode.USER_EMAIL_FORMAT_ERROR);
         }
 
         // 2. 从缓存获取验证码
-        String codeKey = CACHE_KEY_PREFIX + userEmail;
+        String codeKey = REDIS_EMAIL_KEY + userEmail;
         String cachedCode = redis.getValue(codeKey);
 
         // 3. 验证验证码
@@ -106,12 +104,11 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
             throw new AppException("验证码已过期，请重新获取");
         }
         if (!cachedCode.equals(checkCode)) {
-            throw new AppException("验证码错误");
+            throw new AppException(GlobalServiceStatusCode.USER_CAPTCHA_CODE_ERROR);
         }
 
         // 验证通过后删除缓存（避免重复使用）
         redis.remove(codeKey);
-        return true;
     }
 
 

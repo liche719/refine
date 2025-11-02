@@ -23,6 +23,16 @@ public class UserRepository implements IUserRepository {
     private static final SnowflakeIdWorker INSTANCE = new SnowflakeIdWorker(0);
 
 
+    /**
+     * 按ID查询用户
+     *
+     * @param userId
+     */
+    @Override
+    public UserEntity findById(String userId) {
+        return userAccountMapper.selectById(userId);
+    }
+
     @Override
     public UserEntity findByAccount(String account) {
         return userAccountMapper.selectByAccount(account);
@@ -36,8 +46,8 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
-    public void update(UserEntity user, UserEntity query) {
-        userAccountMapper.update(user, query);
+    public void updateByUserAccount(UserEntity user, String account) {
+        userAccountMapper.update(user, account);
     }
 
 }

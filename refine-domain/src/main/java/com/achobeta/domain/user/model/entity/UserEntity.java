@@ -5,7 +5,6 @@ import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * @author liangchaowen
@@ -77,7 +76,7 @@ public class UserEntity {
         if (null == inputPassword || null == userPassword) {
             return false;
         }
-        // BCrypt.checkpw：自动提取加密字符串中的盐值，与输入密码比对
+        // 自动提取加密字符串中的盐值，与输入密码比对
         return BCrypt.checkpw(inputPassword, userPassword);
     }
 

@@ -10,6 +10,11 @@ import com.achobeta.domain.user.model.entity.UserEntity;
 public interface IUserRepository {
 
     /**
+     * 按ID查询用户
+     */
+    UserEntity findById(String userId);
+
+    /**
      * 按账号查询用户
      */
     UserEntity findByAccount(String account);
@@ -22,5 +27,6 @@ public interface IUserRepository {
     /**
      * 更新用户
      */
-    void update(UserEntity user, UserEntity query);
+    void updateByUserAccount(UserEntity user, String account);
+
 }
