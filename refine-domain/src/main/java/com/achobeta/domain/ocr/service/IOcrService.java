@@ -1,5 +1,7 @@
 package com.achobeta.domain.ocr.service;
 
+import com.achobeta.domain.ocr.model.entity.QuestionItem;
+
 /**
  * @Auth : Malog
  * @Desc : 从用户上传的文件中提取第一道题目

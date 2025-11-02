@@ -1,4 +1,4 @@
-package com.achobeta.domain.ocr.service;
+package com.achobeta.domain.ocr.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

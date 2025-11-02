@@ -1,7 +1,7 @@
 package com.achobeta.trigger.http;
 
 import com.achobeta.domain.ocr.service.IOcrService;
-import com.achobeta.domain.ocr.service.QuestionItem;
+import com.achobeta.domain.ocr.model.entity.QuestionItem;
 import com.achobeta.types.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +25,13 @@ public class OcrController {
 
     private final IOcrService ocrService;
 
+    /**
+     * 抽取第一个问题
+     *
+     * @param file     文件（最大为 5MB）
+     * @param fileType 文件类型
+     * @return 第一个问题
+     */
     @PostMapping(value = "extract-first", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<QuestionItem> extractFirst(@RequestPart("file") MultipartFile file,
                                                @RequestParam(value = "fileType", required = false) String fileType) {

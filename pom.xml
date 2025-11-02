@@ -52,6 +52,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- 阿里云 SDK -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>dashscope-sdk-java</artifactId>
+                <version>2.13.0</version>
+            </dependency>
             <!-- PDFBox -->
             <dependency>
                 <groupId>org.apache.pdfbox</groupId>
