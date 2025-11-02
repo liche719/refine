@@ -33,34 +33,32 @@ public class UserAccountServiceImpl implements IUserAccountService {
 
     /**
      * 用户注册（添加验证码验证逻辑）
-     * @param account 邮箱
-     * @param password 明文密码
-     * @param userName 昵称
+     *
+     * @param email     邮箱
+     * @param password  明文密码
+     * @param userName  昵称
      * @param checkCode 验证码
      * @return 注册成功
      * @throws AppException 邮箱已注册、验证码无效等异常
      */
     @Override
-    public void register(String account, String password, String userName, String checkCode) {
+    public void register(String email, String password, String userName, String checkCode) {
 
-        if (!StringTools.isEmail(account)) {
+        if (!StringTools.isEmail(email)) {
             throw new AppException(GlobalServiceStatusCode.USER_EMAIL_FORMAT_ERROR);
         }
         // 先验证验证码（核心新增逻辑：调用验证码服务验证）
-        boolean isCodeValid = emailVerificationService.verifyCode(account, checkCode);
-        if (!isCodeValid) {
-            throw new AppException(GlobalServiceStatusCode.USER_CAPTCHA_CODE_ERROR);
-        }
+        emailVerificationService.verifyCode(email, checkCode);
 
         // 校验邮箱是否已存在
-        if (null != userRepository.findByAccount(account)) {
+        if (null != userRepository.findByAccount(email)) {
             throw new AppException(GlobalServiceStatusCode.USER_EMAIL_ALREADY_EXIST);
         }
 
         // 创建用户实体
         UserEntity user = UserEntity.builder()
                 .userName(userName)
-                .userAccount(account)
+                .userAccount(email)
                 .createTime(LocalDateTime.now())
                 .userStatus(1) // 1-正常 0-禁用
                 .build();
@@ -72,7 +70,8 @@ public class UserAccountServiceImpl implements IUserAccountService {
 
     /**
      * 用户登录（保持不变）
-     * @param account 邮箱
+     *
+     * @param account  邮箱
      * @param password 明文密码
      * @return 登录成功的用户信息（含令牌）
      * @throws AppException 账号或密码错误/账号禁用等异常
@@ -102,11 +101,38 @@ public class UserAccountServiceImpl implements IUserAccountService {
 
     }
 
+    /**
+     * 重置密码
+     *
+     * @param userEmail    邮箱
+     * @param newPassword  新密码
+     * @param checkCode    验证码
+     * @return 重置成功
+     * @throws AppException 邮箱不存在、验证码无效等异常
+     */
     @Override
-    public void logout(String userId) {
-        redis.remove(USER_TOKEN_KEY_PREFIX + userId);
-        redis.remove(USER_ID_KEY_PREFIX + userId);
-
+    public void resetPassword(String userEmail, String newPassword, String checkCode) {
+        // 验证该邮箱用户是否存在
+        if (null == userRepository.findByAccount(userEmail)) {
+            throw new AppException(GlobalServiceStatusCode.USER_ACCOUNT_NOT_EXIST);
+        }
+        // 验证验证码
+        emailVerificationService.verifyCode(userEmail, checkCode);
+        // 改密码
+        UserEntity user = userRepository.findByAccount(userEmail);
+        user.encryptPassword(newPassword);
+        userRepository.updateByUserAccount(user, userEmail);
     }
+
+    @Override
+    public void updatePassword(String userId, String oldPassword, String newPassword) {
+        UserEntity user = userRepository.findById(userId);
+        if (!user.verifyPassword(oldPassword)) {
+            throw new AppException(GlobalServiceStatusCode.USER_CREDENTIALS_ERROR);
+        }
+        user.encryptPassword(newPassword);
+        userRepository.updateByUserAccount(user, user.getUserAccount());
+    }
+
 
 }

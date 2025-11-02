@@ -16,75 +16,82 @@
         <result column="user_status" property="userStatus"/>
     </resultMap>
 
-    <select id="selectByAccount" parameterType="java.lang.String" resultMap="BaseResultMap">
-        SELECT
-        user_id,
-        user_name,
-        user_picture_resource,
-        user_account,
-        user_email,
-        user_phone_num,
-        user_password,
-        create_time,
-        user_status
+    <select id="selectById" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT user_id,
+               user_name,
+               user_picture_resource,
+               user_account,
+               user_email,
+               user_phone_num,
+               user_password,
+               create_time,
+               user_status
         FROM UserInformation
-        WHERE
-        user_account = #{userAccount}
+        WHERE user_id = #{userId}
     </select>
 
+    <select id="selectByAccount" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT user_id,
+               user_name,
+               user_picture_resource,
+               user_account,
+               user_email,
+               user_phone_num,
+               user_password,
+               create_time,
+               user_status
+        FROM UserInformation
+        WHERE user_account = #{userAccount}
+    </select>
 
     <!-- 2. 插入用户（insert 方法） -->
     <insert id="insert" parameterType="com.achobeta.domain.user.model.entity.UserEntity">
-        INSERT INTO UserInformation (
-        user_id,
-        user_name,
-        user_picture_resource,
-        user_account,
-        user_email,
-        user_phone_num,
-        user_password,
-        create_time,
-        user_status
-        ) VALUES (
-        #{userId},
-        #{userName},
-        #{userPictureResource},
-        #{userAccount},
-        #{userEmail},
-        #{userPhoneNum},
-        #{userPassword},
-        #{createTime},
-        #{userStatus}
-        )
+        INSERT INTO UserInformation (user_id,
+                                     user_name,
+                                     user_picture_resource,
+                                     user_account,
+                                     user_email,
+                                     user_phone_num,
+                                     user_password,
+                                     create_time,
+                                     user_status)
+        VALUES (#{userId},
+                #{userName},
+                #{userPictureResource},
+                #{userAccount},
+                #{userEmail},
+                #{userPhoneNum},
+                #{userPassword},
+                #{createTime},
+                #{userStatus})
     </insert>
 
 
     <!-- 3. 更新用户（update 方法） -->
     <update id="update" parameterType="com.achobeta.domain.user.model.entity.UserEntity">
         UPDATE UserInformation
-        SET
         <set>
-            <if test="query.userName != null and query.userName != ''">
-            user_name = #{userName},
+            <if test="user.userName != null and user.userName != ''">
+                user_name = #{user.userName},
             </if>
-            <if test="query.userPictureResource != null">
-            user_picture_resource = #{userPictureResource},
+            <if test="user.userPictureResource != null and user.userPictureResource != ''">
+                user_picture_resource = #{user.userPictureResource},
             </if>
-            <if test="query.userEmail != null">
-            user_email = #{userEmail},
+            <if test="user.userEmail != null and user.userEmail != ''">
+                user_email = #{user.userEmail},
             </if>
-            <if test="query.userPhoneNum != null">
-            user_phone_num = #{userPhoneNum},
+            <if test="user.userPhoneNum != null and user.userPhoneNum != ''">
+                user_phone_num = #{user.userPhoneNum},
             </if>
-            <if test="query.userPassword != null">
-            user_password = #{userPassword},
+            <if test="user.userPassword != null and user.userPassword != ''">
+                user_password = #{user.userPassword},
             </if>
-            <if test="query.userStatus != null">
-            user_status = #{userStatus},
+            <if test="user.userStatus != null and user.userStatus != ''">
+                user_status = #{user.userStatus},
             </if>
         </set>
         WHERE
-        user_id = #{userId}
+        user_account = #{user.userAccount}
     </update>
 
 </mapper>

@@ -1,10 +1,9 @@
 package com.achobeta.api.dto.userAccount;
 
-import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -28,6 +27,6 @@ public class RegisterRequestDTO implements Serializable {
     private String userName;
 
     @NotBlank(message = "验证码不能为空")
-    private String checkCode;//TODO 根据前端字段修改
+    private String checkCode;
 
 }

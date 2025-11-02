@@ -18,8 +18,7 @@ public interface IEmailVerificationService {
      * 验证注册验证码
      * @param userEmail 邮箱
      * @param checkCode 输入的验证码
-     * @return 验证通过返回true
      * @throws AppException 验证码无效/过期等异常
      */
-    boolean verifyCode(String userEmail, String checkCode);
+    void verifyCode(String userEmail, String checkCode);
 }
