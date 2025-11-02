@@ -1,9 +1,10 @@
 package com.achobeta.domain.ocr.service.impl;
 
+import com.achobeta.domain.ai.service.IAiTransferService;
 import com.achobeta.domain.ocr.adapter.port.IFilePreprocessPort;
 import com.achobeta.domain.ocr.adapter.port.IOcrPort;
 import com.achobeta.domain.ocr.service.IOcrService;
-import com.achobeta.domain.ocr.service.QuestionItem;
+import com.achobeta.domain.ocr.model.entity.QuestionItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * @Auth : Malog
- * @Desc : 默认 OCR 识别服务实现
+ * @Desc : OCR 服务实现结合ai提取识别到的第一道题目
  * @Time : 2025/10/31
  */
 @Service
@@ -20,6 +21,7 @@ public class DefaultOcrService implements IOcrService {
 
     private final IFilePreprocessPort filePreprocessPort;
     private final IOcrPort ocrPort;
+    private final IAiTransferService aiTransferService;
 
     /**
      * 抽取第一个问题
@@ -77,6 +79,9 @@ public class DefaultOcrService implements IOcrService {
         } catch (Exception e) {
             throw new RuntimeException("OCR 处理失败: " + e.getMessage(), e);
         }
+
+        // 使用 AI 模型尝试提取第一个问题
+        recognizedText = aiTransferService.extractTheFirstQuestion(recognizedText);
 
         // TODO 填充AI提取题干字段，AI生成答案和生成题目详细解析字段可暂时删除或滞后
         // 构造返回对象，当前只填充 questionText 字段，其余字段暂设为 null
