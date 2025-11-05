@@ -1,10 +1,11 @@
 package com.achobeta.domain.ocr.service.impl;
 
+import cn.hutool.core.lang.UUID;
 import com.achobeta.domain.ai.service.IAiTransferService;
 import com.achobeta.domain.ocr.adapter.port.IFilePreprocessPort;
 import com.achobeta.domain.ocr.adapter.port.IOcrPort;
 import com.achobeta.domain.ocr.service.IOcrService;
-import com.achobeta.domain.ocr.model.entity.QuestionItem;
+import com.achobeta.domain.ocr.model.entity.QuestionEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,7 @@ public class DefaultOcrService implements IOcrService {
      * @return 第一个问题
      */
     @Override
-    public QuestionItem extractQuestionContent(byte[] fileBytes, String fileType) {
+    public QuestionEntity extractQuestionContent(byte[] fileBytes, String fileType) {
         if (fileBytes == null || fileBytes.length == 0) {
             throw new IllegalArgumentException("fileBytes is empty");
         }
@@ -83,14 +84,11 @@ public class DefaultOcrService implements IOcrService {
         // 使用 AI 模型尝试提取第一个问题
         recognizedText = aiTransferService.extractTheFirstQuestion(recognizedText);
 
-        // TODO 填充AI提取题干字段，AI生成答案和生成题目详细解析字段可暂时删除或滞后
-        // 构造返回对象，当前只填充 questionText 字段，其余字段暂设为 null
-        QuestionItem item = new QuestionItem();
-        item.setQuestionText(recognizedText);
-        item.setOptions(null);
-        item.setAnswer(null);
-        item.setAnalysis(null);
-        return item;
+        // 创建并返回问题实体
+        QuestionEntity questionEntity = new QuestionEntity();
+        questionEntity.setQuestionText(recognizedText);
+        questionEntity.setQuestionId(UUID.fastUUID().toString());
+        return questionEntity;
     }
 }
 

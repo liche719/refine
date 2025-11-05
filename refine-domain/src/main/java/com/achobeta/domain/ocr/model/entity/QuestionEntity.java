@@ -14,24 +14,16 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuestionItem implements Serializable {
+public class QuestionEntity implements Serializable {
+
+    /**
+     * 题目ID
+     */
+    private String questionId;
 
     /**
      * 题目文本内容
      */
     private String questionText;
-    /**
-     * 题目选项内容
-     */
-    private String options;
-    /**
-     * 题目正确答案
-     */
-    private String answer;
-    /**
-     * 题目解析说明
-     */
-    private String analysis;
-
 
 }

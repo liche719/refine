@@ -1,6 +1,6 @@
 package com.achobeta.domain.ocr.service;
 
-import com.achobeta.domain.ocr.model.entity.QuestionItem;
+import com.achobeta.domain.ocr.model.entity.QuestionEntity;
 
 /**
  * @Auth : Malog
@@ -16,6 +16,6 @@ public interface IOcrService {
      * @param fileType  文件类型
      * @return 第一道题目信息
      */
-    QuestionItem extractQuestionContent(byte[] fileBytes, String fileType);
+    QuestionEntity extractQuestionContent(byte[] fileBytes, String fileType);
 
 }
