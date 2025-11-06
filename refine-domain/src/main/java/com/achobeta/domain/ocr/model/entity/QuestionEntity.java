@@ -17,6 +17,11 @@ import java.io.Serializable;
 public class QuestionEntity implements Serializable {
 
     /**
+     * 用户ID
+     */
+    private String userId;
+
+    /**
      * 题目ID
      */
     private String questionId;
