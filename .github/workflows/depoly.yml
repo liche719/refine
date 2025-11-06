@@ -57,7 +57,7 @@ jobs:
           # port: ${{ secrets.SSH_PORT }} # Optional; default 22 if not set
           script: |
             set -e
-            cd /refine
+            cd ./refine
             echo "pulling latest code..."
             git pull
             git checkout develop
