@@ -18,17 +18,17 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 # Check if Docker Compose is installed and set the appropriate command
-if command -v docker-compose &> /dev/null
+if command -v docker compose &> /dev/null
 then
+    # 优先使用 V2 (plugin)
+    COMPOSE_COMMAND="docker compose"
+elif command -v docker-compose &> /dev/null
+then
+    # 回退到 V1 (standalone)
     COMPOSE_COMMAND="docker-compose"
 else
-    if command -v docker compose &> /dev/null
-    then
-        COMPOSE_COMMAND="docker compose"
-    else
-        echo "Error: Docker Compose is not installed. Please install Docker Compose before running this script."
-        exit 1
-    fi
+    echo "Error: Docker Compose (V1 or V2) is not installed. Please install it before running this script."
+    exit 1
 fi
 
 # 启动基础环境（必须）
