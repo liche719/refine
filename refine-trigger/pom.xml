@@ -44,7 +44,11 @@
             <groupId>com.achobeta</groupId>
             <artifactId>refine-domain</artifactId>
         </dependency>
-        </dependencies>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+        </dependency>
+    </dependencies>
 
     <build>
         <finalName>refine-trigger</finalName>
