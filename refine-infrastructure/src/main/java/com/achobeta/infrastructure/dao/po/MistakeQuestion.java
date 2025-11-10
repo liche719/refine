@@ -42,6 +42,9 @@ public class MistakeQuestion {
     /** 其他原因 */
     private String otherReason;
 
+    /** 是否选择其他原因（0-否，1-是） */
+    private Integer otherReasonFlag;
+
     /** 逻辑外键：关联knowledge_point表的knowledge_point_id */
     private String knowledgePointId;
 

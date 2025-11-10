@@ -34,4 +34,31 @@ public interface IMistakeQuestionDao {
      * @return 错题列表
      */
     java.util.List<MistakeQuestion> selectByUserId(String userId);
+
+    /**
+     * 根据用户ID和题目ID查询错题
+     *
+     * @param userId 用户ID
+     * @param questionId 题目ID
+     * @return 错题实体
+     */
+    MistakeQuestion selectByUserIdAndQuestionId(String userId, String questionId);
+
+    /**
+     * 更新错因信息
+     *
+     * @param mistakeQuestion 错题实体
+     * @return 影响行数
+     */
+    int updateMistakeReasons(MistakeQuestion mistakeQuestion);
+
+    /**
+     * 更新其他原因文本
+     *
+     * @param userId 用户ID
+     * @param questionId 题目ID
+     * @param otherReasonText 其他原因文本
+     * @return 影响行数
+     */
+    int updateOtherReasonText(String userId, String questionId, String otherReasonText);
 }
