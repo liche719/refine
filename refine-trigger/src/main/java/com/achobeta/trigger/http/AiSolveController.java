@@ -1,9 +1,6 @@
 package com.achobeta.trigger.http;
 
-import com.achobeta.api.dto.AiSolveRequestDTO;
-import com.achobeta.api.dto.AiSolveResponseDTO;
 import com.achobeta.domain.ai.service.IAiService;
-import com.achobeta.types.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
