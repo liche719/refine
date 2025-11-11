@@ -1,6 +1,7 @@
 package com.achobeta.domain.ai.service.impl;
 
 import com.achobeta.domain.ai.service.IAiService;
+import com.achobeta.domain.conversation.model.entity.ConversationMessageEntity;
 import com.alibaba.dashscope.aigc.generation.Generation;
 import com.alibaba.dashscope.aigc.generation.GenerationParam;
 import com.alibaba.dashscope.aigc.generation.GenerationResult;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -211,7 +213,125 @@ public class aiService implements IAiService {
         }
     }
 
-    // 构建调用参数
+    /**
+     * 使用大模型进行问题解答（带上下文）
+     *
+     * @param questionId          错题ID（作为会话ID）
+     * @param question            问题内容
+     * @param conversationHistory 会话历史
+     * @param contentCallback     回调函数，用于处理大模型返回的答案内容
+     */
+    @Override
+    public void aiSolveQuestionWithContext(String questionId, String question, List<ConversationMessageEntity> conversationHistory, Consumer<String> contentCallback) {
+        try {
+            // 清空之前的响应内容
+            completeResponse.setLength(0);
+            
+            // 创建大模型实例
+            Generation gen = new Generation();
+
+            // 构建消息列表，包含历史对话
+            List<Message> messages = buildMessagesWithHistory(question, conversationHistory);
+
+            // 构建调用参数
+            GenerationParam param = GenerationParam.builder()
+                    .apiKey(apiKey)
+                    .model(MODEL_NAME)
+                    .messages(messages)
+                    .resultFormat(GenerationParam.ResultFormat.MESSAGE)
+                    .incrementalOutput(true)
+                    .build();
+
+            // 流式调用
+            Flowable<GenerationResult> result = gen.streamCall(param);
+            result.blockingForEach(resultItem -> _handleGenerationResult(resultItem, contentCallback));
+
+            // 流式输出结束后换行
+            System.out.println();
+            // 打印完整的收集内容
+            System.out.println("\n=== 完整的AI回复内容 ===");
+            System.out.println(completeResponse.toString());
+            
+            // 通知调用方AI回复已完成，让应用服务层保存到Redis
+            if (contentCallback != null) {
+                // 通过回调通知AI回复完成，让上层服务保存到Redis
+                // 使用特殊标记来区分普通流式输出和最终完成通知
+                contentCallback.accept("###AI_RESPONSE_END###" + completeResponse.toString());
+            }
+        } catch (ApiException | NoApiKeyException | InputRequiredException e) {
+            logger.error("An exception occurred: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * 构建包含历史对话的消息列表
+     */
+    private List<Message> buildMessagesWithHistory(String question, List<ConversationMessageEntity> conversationHistory) {
+        List<Message> messages = new ArrayList<>();
+
+        // 添加系统消息
+        Message systemMsg = Message.builder()
+                .role(Role.SYSTEM.getValue())
+                .content("""
+                        你是一位专业的解题助手，能够根据之前的对话历史为用户提供连贯的解答。
+                        请根据上下文理解用户的问题，并提供准确、详细的解答。
+
+                        **解题格式要求：**
+
+                        【题目分析】
+                        - 仔细阅读题目，理解题目的背景、条件和要求
+                        - 明确已知条件和待求目标
+                        - 分析题目的类型和特点
+                        - 指出解题的关键点和可能的突破口
+
+                        【解题过程】
+                        - 按照逻辑顺序，逐步展示完整的解题步骤
+                        - 每一步都要有清晰的推理和计算过程
+                        - 重要的公式、定理要明确写出
+                        - 数值计算要准确，单位要规范
+                        
+                        【解题方法】
+                        - 明确指出本题使用的核心解题方法
+                        - 说明为什么选择这种方法
+                        
+                        【考查知识点】
+                        - 列出本题涉及的所有重要知识点
+                        - 说明每个知识点在本题中的具体应用
+                        
+                        **注意事项：**
+                        - 语言要专业、准确、简洁
+                        - 逻辑要严密，推理要完整
+                        - 重要的结论和答案要用【最终答案】标注
+                        - 如果题目包含公式，请以markdown格式给出
+                        """)
+                .build();
+        messages.add(systemMsg);
+
+        // 添加历史对话
+        if (conversationHistory != null && !conversationHistory.isEmpty()) {
+            for (ConversationMessageEntity historyMessage : conversationHistory) {
+                String role = historyMessage.isUserMessage() ? Role.USER.getValue() : Role.ASSISTANT.getValue();
+                Message msg = Message.builder()
+                        .role(role)
+                        .content(historyMessage.getMessageContent())
+                        .build();
+                messages.add(msg);
+            }
+        }
+
+        // 添加当前用户问题
+        Message userMsg = Message.builder()
+                .role(Role.USER.getValue())
+                .content(question)
+                .build();
+        messages.add(userMsg);
+
+        return messages;
+    }
+
+    /**
+     * 构建调用参数
+     */
     private GenerationParam _buildGenerationParam(Message userMsg) {
         return GenerationParam.builder()
                 .apiKey(apiKey)
@@ -222,7 +342,9 @@ public class aiService implements IAiService {
                 .build();
     }
 
-    // 处理大模型返回的答案结果
+    /**
+     * 处理大模型返回的答案结果
+     */
     private static void _handleGenerationResult(GenerationResult result, Consumer<String> contentCallback) {
         try {
             // 检查结果是否为空
@@ -254,16 +376,27 @@ public class aiService implements IAiService {
     // 流式调用大模型
     public void _streamCallWithMessage(Generation gen, Message userMsg, Consumer<String> contentCallback)
             throws NoApiKeyException, ApiException, InputRequiredException {
+        // 清空之前的响应内容
+        completeResponse.setLength(0);
+        
         GenerationParam param = _buildGenerationParam(userMsg);
         Flowable<GenerationResult> result = gen.streamCall(param);
         result.blockingForEach(resultItem -> _handleGenerationResult(resultItem, contentCallback));
 
-        // TODO 将输出的结果保存在redis中，用于后续的问答
         // 流式输出结束后换行
         System.out.println();
         // 打印完整的收集内容
         System.out.println("\n=== 完整的AI回复内容 ===");
         System.out.println(completeResponse.toString());
+        
+        // 通知调用方AI回复已完成，让应用服务层保存到Redis
+        // 注意：这个方法主要用于单次问答，不带上下文的场景
+        // 对于带上下文的问答，Redis保存逻辑已在aiSolveQuestionWithContext方法中实现
+        if (contentCallback != null) {
+            // 通过回调通知AI回复完成，让上层服务保存到Redis
+            // 使用特殊标记来区分普通流式输出和最终完成通知
+            contentCallback.accept("###AI_RESPONSE_END###" + completeResponse.toString());
+        }
     }
 }
 

@@ -1,8 +1,13 @@
 package com.achobeta.domain.ai.service;
 
+import com.achobeta.domain.conversation.model.entity.ConversationMessageEntity;
+
+import java.util.List;
+import java.util.function.Consumer;
+
 /**
  * @Auth : Malog
- * @Desc : 抽取第一个问题
+ * @Desc : AI服务接口
  * @Time : 2025/11/2 14:34
  */
 public interface IAiService {
@@ -15,6 +20,22 @@ public interface IAiService {
      */
     String extractTheFirstQuestion(String content);
 
-    void aiSolveQuestion(String question, java.util.function.Consumer<String> contentCallback);
+    /**
+     * AI解答问题（无上下文）
+     *
+     * @param question 问题内容
+     * @param contentCallback 流式回调函数
+     */
+    void aiSolveQuestion(String question, Consumer<String> contentCallback);
+
+    /**
+     * AI解答问题（带上下文）
+     *
+     * @param questionId 错题ID（作为会话ID）
+     * @param question 问题内容
+     * @param conversationHistory 会话历史
+     * @param contentCallback 流式回调函数
+     */
+    void aiSolveQuestionWithContext(String questionId, String question, List<ConversationMessageEntity> conversationHistory, Consumer<String> contentCallback);
 
 }
