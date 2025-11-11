@@ -20,6 +20,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.achobeta.types.enums.TimeRange.MORE_THAN_ONE_WEEK;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class ReviewFeedbackService implements IReviewFeedbackService {
         // 如果选中时间，则计算时间范围
         LocalDate startDate = null;
         LocalDate endDate = null;
-        if (timeRange != null) {
+        if (timeRange != MORE_THAN_ONE_WEEK) {
             switch (timeRange) {
                 case THIS_WEEK:
                     startDate = LocalDate.now().minusDays(7);

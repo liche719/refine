@@ -14,7 +14,7 @@ public interface IReviewQuestionRepository {
 
 
     @Select("SELECT COUNT(1) FROM mistakequestion " +
-            "WHERE user_id = #{userId} AND date_sub(now(), interval 7 day) <= update_time")
+            "WHERE user_id = #{userId} AND date_sub(now(), interval 7 day) >= update_time")
     int queryReviewQuestions(@Param("userId") int userId);
 
     void deleteBatch(@Param("userId") int userId, @Param("questionIds") List<Integer> questionIds);

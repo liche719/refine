@@ -13,7 +13,7 @@ public interface MistakeQuestionMapper {
     List<MistakeQuestionEntity> selectByCondition(
             @Param("userId") int userId,
             @Param("keyword") String keyword,
-            @Param("subject") List<String> subject,
+            @Param("subjects") List<String> subjects,
             @Param("errorTypeFields") List<String> errorTypeFields,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate

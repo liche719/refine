@@ -19,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 @CrossOrigin("${app.config.cross-origin}:*")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/feedback/review")
+@RequestMapping("/api/${app.config.api-version}/feedback/review")
 public class ReviewFeedbackController {
 
 
@@ -69,10 +70,18 @@ public class ReviewFeedbackController {
             log.info("用户获取近期出错最多的知识点，userId:{}", userId);
             List<TrickyKnowledgePointVO> trickyKnowledgePointVOS = reviewFeedbackService.getTrickyKnowledgePoint(userId);
             List<TrickyKnowledgePointDTO> trickyKnowledgePointDTOS = trickyKnowledgePointVOS.stream()
-                    .map(trickyKnowledgePointVO -> TrickyKnowledgePointDTO.builder()
-                            .knowledgeId(trickyKnowledgePointVO.getKnowledgeId())
-                            .knowledgeName(trickyKnowledgePointVO.getKnowledgeName())
-                            .build()).toList();
+                    .map(trickyKnowledgePointVO -> {
+                        if (trickyKnowledgePointVO == null) {
+                            return TrickyKnowledgePointDTO.builder()
+                                    .knowledgeId("")
+                                    .knowledgeName("未知")
+                                    .build();
+                        }
+                        return TrickyKnowledgePointDTO.builder()
+                                .knowledgeId(trickyKnowledgePointVO.getKnowledgeId())
+                                .knowledgeName(trickyKnowledgePointVO.getKnowledgeName())
+                                .build();
+                    }).toList();
             return Response.SYSTEM_SUCCESS(trickyKnowledgePointDTOS);
         }catch (Exception e){
             log.error("用户获取近期出错最多的知识点失败！userId:{}", userId, e);
@@ -99,7 +108,13 @@ public class ReviewFeedbackController {
             params.setKeyword(keyword);
             params.setSubject(subject);
             params.setErrorType(errorType);
-            params.setTimeRange(TimeRange.valueOf(timeRange.toUpperCase()));
+            // 添加空值检查
+            if (timeRange != null && !timeRange.isEmpty()) {
+                params.setTimeRange(TimeRange.valueOf(timeRange.toUpperCase()));
+            } else {
+                // 设置默认值或处理空值情况
+                params.setTimeRange(TimeRange.MORE_THAN_ONE_WEEK); // 或其他合适的默认值
+            }
             params.setPage(page);
             params.setSize(size);
 

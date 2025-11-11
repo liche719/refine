@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin("${app.config.cross-origin}:*")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/overview")
+@RequestMapping("/api/${app.config.api-version}/overview")
 public class LearningOverviewController {
     private final ILearningOverviewService service;
     @GetMapping("/get_overview")

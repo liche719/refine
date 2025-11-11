@@ -15,7 +15,7 @@ public interface ITrickyKnowledgeRepository {
      */
     @Select("select m.knowledge_point_id, k.knowledge_desc from mistakequestion m" +
             " join knowledgepoint k on m.knowledge_point_id = k.knowledge_point_id " +
-            "where user_id = #{userId} and question_status = 0 and m.create_time >= subdate(date(localtime), 7)" +
+            "where user_id = #{userId} and question_status = 0 and m.create_time >= subdate(now(), 14)" +
             "group by m.knowledge_point_id, k.knowledge_desc " +
             "having count(m.knowledge_point_id) >= 3")
     List<TrickyKnowledgePointVO> getTrickyKnowledgePoints(int userId);
