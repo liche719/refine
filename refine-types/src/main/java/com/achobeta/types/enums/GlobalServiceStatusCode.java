@@ -51,6 +51,10 @@ public enum GlobalServiceStatusCode {
 
     USER_NO_PERMISSION(2403, "用户无权限"),
     USER_CAPTCHA_CODE_ERROR(2500, "验证码错误"),
+
+    QUESTION_GENERATION_FAIL(10001, "题目生成失败"),
+    QUESTION_IS_EXPIRED(10002, "题目已过期，无法录入错题" )
+
     ;
 
     private Integer code;
