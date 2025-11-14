@@ -75,7 +75,7 @@ public class ReviewFeedbackService implements IReviewFeedbackService {
 
         // 处理错误类型
         List<String> errorTypeFields = new ArrayList<>();
-        if (errorType != null) {
+        if (errorType != null && !errorType.isEmpty()) {
             for (String errorTy : errorType) {
                 String field = ErrorTypeMapper.FIELD_MAP.get(errorTy);
                 if (field != null) {

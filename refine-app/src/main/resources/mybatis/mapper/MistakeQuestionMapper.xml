@@ -4,14 +4,16 @@
 
     <select id="selectByCondition"
             resultType="com.achobeta.domain.Feetback.model.entity.MistakeQuestionEntity">
-        select m.id, question_content, update_time, subject, k.knowledge_desc
-               from mistakequestion m join knowledgepoint k on m.knowledge_point_id = k.knowledge_point_id
+        select m.id, question_content, update_time , subject, k.knowledge_desc, is_calculate_err, is_careless, is_time_shortage, is_unfamiliar
+        from mistakequestion m join knowledgepoint k on m.knowledge_point_id = k.knowledge_point_id
         <where>
         m.user_id = #{userId}
         <if test="keyword != null">
-            and question_content like concat('%',#{keyword},'%')
+            and (
+                question_content like concat('%',#{keyword},'%')
                 or k.knowledge_desc like concat('%',#{keyword},'%')
                 or other_reason like concat('%',#{keyword},'%')
+            )
         </if>
         <!-- 多选学科 -->
         <if test="subjects != null and !subjects.isEmpty()">

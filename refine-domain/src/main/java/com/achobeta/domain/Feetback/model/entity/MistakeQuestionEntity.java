@@ -11,24 +11,24 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class MistakeQuestionEntity {
     /**
-     * 错误题目ID
+     * 错误题目id
      */
     private Integer id;
     /**
      * 错误题目内容
      */
-    private String context;
+    private String question_content;
     /**
      * 错误原因
      */
-    private Integer isCareless;
-    private Integer isUnfamiliar;
-    private Integer isCalculateError;
-    private Integer isTimeShortage;
+    private Integer is_careless;
+    private Integer is_unfamiliar;
+    private Integer is_calculate_err;
+    private Integer is_time_shortage;
     /**
      * 创建时间
      */
-    private LocalDate createTime;
+    private LocalDate update_time;
     /**
      * 所属科目
      */
@@ -36,14 +36,6 @@ public class MistakeQuestionEntity {
     /**
      * 所属知识点
      */
-    private String knowledgePoint;
-    /**
-     * 创建者ID
-     */
-    private String userId;
-    /**
-     * 更新时间
-     */
-    private String updateTime;
+    private String knowledge_desc;
 
 }

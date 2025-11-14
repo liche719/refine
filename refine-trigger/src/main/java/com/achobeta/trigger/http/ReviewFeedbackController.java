@@ -12,6 +12,7 @@ import com.achobeta.domain.Feetback.model.valobj.StatsVO;
 import com.achobeta.domain.Feetback.service.feedback.IReviewFeedbackService;
 import com.achobeta.types.Response;
 import com.achobeta.types.enums.TimeRange;
+import com.alibaba.fastjson2.function.impl.ToDouble;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -62,7 +63,7 @@ public class ReviewFeedbackController {
     }
 
     /**
-     * 获取用户近期(一周)出错多(>= 3)的知识点
+     * 获取用户近期出错多(>= 3)的知识点
      */
     @GetMapping("/tricky_knowledge")
     public Response<List<TrickyKnowledgePointDTO>> getTrickyKnowledgePoint(@RequestParam int userId){
@@ -91,6 +92,7 @@ public class ReviewFeedbackController {
 
     /**
      * 获取用户待复习题目列表
+     * todo 待完善 处理前端传入%22%E6%95%B0%E5%AD%A6%22， 后端转成汉字的问题
      */
     @GetMapping("/list")
     public ResponseEntity<Page<MistakeQuestionEntity>> list(

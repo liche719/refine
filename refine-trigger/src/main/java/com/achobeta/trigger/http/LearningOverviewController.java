@@ -6,6 +6,7 @@ import com.achobeta.domain.overview.service.ILearningOverviewService;
 import com.achobeta.domain.overview.model.valobj.StudyOverviewVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class LearningOverviewController {
     private final ILearningOverviewService service;
     @GetMapping("/get_overview")
-    public StudyOverviewDTO getOverview(int userId) {
+    public StudyOverviewDTO getOverview(@Param("userId") int userId) {
         try {
             log.info("用户获取学习概览，userId:{}", userId);
             StudyOverviewVO vo = service.getOverview(userId);
