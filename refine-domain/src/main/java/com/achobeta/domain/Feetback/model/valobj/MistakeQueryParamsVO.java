@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MistakeQueryParamsVO {
-    private int userId;
+    private String userId;
     private String keyword;
     private List<String> subject;
     private List<String> errorType;

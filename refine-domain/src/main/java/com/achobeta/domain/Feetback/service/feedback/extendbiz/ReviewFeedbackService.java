@@ -34,7 +34,7 @@ public class ReviewFeedbackService implements IReviewFeedbackService {
 
 
     @Override
-    public OverdueCountVO getOverdueCount(int userId) {
+    public OverdueCountVO getOverdueCount(String userId) {
         return OverdueCountVO.builder()
                 .count(repository.queryReviewQuestions(userId))
                 .description("待复习题目数量")
@@ -44,7 +44,7 @@ public class ReviewFeedbackService implements IReviewFeedbackService {
     @Override
     public Page<MistakeQuestionEntity> searchAndFilter(MistakeQueryParamsVO params) {
         // 构造查询条件
-        int userId = params.getUserId();
+        String userId = params.getUserId();
         String keyword = params.getKeyword();
         List<String> subject = params.getSubject();
         List<String> errorType = params.getErrorType();
@@ -100,12 +100,12 @@ public class ReviewFeedbackService implements IReviewFeedbackService {
     }
 
     @Override
-    public void deleteBatch(int userId, List<Integer> questionIds) {
+    public void deleteBatch(String userId, List<Integer> questionIds) {
         repository.deleteBatch(userId, questionIds);
     }
 
     @Override
-    public StatsVO getStatistics(int userId) {
+    public StatsVO getStatistics(String userId) {
         // 时间范围：最近12个月
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusMonths(11).withDayOfMonth(1);
@@ -125,7 +125,7 @@ public class ReviewFeedbackService implements IReviewFeedbackService {
      * @return
      */
     @Override
-    public List<TrickyKnowledgePointVO> getTrickyKnowledgePoint(int userId) {
+    public List<TrickyKnowledgePointVO> getTrickyKnowledgePoint(String userId) {
         return trickyKnowledgeRepository.getTrickyKnowledgePoints(userId);
     }
 

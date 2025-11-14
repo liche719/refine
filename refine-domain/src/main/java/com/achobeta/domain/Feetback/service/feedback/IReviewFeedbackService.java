@@ -16,7 +16,7 @@ public interface IReviewFeedbackService {
      * @param userId
      * @return
      */
-    OverdueCountVO getOverdueCount(int userId);
+    OverdueCountVO getOverdueCount(String userId);
 
     /**
      * 获取用户待复习题目列表
@@ -30,19 +30,19 @@ public interface IReviewFeedbackService {
      * @param userId
      * @param questionIds
      */
-    void deleteBatch(int userId, List<Integer> questionIds);
+    void deleteBatch(String userId, List<Integer> questionIds);
 
     /**
      * 获取用户待复习题目统计信息
      * @param userId
      * @return
      */
-    StatsVO getStatistics(int userId);
+    StatsVO getStatistics(String userId);
 
     /**
      * 获取用户近期出错最多的知识点
      * @param userId
      * @return
      */
-    List<TrickyKnowledgePointVO> getTrickyKnowledgePoint(int userId);
+    List<TrickyKnowledgePointVO> getTrickyKnowledgePoint(String userId);
 }

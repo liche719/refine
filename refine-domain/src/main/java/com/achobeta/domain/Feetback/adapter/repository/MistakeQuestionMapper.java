@@ -11,7 +11,7 @@ import java.util.List;
 public interface MistakeQuestionMapper {
 
     List<MistakeQuestionEntity> selectByCondition(
-            @Param("userId") int userId,
+            @Param("userId") String userId,
             @Param("keyword") String keyword,
             @Param("subjects") List<String> subjects,
             @Param("errorTypeFields") List<String> errorTypeFields,

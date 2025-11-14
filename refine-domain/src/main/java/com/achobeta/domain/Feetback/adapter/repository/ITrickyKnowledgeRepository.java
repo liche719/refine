@@ -18,5 +18,5 @@ public interface ITrickyKnowledgeRepository {
             "where user_id = #{userId} and question_status = 0 and m.create_time >= subdate(now(), 14)" +
             "group by m.knowledge_point_id, k.knowledge_desc " +
             "having count(m.knowledge_point_id) >= 3")
-    List<TrickyKnowledgePointVO> getTrickyKnowledgePoints(int userId);
+    List<TrickyKnowledgePointVO> getTrickyKnowledgePoints(String userId);
 }

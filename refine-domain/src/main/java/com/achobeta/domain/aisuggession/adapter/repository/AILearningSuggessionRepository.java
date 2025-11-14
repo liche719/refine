@@ -14,5 +14,5 @@ public interface AILearningSuggessionRepository {
      * @return
      */
 
-    List<KnowledgePointEntity> getKeyPoint(int userId);
+    List<KnowledgePointEntity> getKeyPoint(String userId);
 }

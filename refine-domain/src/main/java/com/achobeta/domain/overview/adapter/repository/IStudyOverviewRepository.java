@@ -9,5 +9,5 @@ public interface IStudyOverviewRepository {
 
     @Select("select questions_num, review_rate, hard_questions, study_time" +
             " from userdata where user_id = #{userId}")
-    StudyOverviewVO queryStudyOverview(int userId);
+    StudyOverviewVO queryStudyOverview(String userId);
 }

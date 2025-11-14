@@ -5,5 +5,5 @@ import com.achobeta.domain.aisuggession.model.valobj.KeyPointVO;
 import java.util.List;
 
 public interface IAILearningSuggessionService {
-    List<KeyPointVO> getKeyPoint(int userId);
+    List<KeyPointVO> getKeyPoint(String userId);
 }

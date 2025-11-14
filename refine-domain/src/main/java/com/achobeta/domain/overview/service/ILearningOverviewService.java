@@ -9,5 +9,5 @@ public interface ILearningOverviewService {
      * @param userId 用户id
      * @return 学习概览
      */
-    StudyOverviewVO getOverview(int userId);
+    StudyOverviewVO getOverview(String userId);
 }

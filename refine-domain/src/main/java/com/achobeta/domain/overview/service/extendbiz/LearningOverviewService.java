@@ -11,7 +11,7 @@ public class LearningOverviewService implements ILearningOverviewService{
     @Autowired
     private IStudyOverviewRepository repository;
     @Override
-    public StudyOverviewVO getOverview(int userId) {
+    public StudyOverviewVO getOverview(String userId) {
         return repository.queryStudyOverview(userId);
     }
 }

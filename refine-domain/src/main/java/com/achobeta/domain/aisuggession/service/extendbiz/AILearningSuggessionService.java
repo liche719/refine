@@ -23,7 +23,7 @@ public class AILearningSuggessionService implements IAILearningSuggessionService
     private ConsultantService consultantService;
 
     @Override
-    public List<KeyPointVO> getKeyPoint(int userId) {
+    public List<KeyPointVO> getKeyPoint(String userId) {
         List<KnowledgePointEntity> entities = repository.getKeyPoint(userId);
         try {
             if (entities != null && !entities.isEmpty()) {

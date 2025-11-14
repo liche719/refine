@@ -10,9 +10,10 @@ import com.achobeta.domain.Feetback.model.valobj.MistakeQueryParamsVO;
 import com.achobeta.domain.Feetback.model.valobj.OverdueCountVO;
 import com.achobeta.domain.Feetback.model.valobj.StatsVO;
 import com.achobeta.domain.Feetback.service.feedback.IReviewFeedbackService;
+import com.achobeta.domain.IRedisService;
 import com.achobeta.types.Response;
+import com.achobeta.types.common.Constants;
 import com.achobeta.types.enums.TimeRange;
-import com.alibaba.fastjson2.function.impl.ToDouble;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,13 +40,15 @@ public class ReviewFeedbackController {
 
     private final IReviewFeedbackService reviewFeedbackService;
 
+    private final IRedisService redis;
+
     /**
      * 获取用户超过一周未复习题目数量
-     * @param userId
      * @return
      */
     @GetMapping("/overdue-count")
-    public Response<OverdueReviewDTO> getOverdueReviewCount(@RequestParam int userId) {
+    public Response<OverdueReviewDTO> getOverdueReviewCount(@RequestHeader("token") String token) {
+        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
         try{
             log.info("用户获取待复习题目数量开始，userId:{}", userId);
             OverdueCountVO overdueCountVO = reviewFeedbackService.getOverdueCount(userId);
@@ -66,7 +68,8 @@ public class ReviewFeedbackController {
      * 获取用户近期出错多(>= 3)的知识点
      */
     @GetMapping("/tricky_knowledge")
-    public Response<List<TrickyKnowledgePointDTO>> getTrickyKnowledgePoint(@RequestParam int userId){
+    public Response<List<TrickyKnowledgePointDTO>> getTrickyKnowledgePoint(@RequestHeader("token") String token){
+        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
         try{
             log.info("用户获取近期出错最多的知识点，userId:{}", userId);
             List<TrickyKnowledgePointVO> trickyKnowledgePointVOS = reviewFeedbackService.getTrickyKnowledgePoint(userId);
@@ -96,7 +99,7 @@ public class ReviewFeedbackController {
      */
     @GetMapping("/list")
     public ResponseEntity<Page<MistakeQuestionEntity>> list(
-            @RequestParam int userId,
+            @RequestHeader("token") String token,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) List<String> subject,
             @RequestParam(required = false) List<String> errorType,
@@ -104,6 +107,7 @@ public class ReviewFeedbackController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
         try {
             MistakeQueryParamsVO params = new MistakeQueryParamsVO();
             params.setUserId(userId);
@@ -130,7 +134,8 @@ public class ReviewFeedbackController {
     }
 
     @DeleteMapping("/deleteBatch")
-    public ResponseEntity<String> deleteBatch(@RequestParam int userId, @RequestParam List<Integer> questionIds) {
+    public ResponseEntity<String> deleteBatch(@RequestHeader("token") String token, @RequestParam List<Integer> questionIds) {
+        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
         try {
             log.info("用户删除待复习题目开始，userId:{}", userId);
             reviewFeedbackService.deleteBatch(userId, questionIds);
@@ -146,7 +151,8 @@ public class ReviewFeedbackController {
      * 获取待复习题目统计信息
      */
     @GetMapping("/statistics")
-    public ResponseEntity<StatsDTO> getStatistics(@RequestParam int userId) {
+    public ResponseEntity<StatsDTO> getStatistics(@RequestHeader("token") String token) {
+        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
         try {
             log.info("获取待复习题目统计信息开始");
             StatsVO statsVO = reviewFeedbackService.getStatistics(userId);
