@@ -1,4 +1,3 @@
-// com.achobeta.infrastructure.dao.po.MistakePO.java
 package com.achobeta.infrastructure.dao.po;
 
 import lombok.AllArgsConstructor;
@@ -9,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 错题数据库映射对象（与数据库表1:1对应）
+ * 错题数据库映射对象
  */
 @Data
 @Builder
@@ -23,5 +22,5 @@ public class MistakePO {
     private String otherReason;
     private Integer knowledgePointId;
     private LocalDateTime createTime;
-    private LocalDateTime updateTime; // 领域层Entity无需关注的字段
+    private LocalDateTime updateTime;
 }
