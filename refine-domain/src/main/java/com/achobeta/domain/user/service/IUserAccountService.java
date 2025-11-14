@@ -35,7 +35,7 @@ public interface IUserAccountService {
      */
     UserLoginVO login(String userEmail, String userPassword);
 
-    void resetPassword(String userEmail, String newPassword, String checkCode);
+    void resetPassword(String userAccount, String newPassword, String checkCode);
 
     void updatePassword(String userId, String oldPassword, String newPassword);
 

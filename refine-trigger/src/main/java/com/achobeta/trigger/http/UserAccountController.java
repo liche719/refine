@@ -72,9 +72,9 @@ public class UserAccountController {
      */
     @PostMapping("/resetPassword")
     @Validated
-    public Response resetPassword(@NotBlank String userEmail, @NotBlank @Pattern(regexp = Constants.REGEX_PASSWORD) String newPassword, @NotBlank String checkCode) {
-        userAccountService.resetPassword(userEmail, newPassword, checkCode);
-        log.info("账号 {} 重置密码", userEmail);
+    public Response resetPassword(@NotBlank String userAccount, @NotBlank @Pattern(regexp = Constants.REGEX_PASSWORD) String newPassword, @NotBlank String checkCode) {
+        userAccountService.resetPassword(userAccount, newPassword, checkCode);
+        log.info("账号 {} 重置密码", userAccount);
         return Response.SYSTEM_SUCCESS();
     }
 

@@ -110,24 +110,24 @@ public class UserAccountServiceImpl implements IUserAccountService {
     /**
      * 重置密码
      *
-     * @param userEmail   邮箱
+     * @param userAccount  账号
      * @param newPassword 新密码
      * @param checkCode   验证码
      * @return 重置成功
      * @throws AppException 邮箱不存在、验证码无效等异常
      */
     @Override
-    public void resetPassword(String userEmail, String newPassword, String checkCode) {
+    public void resetPassword(String userAccount, String newPassword, String checkCode) {
         // 验证该邮箱用户是否存在
-        if (null == userRepository.findByAccount(userEmail)) {
+        if (null == userRepository.findByAccount(userAccount)) {
             throw new AppException(GlobalServiceStatusCode.USER_ACCOUNT_NOT_EXIST);
         }
         // 验证验证码
-        emailVerificationService.verifyCode(userEmail, checkCode);
+        emailVerificationService.verifyCode(userAccount, checkCode);
         // 改密码
-        UserEntity user = userRepository.findByAccount(userEmail);
+        UserEntity user = userRepository.findByAccount(userAccount);
         user.encryptPassword(newPassword);
-        userRepository.updateByUserAccount(user, userEmail);
+        userRepository.updateByUserAccount(user, userAccount);
     }
 
     @Override
