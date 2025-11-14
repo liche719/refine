@@ -9,16 +9,12 @@ import com.achobeta.domain.user.service.IUserAccountService;
 import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.Constants;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author liangchaowen
@@ -63,8 +59,7 @@ public class UserAccountController {
 
     @GlobalInterception
     @PostMapping("/logout")
-    public Response logout(HttpServletRequest request) {
-        String token = request.getHeader("token");
+    public Response logout(@RequestHeader("token") String token) {
         redis.remove(Constants.USER_ID_KEY_PREFIX + token);
         return Response.SYSTEM_SUCCESS();
     }
@@ -84,8 +79,7 @@ public class UserAccountController {
      */
     @GlobalInterception
     @PostMapping("/updatePassword")
-    public Response updatePassword(HttpServletRequest request, @NotBlank String oldPassword, @NotBlank @Pattern(regexp = Constants.REGEX_PASSWORD) String newPassword) {
-        String token = request.getHeader("token");
+    public Response updatePassword(@RequestHeader("token") String token, @NotBlank String oldPassword, @NotBlank @Pattern(regexp = Constants.REGEX_PASSWORD) String newPassword) {
         String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
         userAccountService.updatePassword(userId, oldPassword, newPassword);
         return Response.SYSTEM_SUCCESS();
