@@ -5,6 +5,7 @@ import com.achobeta.api.dto.UserInfoRequestDTO;
 import com.achobeta.domain.auth.service.AuthService;
 import com.achobeta.domain.ocr.model.entity.QuestionEntity;
 import com.achobeta.domain.ocr.service.IOcrService;
+import com.achobeta.domain.ocr.service.IMistakeQuestionService;
 import com.achobeta.types.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class OcrController {
 
     private final IOcrService ocrService;
     private final AuthService authService;
+    private final IMistakeQuestionService mistakeQuestionService;
 
     /**
      * 抽取第一个问题
@@ -65,7 +67,12 @@ public class OcrController {
             QuestionEntity questionEntity = ocrService.extractQuestionContent(file.getBytes(), ft);
             questionEntity.setUserId(userId);
 
-            // TODO 将错题数据保存到数据库中
+            // 将错题数据保存到数据库中
+            boolean saveSuccess = mistakeQuestionService.saveMistakeQuestion(questionEntity);
+            if (!saveSuccess) {
+                log.warn("错题保存失败，但继续返回OCR识别结果: userId={}, questionId={}",
+                        userId, questionEntity.getQuestionId());
+            }
 
             // 返回响应
             return Response.<QuestionInfoResponseDTO>builder()

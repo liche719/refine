@@ -1,11 +1,11 @@
 package com.achobeta.domain.ocr.service.impl;
 
 import cn.hutool.core.lang.UUID;
-import com.achobeta.domain.ai.service.IAiTransferService;
+import com.achobeta.domain.ai.service.IAiService;
 import com.achobeta.domain.ocr.adapter.port.IFilePreprocessPort;
 import com.achobeta.domain.ocr.adapter.port.IOcrPort;
-import com.achobeta.domain.ocr.service.IOcrService;
 import com.achobeta.domain.ocr.model.entity.QuestionEntity;
+import com.achobeta.domain.ocr.service.IOcrService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,9 @@ public class DefaultOcrService implements IOcrService {
 
     private final IFilePreprocessPort filePreprocessPort;
     private final IOcrPort ocrPort;
-    private final IAiTransferService aiTransferService;
+    private final IAiService aiTransferService;
+//    @Qualifier("redissonService")
+//    private final RedissonService redissonService;
 
     /**
      * 抽取第一个问题
@@ -83,11 +85,17 @@ public class DefaultOcrService implements IOcrService {
 
         // 使用 AI 模型尝试提取第一个问题
         recognizedText = aiTransferService.extractTheFirstQuestion(recognizedText);
+        String uuid = UUID.fastUUID().toString();
 
-        // 创建并返回问题实体
+        // 创建问题实体
         QuestionEntity questionEntity = new QuestionEntity();
         questionEntity.setQuestionText(recognizedText);
-        questionEntity.setQuestionId(UUID.fastUUID().toString());
+        questionEntity.setQuestionId(uuid);
+
+        // TODO 将题干存储到Redis中，通过uuid可以查询，设置24小时过期时间
+//        String redisKey = "ocr:question:" + uuid;
+//        redissonService.setValue(redisKey, recognizedText, 24 * 60 * 60 * 1000L); // 24小时过期，单位毫秒
+
         return questionEntity;
     }
 }

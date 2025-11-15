@@ -18,6 +18,9 @@ public class MistakeQuestion {
     /** 逻辑外键：关联UserInformation表的user_id */
     private String userId;
 
+    /** 题目ID */
+    private String questionId;
+
     /** 题目内容 */
     private String questionContent;
 
@@ -38,6 +41,9 @@ public class MistakeQuestion {
 
     /** 其他原因 */
     private String otherReason;
+
+    /** 是否选择其他原因（0-否，1-是） */
+    private Integer otherReasonFlag;
 
     /** 逻辑外键：关联knowledge_point表的knowledge_point_id */
     private String knowledgePointId;

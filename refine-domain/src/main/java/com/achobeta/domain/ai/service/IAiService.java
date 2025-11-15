@@ -5,7 +5,7 @@ package com.achobeta.domain.ai.service;
  * @Desc : 抽取第一个问题
  * @Time : 2025/11/2 14:34
  */
-public interface IAiTransferService {
+public interface IAiService {
 
     /**
      * 抽取第一个问题
@@ -14,5 +14,7 @@ public interface IAiTransferService {
      * @return 第一个问题
      */
     String extractTheFirstQuestion(String content);
+
+    void aiSolveQuestion(String question, java.util.function.Consumer<String> contentCallback);
 
 }
