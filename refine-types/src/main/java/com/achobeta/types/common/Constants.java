@@ -18,13 +18,12 @@ public class Constants {
     public static final Long QUESTION_GENERATION_EXPIRED_SECONDS = 60 * 60 * 24L;
 
 
-    // 验证码发送间隔
-    public static final Long SEND_INTERVAL_SECONDS = 60L;
+    // 验证码发送间隔 1分钟
+    public static final int SEND_INTERVAL_MILLISECONDS = 60 * 1000;
 
-    // 用户token有效期：2天
-    public static final Long USER_TOKEN_EXPIRED_SECONDS = 60 * 60 * 24 * 2L;
+    public static final String USER_REFRESH_TOKEN_KEY = "user:token:refresh:";
 
-
+    // 密码正则
     public static final String REGEX_PASSWORD = "^(?=.*\\d)(?=.*[a-zA-Z])[\\da-zA-Z~!@#$%^&*_]{8,18}$";
 
 
