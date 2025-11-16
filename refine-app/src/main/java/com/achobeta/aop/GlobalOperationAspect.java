@@ -1,6 +1,5 @@
 package com.achobeta.aop;
 
-import com.achobeta.infrastructure.redis.IRedisService;
 import com.achobeta.jwt.JwtTool;
 import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.UserContext;
@@ -8,6 +7,7 @@ import com.achobeta.types.enums.GlobalServiceStatusCode;
 import com.achobeta.types.exception.AppException;
 import com.achobeta.types.exception.UnauthorizedException;
 import com.achobeta.types.support.util.StringTools;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -19,8 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.lang.reflect.Method;
 
 @Aspect
@@ -28,8 +26,6 @@ import java.lang.reflect.Method;
 @Slf4j
 @RequiredArgsConstructor
 public class GlobalOperationAspect {
-
-    private final IRedisService redis;
 
     private final JwtTool jwtTool;
 
@@ -47,10 +43,10 @@ public class GlobalOperationAspect {
             checkLogin();
         } catch (UnauthorizedException e) {
             log.error("登录验证失败：{}", e.getMessage());
-            throw e;
+            throw new AppException(e.getMessage());
         } catch (AppException e) {
             log.error("全局拦截异常", e);
-            throw e;
+            throw new AppException(e.getMessage());
         } catch (Throwable e) {
             log.error("全局拦截异常", e);
             throw new AppException(GlobalServiceStatusCode.PARAM_FAILED_VALIDATE);
@@ -87,7 +83,7 @@ public class GlobalOperationAspect {
             // JwtTool 内部校验签名和过期
             userId = jwtTool.parseAccessToken(token);
         } catch (UnauthorizedException e) {
-            throw new AppException(e.getMessage());
+            throw new UnauthorizedException(e.getMessage());
         }
         // 存入上下文
         UserContext.setUserId(userId);

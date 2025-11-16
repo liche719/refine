@@ -1,7 +1,7 @@
 package com.achobeta.trigger.http;
 
-import com.achobeta.api.dto.userAccount.LoginRequestDTO;
-import com.achobeta.api.dto.userAccount.RegisterRequestDTO;
+import com.achobeta.api.dto.LoginRequestDTO;
+import com.achobeta.api.dto.RegisterRequestDTO;
 import com.achobeta.domain.user.model.valobj.UserLoginVO;
 import com.achobeta.domain.user.service.IEmailVerificationService;
 import com.achobeta.domain.user.service.IUserAccountService;
@@ -94,6 +94,7 @@ public class UserAccountController {
     @PostMapping("/refreshToken")
     public Response<Map<String, String>> refreshToken(@RequestHeader("refresh-token") String refreshToken) {
         Map<String, String> newToken = userAccountService.refreshToken(refreshToken);
+        log.info("用户刷新access-token");
         return Response.SYSTEM_SUCCESS(newToken);
     }
 

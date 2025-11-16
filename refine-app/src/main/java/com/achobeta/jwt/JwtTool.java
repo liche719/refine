@@ -195,7 +195,6 @@ public class JwtTool implements Jwt {
             if (remainingTime > 0 && remainingTime < (jwtProperties.getRefreshTokenTtl().toMillis() / 2)) {
                 // 同时会自动更新 Redis 的refresh-token
                 newRefreshToken = createRefreshToken(userId);
-                // 使旧 refresh-token 失效
                 invalidateRefreshToken(refreshToken);
             }
         } catch (Exception e) {
