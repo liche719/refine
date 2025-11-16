@@ -3,7 +3,7 @@ package com.achobeta.infrastructure.adapter.repository;
 import com.achobeta.domain.question.adapter.repository.IMistakeRepository;
 import com.achobeta.domain.question.model.entity.MistakeQuestionEntity;
 import com.achobeta.domain.question.model.po.MistakeKnowledgePO;
-import com.achobeta.domain.question.model.valobj.MistakeQuestionVO;
+import com.achobeta.api.dto.MistakeQuestionDTO;
 import com.achobeta.infrastructure.dao.MistakeQuestionMapper;
 import com.achobeta.infrastructure.dao.po.MistakePO;
 import com.achobeta.infrastructure.redis.IRedisService;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 
 @Repository
 @RequiredArgsConstructor
-public class MistakeRepositoryImpl implements IMistakeRepository {
+public class MistakeRepository implements IMistakeRepository {
 
     @Resource
     private IRedisService redis;
@@ -37,12 +37,12 @@ public class MistakeRepositoryImpl implements IMistakeRepository {
     }
 
     @Override
-    public void setValue(String s, MistakeQuestionVO mistakeQuestionDTO, Long expired) {
+    public void setValue(String s, MistakeQuestionDTO mistakeQuestionDTO, Long expired) {
         redis.setValue(s, mistakeQuestionDTO, expired);
     }
 
     @Override
-    public MistakeQuestionVO getValue(String s) {
+    public MistakeQuestionDTO getValue(String s) {
         return redis.getValue(s);
     }
 

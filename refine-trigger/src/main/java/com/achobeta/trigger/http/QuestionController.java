@@ -1,6 +1,6 @@
 package com.achobeta.trigger.http;
 
-import com.achobeta.domain.question.model.valobj.QuestionResponseVO;
+import com.achobeta.api.dto.QuestionResponseDTO;
 import com.achobeta.domain.question.service.impl.QuestionServiceImpl;
 import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
@@ -8,10 +8,12 @@ import com.achobeta.types.common.UserContext;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 
 @Slf4j
 @Validated
@@ -35,10 +37,10 @@ public class QuestionController {
      */
     @GlobalInterception
     @PostMapping("/generation")
-    public Response<QuestionResponseVO> questionGeneration(@NotNull Integer mistakeQuestionId) {
+    public Response<QuestionResponseDTO> questionGeneration(@NotNull Integer mistakeQuestionId) {
         String userId = UserContext.getUserId();
         try {
-            QuestionResponseVO responseDTO = questionService.questionGeneration(userId, mistakeQuestionId);
+            QuestionResponseDTO responseDTO = questionService.questionGeneration(userId, mistakeQuestionId);
             log.info("用户 {} 生成题目成功，题目redis id: {}", userId, responseDTO.getQuestionId());
             return Response.SYSTEM_SUCCESS(responseDTO);
         } catch (Exception e) {
@@ -65,6 +67,19 @@ public class QuestionController {
         }
     }
 
-
+    /**
+     * ai判题
+     */
+    @GlobalInterception
+    @PostMapping("/judge")
+    public Flux<ServerSentEvent<String>> aiJudge(@NotNull String questionId, @NotNull String answer) {
+        String userId = UserContext.getUserId();
+        try {
+            log.info("用户 {} 调用ai判题，题目id: {}", userId, questionId);
+            return questionService.aiJudge(questionId, answer);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

@@ -1,4 +1,4 @@
-package com.achobeta.domain.question.model.valobj;
+package com.achobeta.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MistakeQuestionVO {
+public class MistakeQuestionDTO {
 
     // 用户id
     private String userId;

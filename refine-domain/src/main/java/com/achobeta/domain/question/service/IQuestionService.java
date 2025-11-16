@@ -1,10 +1,10 @@
 package com.achobeta.domain.question.service;
 
-import com.achobeta.domain.question.model.valobj.QuestionResponseVO;
+import com.achobeta.api.dto.QuestionResponseDTO;
 
 public interface IQuestionService {
 
-    QuestionResponseVO questionGeneration(String userId, Integer knowledgePointId);
+    QuestionResponseDTO questionGeneration(String userId, Integer knowledgePointId);
 
     void recordMistakeQuestion(String userId, String questionId);
 
