@@ -7,6 +7,8 @@ import com.achobeta.api.dto.MistakeQuestionDTO;
 import com.achobeta.infrastructure.dao.MistakeQuestionMapper;
 import com.achobeta.infrastructure.dao.po.MistakePO;
 import com.achobeta.infrastructure.redis.IRedisService;
+import com.achobeta.types.enums.GlobalServiceStatusCode;
+import com.achobeta.types.exception.AppException;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -33,7 +35,11 @@ public class MistakeRepository implements IMistakeRepository {
 
     @Override
     public MistakeKnowledgePO findSubjectAndKnowledgeIdById(Integer mistakeQuestionId) {
-        return mistakeQuestionMapper.findSubjectAndKnowledgeIdById(mistakeQuestionId);
+        MistakeKnowledgePO po = mistakeQuestionMapper.findSubjectAndKnowledgeIdById(mistakeQuestionId);
+        if (null == po) {
+            throw new AppException(GlobalServiceStatusCode.PARAM_NOT_VALID);
+        }
+        return po;
     }
 
     @Override
@@ -43,7 +49,11 @@ public class MistakeRepository implements IMistakeRepository {
 
     @Override
     public MistakeQuestionDTO getValue(String s) {
-        return redis.getValue(s);
+        MistakeQuestionDTO value = redis.getValue(s);
+        if (null == value) {
+            throw new AppException(GlobalServiceStatusCode.QUESTION_IS_EXPIRED);
+        }
+        return value;
     }
 
     @Override

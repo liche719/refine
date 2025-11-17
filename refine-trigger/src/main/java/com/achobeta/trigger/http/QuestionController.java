@@ -32,8 +32,8 @@ public class QuestionController {
 
 
     /**
-     * 题目生成，目前支持判分的只有填空题和选择题
-     * @return  题目id，题目内容（含答案）
+     * 1.题目生成，目前支持判分的只有填空题和选择题
+     * @return  题目id，题目内容（含答案,简单解析）
      */
     @GlobalInterception
     @PostMapping("/generation")
@@ -49,7 +49,7 @@ public class QuestionController {
     }
 
     /**
-     * 题目回答错误时调用，存入用户错题数据库
+     * 3.题目回答错误时调用，存入用户错题数据库
      */
     @GlobalInterception
     @PostMapping("/handle/mistakequestion")
@@ -58,18 +58,16 @@ public class QuestionController {
         try {
             log.info("用户 {} 录入错题中，错题id: {}", userId, questionId);
             questionService.recordMistakeQuestion(userId, questionId);
-            return Response.SYSTEM_SUCCESS("该题已录入错题");
+            return Response.SYSTEM_SUCCESS("该题已录入错题库");
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            questionService.removeQuestionCache(questionId);
-            log.info("已删除redis题目缓存，题目id：{}", questionId);
         }
     }
 
     /**
-     * ai判题
+     * 2.ai判题
      */
+    //TODO ai判题后 自动根据答题正误 录入错题数据库
     @GlobalInterception
     @PostMapping("/judge")
     public Flux<ServerSentEvent<String>> aiJudge(@NotNull String questionId, @NotNull String answer) {

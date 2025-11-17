@@ -13,6 +13,7 @@ import com.achobeta.types.exception.AppException;
 import com.achobeta.types.support.postprocessor.AbstractPostProcessor;
 import com.achobeta.types.support.postprocessor.PostContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -24,6 +25,7 @@ import static com.achobeta.types.common.Constants.QUESTION_GENERATION_ID_KEY;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseDTO> implements IQuestionService {
 
     private final IMistakeRepository mistakeRepository;
@@ -46,31 +48,33 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         String toAi = "你是一位" + subject + "老师，请根据\"" + knowledgePointName + "\"知识点出一道题目";
 
         // 调用外部接口生成新题目
-        QuestionResponseDTO questionResult = aiGenerationService.Generation(toAi);
-        if (null == questionResult.getQuestionContent() || null == questionResult.getAnswer() || null == questionResult.getAnalysis()) {
+        QuestionResponseDTO question = aiGenerationService.Generation(toAi);
+        if (null == question.getContent() || null == question.getAnswer()) {
             throw new AppException(GlobalServiceStatusCode.QUESTION_GENERATION_FAIL);
         }
 
         // 构建错题实体
         String questionId = String.valueOf(mistakeQuestionId + System.currentTimeMillis());
 
-        MistakeQuestionDTO vo = new MistakeQuestionDTO();
-        vo.setUserId(userId);
-        vo.setQuestionId(questionId);
-        vo.setQuestionContent(questionResult.getQuestionContent());
-        vo.setSubject(subject);
-        vo.setKnowledgePointId(knowledgeId);
+        MistakeQuestionDTO dto = new MistakeQuestionDTO();
+        dto.setUserId(userId);
+        dto.setQuestionId(questionId);
+        dto.setQuestionContent(question.getContent());
+        dto.setAnswer(question.getAnswer());
+        dto.setSubject(subject);
+        dto.setKnowledgePointId(knowledgeId);
 
         // 暂存题目到redis
-        mistakeRepository.setValue(QUESTION_GENERATION_ID_KEY + questionId, vo, QUESTION_GENERATION_EXPIRED_SECONDS);
+        mistakeRepository.setValue(QUESTION_GENERATION_ID_KEY + questionId, dto, QUESTION_GENERATION_EXPIRED_SECONDS);
 
-        questionResult.setQuestionId(questionId);
-
-        return questionResult;
+        return QuestionResponseDTO.builder()
+                .questionId(questionId)
+                .content(question.getContent())
+                .build();
     }
 
     /**
-     * 把错题存入数据库
+     * 把redis的错题存入数据库
      */
     @Override
     public void recordMistakeQuestion(String userId, String questionId) {
@@ -78,6 +82,9 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         MistakeQuestionDTO vo = mistakeRepository.getValue(QUESTION_GENERATION_ID_KEY + questionId);
         if (null == vo) {
             throw new AppException(GlobalServiceStatusCode.QUESTION_IS_EXPIRED);
+        }
+        if (!userId.equals(vo.getUserId())) {
+            throw new AppException(GlobalServiceStatusCode.PARAM_FAILED_VALIDATE);
         }
         mistakeRepository.save(MistakeQuestionEntity.builder()
                 .userId(userId)
@@ -88,7 +95,7 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
                 .createTime(LocalDateTime.now())
                 .build());
 
-
+        this.removeQuestionCache(questionId);
     }
 
     @Override
@@ -98,15 +105,14 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
 
     public void removeQuestionCache(String questionId) {
         mistakeRepository.remove(QUESTION_GENERATION_ID_KEY + questionId);
+        log.info("已删除redis题目缓存，题目id：{}", questionId);
     }
 
     public Flux<ServerSentEvent<String>> aiJudge(String questionId, String answer) {
         MistakeQuestionDTO value = mistakeRepository.getValue(QUESTION_GENERATION_ID_KEY + questionId);
-        if (null == value) {
-            throw new AppException(GlobalServiceStatusCode.QUESTION_IS_EXPIRED);
-        }
         String questionContent = value.getQuestionContent();
         String chat = "请判断\"" + questionContent + "\"的答案:" + answer + "是否正确，并给出解析。";
+
         return aiGenerationService.aiJudgeStream(chat)
                 .map(chunk -> ServerSentEvent.<String>builder()
                         .data(chunk)

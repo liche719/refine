@@ -13,7 +13,7 @@ public class Constants {
 
     public static final String QUESTION_GENERATION_ID_KEY = "question:generationId:";
     // 题目缓存最大时间: 1天
-    public static final Long QUESTION_GENERATION_EXPIRED_SECONDS = 60 * 60 * 24L;
+    public static final Long QUESTION_GENERATION_EXPIRED_SECONDS = 2 * 60 * 60 * 24 * 1000L;
 
 
     // 验证码发送间隔 1分钟
@@ -23,7 +23,6 @@ public class Constants {
 
     // 密码正则
     public static final String REGEX_PASSWORD = "^(?=.*\\d)(?=.*[a-zA-Z])[\\da-zA-Z~!@#$%^&*_]{8,18}$";
-
 
 
 }
