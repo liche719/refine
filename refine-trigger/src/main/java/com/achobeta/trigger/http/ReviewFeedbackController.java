@@ -1,14 +1,12 @@
 package com.achobeta.trigger.http;
 
 
+import com.achobeta.api.dto.ReviewTrendDTO;
 import com.achobeta.api.dto.TrickyKnowledgePointDTO;
 import com.achobeta.api.dto.OverdueReviewDTO;
 import com.achobeta.api.dto.StatsDTO;
 import com.achobeta.domain.Feetback.model.entity.MistakeQuestionEntity;
-import com.achobeta.domain.Feetback.model.valobj.TrickyKnowledgePointVO;
-import com.achobeta.domain.Feetback.model.valobj.MistakeQueryParamsVO;
-import com.achobeta.domain.Feetback.model.valobj.OverdueCountVO;
-import com.achobeta.domain.Feetback.model.valobj.StatsVO;
+import com.achobeta.domain.Feetback.model.valobj.*;
 import com.achobeta.domain.Feetback.service.feedback.IReviewFeedbackService;
 import com.achobeta.domain.IRedisService;
 import com.achobeta.types.Response;
@@ -21,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,14 +132,16 @@ public class ReviewFeedbackController {
         }
     }
 
+    /**
+     * 删除用户待复习题目
+     */
     @DeleteMapping("/deleteBatch")
     public ResponseEntity<String> deleteBatch(@RequestHeader("token") String token, @RequestParam List<Integer> questionIds) {
         String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
         try {
             log.info("用户删除待复习题目开始，userId:{}", userId);
             reviewFeedbackService.deleteBatch(userId, questionIds);
-            log.info("用户删除待复习题目结束，userId:{}", userId);
-            return ResponseEntity.ok("删除成功");
+            return ResponseEntity.status(200).body("删除成功");
         } catch (Exception e) {
             log.error("用户删除待复习题目失败！userId:{}", userId, e);
             return ResponseEntity.status(500).body("删除失败");
@@ -156,6 +157,33 @@ public class ReviewFeedbackController {
         try {
             log.info("获取待复习题目统计信息开始");
             StatsVO statsVO = reviewFeedbackService.getStatistics(userId);
+            List<ReviewTrendDTO> reviewTrendDTOS = new ArrayList<>();
+            if(statsVO.getReviewTrend() == null || statsVO.getReviewTrend().isEmpty()){
+                reviewTrendDTOS.add(ReviewTrendDTO.builder()
+                        .month("0")
+                        .total(0)
+                        .reviewed(0)
+                        .completionRate(0.0)
+                        .build());
+            }else{
+                reviewTrendDTOS = statsVO.getReviewTrend().stream().map(reviewTrendVO -> {
+                    if(reviewTrendVO == null || reviewTrendVO.getTotal() == 0){
+                        return ReviewTrendDTO.builder()
+                                .month(reviewTrendVO.getMonth())
+                                .total(0)
+                                .reviewed(0)
+                                .completionRate(0.0)
+                                .build();
+                    }
+                    return ReviewTrendDTO.builder()
+                            .month(reviewTrendVO.getMonth())
+                            .total(reviewTrendVO.getTotal())
+                            .reviewed(reviewTrendVO.getReviewed())
+                            .completionRate(reviewTrendVO.getReviewed()*1.0/reviewTrendVO.getTotal())
+                            .build();
+                }).toList();
+            }
+
             StatsDTO statsDTO = StatsDTO.builder()
                     .subjectDistribution(statsVO.getSubjectDistribution().stream().map(count -> {
                         Map<String, Integer> map = new HashMap<>();
@@ -167,7 +195,7 @@ public class ReviewFeedbackController {
                         map.put(count.getName(), count.getCount());
                         return map;
                     }).collect(Collectors.toList()))
-                    .build();
+                    .reviewTrend(reviewTrendDTOS).build();
             return ResponseEntity.ok(statsDTO);
         } catch (Exception e) {
             log.error("获取待复习题目统计信息失败！", e);

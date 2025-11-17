@@ -17,7 +17,7 @@
     <select id="countByKnowledge" resultType="com.achobeta.domain.Feetback.model.valobj.CountByTypeVO">
         select k.knowledge_desc as name, count(1) as count
         from mistakequestion m join  knowledgepoint k on m.knowledge_point_id = k.knowledge_point_id
-        where user_id = #{userId} and question_status = 0
+        where m.user_id = #{userId} and question_status = 0
         group by m.knowledge_point_id
     </select>
     <select id="calculateReviewRate" resultType="com.achobeta.domain.Feetback.model.valobj.ReviewTrendVO">

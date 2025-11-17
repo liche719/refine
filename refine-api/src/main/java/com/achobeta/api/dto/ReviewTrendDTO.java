@@ -1,4 +1,4 @@
-package com.achobeta.domain.Feetback.model.valobj;
+package com.achobeta.api.dto;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReviewTrendVO {
+public class ReviewTrendDTO {
     private String month;           // 月份
     private int total;            // 当月新增错题数
     private int reviewed;         // 当月错题中已复习错题数
