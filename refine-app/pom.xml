@@ -36,11 +36,6 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.aspectj</groupId>-->
-<!--            <artifactId>aspectjweaver</artifactId>-->
-<!--            <version>1.9.21</version> &lt;!&ndash; 3.x 最优兼容版本 &ndash;&gt;-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

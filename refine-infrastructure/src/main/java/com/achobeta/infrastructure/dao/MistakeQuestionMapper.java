@@ -1,4 +1,3 @@
-// com.achobeta.infrastructure.dao.MistakeQuestionMapper.java
 package com.achobeta.infrastructure.dao;
 
 import com.achobeta.domain.question.model.po.MistakeKnowledgePO;

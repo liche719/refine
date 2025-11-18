@@ -1,4 +1,4 @@
-package com.achobeta.api.dto.question;
+package com.achobeta.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,13 +17,10 @@ public class QuestionResponseDTO {
     private String questionId;
 
     // 题目内容(含选项)
-    private String questionContent;
+    private String content;
 
     // 答案
     private String answer;
-
-    //解析
-    private String analysis;
 
 
 }

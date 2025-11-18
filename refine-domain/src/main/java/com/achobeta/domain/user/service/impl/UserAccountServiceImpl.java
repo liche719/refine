@@ -1,6 +1,5 @@
 package com.achobeta.domain.user.service.impl;
 
-import cn.hutool.jwt.JWT;
 import com.achobeta.domain.user.adapter.repository.IUserRepository;
 import com.achobeta.domain.user.model.entity.UserEntity;
 import com.achobeta.domain.user.model.valobj.UserLoginVO;
@@ -12,16 +11,12 @@ import com.achobeta.types.exception.AppException;
 import com.achobeta.types.support.util.StringTools;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
-import static com.achobeta.types.common.Constants.*;
+import static com.achobeta.types.common.Constants.USER_REFRESH_TOKEN_KEY;
 
 /**
  * 用户领域服务实现

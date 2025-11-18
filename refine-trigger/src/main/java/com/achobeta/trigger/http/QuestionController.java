@@ -1,21 +1,19 @@
 package com.achobeta.trigger.http;
 
-import com.achobeta.api.dto.question.QuestionResponseDTO;
-import com.achobeta.domain.IRedisService;
+import com.achobeta.api.dto.QuestionResponseDTO;
 import com.achobeta.domain.question.service.impl.QuestionServiceImpl;
 import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
-import com.achobeta.types.common.Constants;
+import com.achobeta.types.common.UserContext;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import static com.achobeta.types.common.Constants.QUESTION_GENERATION_ID_KEY;
+import reactor.core.publisher.Flux;
 
 @Slf4j
 @Validated
@@ -26,8 +24,6 @@ public class QuestionController {
 
     private final QuestionServiceImpl questionService;
 
-    private final IRedisService redis;
-
 
     /*
         生成出来的题目先放入redis，
@@ -36,15 +32,16 @@ public class QuestionController {
 
 
     /**
-     * 题目生成，目前支持判分的只有填空题和选择题
-     * @return  题目id，题目内容（含答案）
+     * 1.题目生成，目前支持判分的只有填空题和选择题
+     * @return  题目id，题目内容（含答案,简单解析）
      */
     @GlobalInterception
     @PostMapping("/generation")
-    public Response<QuestionResponseDTO> questionGeneration(@RequestHeader("token") String token, @NotNull Integer mistakeQuestionId) {
+    public Response<QuestionResponseDTO> questionGeneration(@NotNull Integer mistakeQuestionId) {
+        String userId = UserContext.getUserId();
         try {
-            String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
             QuestionResponseDTO responseDTO = questionService.questionGeneration(userId, mistakeQuestionId);
+            log.info("用户 {} 生成题目成功，题目redis id: {}", userId, responseDTO.getQuestionId());
             return Response.SYSTEM_SUCCESS(responseDTO);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -52,24 +49,35 @@ public class QuestionController {
     }
 
     /**
-     * 题目回答错误时调用，存入用户错题数据库
+     * 3.题目回答错误时调用，存入用户错题数据库
      */
     @GlobalInterception
     @PostMapping("/handle/mistakequestion")
-    public Response handleWrongQuestion(@RequestHeader("token") String token, String questionId) {
+    public Response handleWrongQuestion(String questionId) {
+        String userId = UserContext.getUserId();
         try {
-            String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
             log.info("用户 {} 录入错题中，错题id: {}", userId, questionId);
             questionService.recordMistakeQuestion(userId, questionId);
-            return Response.SYSTEM_SUCCESS("该题已录入错题");
+            return Response.SYSTEM_SUCCESS("该题已录入错题库");
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            redis.remove(QUESTION_GENERATION_ID_KEY + questionId);
-            log.info("已删除redis题目缓存，题目id：{}", questionId);
         }
     }
 
-
+    /**
+     * 2.ai判题
+     */
+    //TODO ai判题后 自动根据答题正误 录入错题数据库
+    @GlobalInterception
+    @PostMapping("/judge")
+    public Flux<ServerSentEvent<String>> aiJudge(@NotNull String questionId, @NotNull String answer) {
+        String userId = UserContext.getUserId();
+        try {
+            log.info("用户 {} 调用ai判题，题目id: {}", userId, questionId);
+            return questionService.aiJudge(questionId, answer);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

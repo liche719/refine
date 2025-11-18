@@ -1,4 +1,4 @@
-package com.achobeta.api.dto.question;
+package com.achobeta.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,10 +17,8 @@ public class MistakeQuestionDTO {
     private String questionId;
     // 识别出的题目内容（如果有选项则包含选项）
     private String questionContent;
-    // 题目答案
+    // 答案
     private String answer;
-    // 解析
-    private String analysis;
     // 科目
     private String subject;
     // 知识点id
