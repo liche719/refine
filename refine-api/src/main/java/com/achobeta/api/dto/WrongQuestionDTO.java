@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WrongQuestionDTO {
-    private int updateCount;
-    private String mainQuestion;
-    private int reviewCount;
+    private int id;
+    private String content;
 }

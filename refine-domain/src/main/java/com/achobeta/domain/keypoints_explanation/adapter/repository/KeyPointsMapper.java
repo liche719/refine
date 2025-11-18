@@ -1,6 +1,8 @@
 package com.achobeta.domain.keypoints_explanation.adapter.repository;
 
+import cn.hutool.core.date.DateTime;
 import com.achobeta.domain.keypoints_explanation.model.valobj.KeyPointsVO;
+import com.achobeta.domain.keypoints_explanation.model.valobj.ToolTipVO;
 import com.achobeta.domain.keypoints_explanation.model.valobj.WrongQuestionVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -15,8 +17,8 @@ public interface KeyPointsMapper {
     List<KeyPointsVO> getSonKeyPoints(@Param("knowledgeId") int knowledgeId, @Param("userId") String userId);
 
     @Select("select knowledge_point_id as id, knowledge_point_name as keyPoints from knowledgepoint" +
-            " where subject = #{subject} and parent_knowledge_point_id IS NULL and user_id = #{userId}")
-    List<KeyPointsVO> getKeyPoints(String subject, String userId);
+            " where parent_knowledge_point_id = #{subjectId} and user_id = #{userId}")
+    List<KeyPointsVO> getKeyPoints(int subjectId, String userId);
 
     @Select("select knowledge_desc from knowledgepoint" +
             " where knowledge_point_id = #{knowledgeId} and user_id = #{userId}")
@@ -32,5 +34,20 @@ public interface KeyPointsMapper {
     KeyPointsVO getParentKeyPoints(int knowledgeId, String userId);
     
     @Select("update knowledgepoint set note = #{note} where knowledge_point_id = #{knowledgeId} and user_id = #{userId}")
-    Boolean savedNote(String note, int knowledgeId, String userId);
+    void savedNote(String note, int knowledgeId, String userId);
+
+    @Select("update knowledgepoint set status = 1  where knowledge_point_id = #{knowledgeId} and user_id = #{userId}")
+    void markAsMastered(int knowledgeId, String userId);
+
+    @Select("update knowledgepoint set knowledge_point_name = #{newName} where knowledge_point_id = #{knowledgeId} and user_id = #{userId}")
+    void renameNode(int knowledgeId, String newName, String userId);
+
+    @Select("select count(id) from mistakequestion where knowledge_point_id = #{knowledgeId} and user_id = #{userId}")
+    int getTotalById(int knowledgeId, String userId);
+
+    @Select("select count(id) from mistakequestion where knowledge_point_id = #{knowledgeId} and user_id = #{userId} and question_status = 0")
+    int getCountById(int knowledgeId, String userId);
+
+    @Select("select max(update_time) from mistakequestion where knowledge_point_id = #{knowledgeId} and user_id = #{userId}")
+    String getLastReviewTimeById(int knowledgeId, String userId);
 }
