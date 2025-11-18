@@ -44,39 +44,28 @@ public class QuestionController {
             log.info("用户 {} 生成题目成功，题目redis id: {}", userId, responseDTO.getQuestionId());
             return Response.SYSTEM_SUCCESS(responseDTO);
         } catch (Exception e) {
+            log.error("用户 {} 生成题目失败，题目id: {}", userId, mistakeQuestionId);
             throw new RuntimeException(e);
         }
     }
 
-    /**
-     * 3.题目回答错误时调用，存入用户错题数据库
-     */
-    @GlobalInterception
-    @PostMapping("/handle/mistakequestion")
-    public Response handleWrongQuestion(String questionId) {
-        String userId = UserContext.getUserId();
-        try {
-            log.info("用户 {} 录入错题中，错题id: {}", userId, questionId);
-            questionService.recordMistakeQuestion(userId, questionId);
-            return Response.SYSTEM_SUCCESS("该题已录入错题库");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 
     /**
      * 2.ai判题
      */
-    //TODO ai判题后 自动根据答题正误 录入错题数据库
     @GlobalInterception
     @PostMapping("/judge")
     public Flux<ServerSentEvent<String>> aiJudge(@NotNull String questionId, @NotNull String answer) {
         String userId = UserContext.getUserId();
         try {
             log.info("用户 {} 调用ai判题，题目id: {}", userId, questionId);
-            return questionService.aiJudge(questionId, answer);
+            return questionService.aiJudge(userId, questionId, answer);
         } catch (Exception e) {
+            log.error("用户 {} 调用ai判题失败，题目id: {}", userId, questionId);
             throw new RuntimeException(e);
+        }finally {
+            questionService.removeQuestionCache(questionId);
         }
     }
 
