@@ -32,7 +32,6 @@ public class KeyPointsExplanationController {
 
     /**
      * 根据学科获取中心知识点
-     * todo 解决中文传到后端乱码问题
      * @param subject
      * @return
      */
@@ -89,7 +88,7 @@ public class KeyPointsExplanationController {
 
     /**
      * 获取相关错题统计数量
-     * todo: 需要额外获取错题id的集合，然后需要完善学习反馈模块获取错题内容
+     * todo 完善学习反馈模块获取错题内容
      */
     @GetMapping("/{knowledgeId}/related-questions-statistic")
     public ResponseEntity<String> getRelatedWrongQuestionsStatistic(

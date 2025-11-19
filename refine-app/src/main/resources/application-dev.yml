@@ -5,6 +5,9 @@ server:
       max: 200        # 设定处理客户请求的线程的最大数目，决定了服务器可以同时响应客户请求的数,默认200
       min-spare: 50   # 初始化线程数,最小空闲线程数,默认是10
     accept-count: 10  # 等待队列长度
+  servlet:
+    encoding:
+      charset: UTF-8
 
 # 应用配置
 app:
@@ -35,7 +38,7 @@ spring:
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://127.0.0.1:3306/achobeta-refine?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    url: jdbc:mysql://mysql:3306/achobeta_refine?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
@@ -52,7 +55,7 @@ spring:
 redis:
   sdk:
     # 开关
-    enabled: false
+    enabled: true
     config:
       host: 127.0.0.1
       port: 6379
@@ -75,3 +78,10 @@ logging:
   level:
     root: info
   config: classpath:logback-spring.xml
+
+langchain4j:
+  open-ai:
+    chat-model:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${API_KEY}
+      model-name: qwen-plus

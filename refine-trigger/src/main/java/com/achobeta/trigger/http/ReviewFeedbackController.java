@@ -94,7 +94,6 @@ public class ReviewFeedbackController {
 
     /**
      * 获取用户待复习题目列表
-     * todo 待完善 处理前端传入%22%E6%95%B0%E5%AD%A6%22， 后端转成汉字的问题
      */
     @GetMapping("/list")
     public ResponseEntity<Page<MistakeQuestionEntity>> list(
