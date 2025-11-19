@@ -1,9 +1,7 @@
 package com.achobeta.domain.keypoints_explanation.adapter.repository;
 
 import cn.hutool.core.date.DateTime;
-import com.achobeta.domain.keypoints_explanation.model.valobj.KeyPointsVO;
-import com.achobeta.domain.keypoints_explanation.model.valobj.ToolTipVO;
-import com.achobeta.domain.keypoints_explanation.model.valobj.WrongQuestionVO;
+import com.achobeta.domain.keypoints_explanation.model.valobj.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -50,4 +48,16 @@ public interface KeyPointsMapper {
 
     @Select("select max(update_time) from mistakequestion where knowledge_point_id = #{knowledgeId} and user_id = #{userId}")
     String getLastReviewTimeById(int knowledgeId, String userId);
+
+    @Select("select id as id, question_content as question from mistakequestion" +
+            " where knowledge_point_id = #{knowledgeId} and user_id = #{userId} limit 3")
+    List<QuestionVO> getRelatedQuestions(int knowledgeId, String userId);
+
+    @Select("select note from knowledgepoint" +
+            " where knowledge_point_id = #{knowledgeId} and user_id = #{userId}")
+    String getNoteById(int knowledgeId, String userId);
+
+    @Select("insert into knowledgepoint(knowledge_point_id, knowledge_point_name, knowledge_desc, parent_knowledge_point_id, user_id)" +
+            " values(#{node.pointId}, #{node.pointName}, #{node.pointDesc}, #{parentId}, #{userId})")
+    void saveMindMapTree(String userId, SonPointVO node, String parentId);
 }

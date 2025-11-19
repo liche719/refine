@@ -1,12 +1,9 @@
 package com.achobeta.domain.keypoints_explanation.service.etendbiz;
 
-import cn.hutool.core.date.DateTime;
-import com.achobeta.domain.Feetback.adapter.repository.ErrorTypeMapper;
+
 import com.achobeta.domain.keypoints_explanation.adapter.repository.KeyPointsMapper;
 import com.achobeta.domain.keypoints_explanation.adapter.repository.SubjectTransportMappeer;
-import com.achobeta.domain.keypoints_explanation.model.valobj.KeyPointsVO;
-import com.achobeta.domain.keypoints_explanation.model.valobj.ToolTipVO;
-import com.achobeta.domain.keypoints_explanation.model.valobj.WrongQuestionVO;
+import com.achobeta.domain.keypoints_explanation.model.valobj.*;
 import com.achobeta.domain.keypoints_explanation.service.IKeyPointsExplanationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +17,9 @@ import java.util.List;
 public class KeyPointsExplanationService implements IKeyPointsExplanationService {
     @Autowired
     private KeyPointsMapper keyPointsMapper;
+
+    @Autowired
+    private MindMapService mindMapService;
 
     /**
      * 获取子知识点
@@ -39,7 +39,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
      */
     @Override
     public List<KeyPointsVO> getKeyPoints(String subject, String userId) {
-        int subjectId = 0;
+        int subjectId;
         subjectId = SubjectTransportMappeer.FIELD_MAP.get(subject);
         return keyPointsMapper.getKeyPoints(subjectId, userId);
 
@@ -135,5 +135,26 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
         String lastReviewTime = keyPointsMapper.getLastReviewTimeById(knowledgeId, userId);
 
         return new ToolTipVO(total, count, lastReviewTime);
+    }
+
+    @Override
+    public RelateQuestionVO getRelatedWrongQuestions(int knowledgeId, String userId) {
+        List<QuestionVO> qestions = keyPointsMapper.getRelatedQuestions(knowledgeId, userId);
+        String note = keyPointsMapper.getNoteById(knowledgeId, userId);
+
+        return new RelateQuestionVO(qestions, note);
+    }
+
+    @Override
+    public void addSonPoint(SonPointVO sonPointVOs, String userId, String parentId) {
+        saveMindMapNode(userId, sonPointVOs, parentId);
+    }
+
+    private void saveMindMapNode(String userId, SonPointVO node, String parentId) {
+        node.setPointId(mindMapService.generateUUID());
+        keyPointsMapper.saveMindMapTree(userId, node, parentId);
+        for (SonPointVO child : node.getSonPoints()) {
+            saveMindMapNode(userId, child, node.getPointId());
+        }
     }
 }

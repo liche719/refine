@@ -1,17 +1,15 @@
 package com.achobeta.trigger.http;
 
 
-import com.achobeta.api.dto.KeyPointsDTO;
-import com.achobeta.api.dto.ToolTipDTO;
+import com.achobeta.api.dto.*;
 import com.achobeta.domain.IRedisService;
-import com.achobeta.domain.keypoints_explanation.model.valobj.KeyPointsVO;
-import com.achobeta.domain.keypoints_explanation.model.valobj.ToolTipVO;
-import com.achobeta.domain.keypoints_explanation.model.valobj.WrongQuestionVO;
+import com.achobeta.domain.keypoints_explanation.model.valobj.*;
 import com.achobeta.domain.keypoints_explanation.service.IKeyPointsExplanationService;
 import com.achobeta.types.common.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
+import org.redisson.api.RList;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.validation.annotation.Validated;
@@ -39,15 +37,19 @@ public class KeyPointsExplanationController {
      * @return
      */
     @GetMapping("/get_key_points")
-    public List<KeyPointsDTO> getKeyPoints(@Param("subject") String subject, @RequestHeader("token") String token) {
+    public ResponseEntity<List<KeyPointsDTO>> getKeyPoints(@Param("subject") String subject, @RequestHeader("token") String token) {
         String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
         log.info("用户获取中心知识点，subject:{}", subject);
-        return keyPointsExplanationService.getKeyPoints(subject, userId).stream()
+        List<KeyPointsVO> keyPoints = keyPointsExplanationService.getKeyPoints(subject, userId);
+        if (keyPoints == null || keyPoints.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(keyPoints.stream()
                 .map(keyPointsVO -> KeyPointsDTO.builder()
                         .id(keyPointsVO.getId())
                         .keyPoints(keyPointsVO.getKeyPoints())
                         .build())
-                .toList();
+                .toList());
     }
     /**
      * 获取子知识点
@@ -103,20 +105,28 @@ public class KeyPointsExplanationController {
         return ResponseEntity.ok(res);
     }
 
-//    /**
-//     * 获取相关错题或笔记
-//     *
-//     */
-//    @GetMapping("/{knowledgeId}/related-questions")
-//    public ResponseEntity<List<WrongQuestionDTO>> getRelatedWrongQuestions(
-//            @PathVariable int knowledgeId, @RequestHeader("token") String token) {
-//        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
-//        List<WrongQuestionVO> relatedQuestions = keyPointsExplanationService.getRelatedWrongQuestions(knowledgeId, userId);
-//        if (relatedQuestions == null || relatedQuestions.isEmpty()){
-//            return ResponseEntity.notFound().build();
-//        }
-//        return null;
-//    }
+    /**
+     * 获取相关错题或笔记
+     *
+     */
+    @GetMapping("/{knowledgeId}/related-questions")
+    public ResponseEntity<RelateQeustionDTO> getRelatedWrongQuestions(
+            @PathVariable int knowledgeId, @RequestHeader("token") String token) {
+        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
+        RelateQuestionVO relatedQuestions = keyPointsExplanationService.getRelatedWrongQuestions(knowledgeId, userId);
+        if (relatedQuestions == null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(RelateQeustionDTO.builder()
+                .questions(relatedQuestions.getQestions().stream()
+                        .map(questionVO -> QuestionDTO.builder()
+                                .id(questionVO.getId())
+                                .question(questionVO.getQuestion())
+                                .build())
+                        .toList())
+                .note(relatedQuestions.getNote())
+                .build());
+    }
 
     /**
      * 标记知识点已掌握
@@ -188,14 +198,14 @@ public class KeyPointsExplanationController {
                 .build());
     }
 
-//    /**
-//     * 添加子知识点
-//     */
-//    @PostMapping("/{knowledgeId}/add-son-point")
-//    public ResponseEntity<Boolean> addSonPoint(@PathVariable int knowledgeId, @RequestBody String sonPoint, @RequestHeader("token") String token) {
-//        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
-//        Boolean addSonPoint = keyPointsExplanationService.addSonPoint(knowledgeId, sonPoint, userId);
-//        return ResponseEntity.ok(addSonPoint);
-//    }
+    /**
+     * 添加子知识点
+     */
+    @PostMapping("/{knowledgeId}/add-son-point")
+    public ResponseEntity<String> addSonPoint(@PathVariable String knowledgeId, @RequestBody SonPointVO sonPoints, @RequestHeader("token") String token) {
+        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
+        keyPointsExplanationService.addSonPoint(sonPoints, userId, knowledgeId);
+        return ResponseEntity.ok("添加成功");
+    }
 
 }
