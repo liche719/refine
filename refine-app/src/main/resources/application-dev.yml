@@ -29,12 +29,12 @@ thread:
 spring:
   autoconfigure:
     exclude:
-      - org.redisson.spring.starter.RedissonAutoConfigurationV2
+      #      - org.redisson.spring.starter.RedissonAutoConfigurationV2
       # 如需使用 RabbitMQ 就开开这个
       - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   datasource:
     username: root
-    password: 123456
+    password: ${DB_PASSWORD}
     url: jdbc:mysql://127.0.0.1:3306/achobeta-refine?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
@@ -47,12 +47,48 @@ spring:
       max-lifetime: 1800000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
       connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
       connection-test-query: SELECT 1
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB    # 百度OCR单文件限制
+      max-request-size: 5MB
+  # 阿里百炼 DashScope 配置
+  ai:
+    dashscope:
+      api-key: ${DASHSCOPE_API_KEY}
+      chat:
+        options:
+          model: qwen3-max
+
+# OCR服务配置
+ocr:
+  provider: baidu  # 设置OCR服务提供商，可选值：baidu, aliyun
+
+# 阿里云OCR配置（已弃用，保留兼容）
+aliyun:
+  ocr:
+    enabled: false
+    accessKeyId: your-aliyun-access-key-id
+    accessKeySecret: your-aliyun-access-key-secret
+    regionId: cn-shanghai
+
+# 百度智能云OCR配置
+baidu:
+  ocr:
+    enabled: true
+    apiKey: ${BAIDU_OCR_API_KEY}
+    secretKey: ${BAIDU_OCR_SECRET_KEY}
+
+# 保留原有的自定义配置（如果其他地方有使用）
+dashscope:
+  apiKey: ${DASHSCOPE_API_KEY}
+  MODEL_NAME: qwen3-max
 
 # Redis【如需使用请打开】
 redis:
   sdk:
     # 开关
-    enabled: false
+    enabled: true
     config:
       host: 127.0.0.1
       port: 6379
