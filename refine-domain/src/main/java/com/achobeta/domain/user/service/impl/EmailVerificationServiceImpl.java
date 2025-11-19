@@ -81,7 +81,7 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
             // 发送失败时清理缓存,避免验证码残留
             userRepository.delValue(codeKey);
             log.error("验证码邮件发送失败：{}", e.getMessage());
-            throw new AppException("该邮箱不存在，请查看邮箱是否有误");
+            throw new AppException(GlobalServiceStatusCode.USER_EMAIL_NOT_EXIST);
         }
     }
 

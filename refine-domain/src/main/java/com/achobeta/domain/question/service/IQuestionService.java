@@ -9,7 +9,7 @@ public interface IQuestionService {
 
     QuestionResponseDTO questionGeneration(String userId, Integer knowledgePointId);
 
-    void recordMistakeQuestion(String userId, MistakeQuestionDTO value);
+    void recordMistakeQuestion(String userId, String questionId);
 
     void removeQuestionCache(String questionId);
 

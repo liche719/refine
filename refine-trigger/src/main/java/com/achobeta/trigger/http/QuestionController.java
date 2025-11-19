@@ -33,7 +33,8 @@ public class QuestionController {
 
     /**
      * 1.题目生成，目前支持判分的只有填空题和选择题
-     * @return  题目id，题目内容（含答案,简单解析）
+     *
+     * @return 题目id，题目内容（含答案,简单解析）
      */
     @GlobalInterception
     @PostMapping("/generation")
@@ -41,14 +42,13 @@ public class QuestionController {
         String userId = UserContext.getUserId();
         try {
             QuestionResponseDTO responseDTO = questionService.questionGeneration(userId, mistakeQuestionId);
-            log.info("用户 {} 生成题目成功，题目redis id: {}", userId, responseDTO.getQuestionId());
+            log.info("用户id: {} 生成题目成功，题目redis id: {}", userId, responseDTO.getQuestionId());
             return Response.SYSTEM_SUCCESS(responseDTO);
         } catch (Exception e) {
-            log.error("用户 {} 生成题目失败，题目id: {}", userId, mistakeQuestionId);
+            log.error("用户id: {} 生成题目失败，题目id: {}", userId, mistakeQuestionId, e);
             throw new RuntimeException(e);
         }
     }
-
 
 
     /**
@@ -59,14 +59,31 @@ public class QuestionController {
     public Flux<ServerSentEvent<String>> aiJudge(@NotNull String questionId, @NotNull String answer) {
         String userId = UserContext.getUserId();
         try {
-            log.info("用户 {} 调用ai判题，题目id: {}", userId, questionId);
+            log.info("用户id: {} 调用ai判题，题目id: {}", userId, questionId);
             return questionService.aiJudge(userId, questionId, answer);
         } catch (Exception e) {
-            log.error("用户 {} 调用ai判题失败，题目id: {}", userId, questionId);
+            log.error("用户id: {} 调用ai判题失败，题目id: {}", userId, questionId, e);
             throw new RuntimeException(e);
-        }finally {
-            questionService.removeQuestionCache(questionId);
         }
     }
+
+
+    /**
+     * 3.记录错题
+     */
+    @GlobalInterception
+    @PostMapping("/record")
+    public Response recordMistakeQuestion(@NotNull String questionId) {
+        String userId = UserContext.getUserId();
+        try {
+            log.info("用户 {} 记录错题，题目id: {}", userId, questionId);
+            questionService.recordMistakeQuestion(userId, questionId);
+            return Response.SYSTEM_SUCCESS("已加入错题");
+        } catch (Exception e) {
+            log.error("用户 {} 记录错题失败，题目id: {}", userId, questionId, e);
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }
