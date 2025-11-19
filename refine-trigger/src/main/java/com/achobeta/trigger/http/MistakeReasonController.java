@@ -2,8 +2,12 @@ package com.achobeta.trigger.http;
 
 import com.achobeta.api.dto.MistakeReasonRequestDTO;
 import com.achobeta.api.dto.MistakeReasonResponseDTO;
+import com.achobeta.api.dto.StudyNoteRequestDTO;
+import com.achobeta.api.dto.StudyNoteResponseDTO;
 import com.achobeta.domain.mistake.model.valobj.MistakeReasonVO;
+import com.achobeta.domain.mistake.model.valobj.StudyNoteVO;
 import com.achobeta.domain.mistake.service.IMistakeReasonService;
+import com.achobeta.domain.mistake.service.IStudyNoteService;
 import com.achobeta.types.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class MistakeReasonController {
 
     private final IMistakeReasonService mistakeReasonService;
+    private final IStudyNoteService studyNoteService;
 
     /**
      * 切换错因状态
@@ -42,13 +47,13 @@ public class MistakeReasonController {
                     requestDTO.getUserId(), requestDTO.getQuestionId(), reasonName);
 
             // 转换DTO为领域值对象
-            MistakeReasonVO reasonVO = convertToVO(requestDTO);
+            MistakeReasonVO reasonVO = convertToMistakeReasonVO(requestDTO);
 
             // 调用领域服务
             MistakeReasonVO responseVO = mistakeReasonService.toggleMistakeReason(reasonVO, reasonName);
 
             // 转换为响应DTO
-            MistakeReasonResponseDTO response = convertToResponseDTO(responseVO);
+            MistakeReasonResponseDTO response = convertToMistakeReasonResponseDTO(responseVO);
 
             if (response.getSuccess()) {
                 log.info("用户切换错因状态成功，userId:{} questionId:{} reasonName:{}",
@@ -84,13 +89,13 @@ public class MistakeReasonController {
                     requestDTO.getUserId(), requestDTO.getQuestionId());
 
             // 转换DTO为领域值对象
-            MistakeReasonVO reasonVO = convertToVO(requestDTO);
+            MistakeReasonVO reasonVO = convertToMistakeReasonVO(requestDTO);
 
             // 调用领域服务
             MistakeReasonVO responseVO = mistakeReasonService.updateOtherReasonText(reasonVO);
 
             // 转换为响应DTO
-            MistakeReasonResponseDTO response = convertToResponseDTO(responseVO);
+            MistakeReasonResponseDTO response = convertToMistakeReasonResponseDTO(responseVO);
 
             if (response.getSuccess()) {
                 log.info("用户更新其他原因成功，userId:{} questionId:{}",
@@ -130,7 +135,7 @@ public class MistakeReasonController {
             MistakeReasonVO responseVO = mistakeReasonService.getMistakeReasons(userId, questionId);
 
             // 转换为响应DTO
-            MistakeReasonResponseDTO response = convertToResponseDTO(responseVO);
+            MistakeReasonResponseDTO response = convertToMistakeReasonResponseDTO(responseVO);
 
             if (response.getSuccess()) {
                 log.info("获取错因信息成功，userId:{} questionId:{}", userId, questionId);
@@ -151,9 +156,89 @@ public class MistakeReasonController {
     }
 
     /**
-     * 将请求DTO转换为领域值对象
+     * 提交错题笔记
+     *
+     * @param requestDTO 错题笔记请求DTO
+     * @return 错题笔记响应
      */
-    private MistakeReasonVO convertToVO(MistakeReasonRequestDTO requestDTO) {
+    @PostMapping("study-note/submit")
+    public Response<StudyNoteResponseDTO> submitStudyNote(
+            @Valid @RequestBody StudyNoteRequestDTO requestDTO) {
+        try {
+            log.info("用户提交错题笔记开始，userId:{} questionId:{}",
+                    requestDTO.getUserId(), requestDTO.getQuestionId());
+
+            // 转换DTO为领域值对象
+            StudyNoteVO studyNoteVO = convertToStudyNoteVO(requestDTO);
+
+            // 调用领域服务
+            StudyNoteVO responseVO = studyNoteService.updateStudyNote(studyNoteVO);
+
+            // 转换为响应DTO
+            StudyNoteResponseDTO response = convertToStudyNoteResponseDTO(responseVO);
+
+            if (response.getSuccess()) {
+                log.info("用户提交错题笔记成功，userId:{} questionId:{}",
+                        requestDTO.getUserId(), requestDTO.getQuestionId());
+                return Response.SYSTEM_SUCCESS(response);
+            } else {
+                log.warn("用户提交错题笔记失败，userId:{} questionId:{} message:{}",
+                        requestDTO.getUserId(), requestDTO.getQuestionId(), response.getMessage());
+                return Response.<StudyNoteResponseDTO>builder()
+                        .code(Response.SERVICE_ERROR().getCode())
+                        .info(response.getMessage())
+                        .data(response)
+                        .build();
+            }
+        } catch (Exception e) {
+            log.error("用户提交错题笔记时发生异常，userId:{} questionId:{}",
+                    requestDTO.getUserId(), requestDTO.getQuestionId(), e);
+            return Response.SERVICE_ERROR("系统异常: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取错题笔记
+     *
+     * @param userId 用户ID
+     * @param questionId 题目ID
+     * @return 错题笔记响应
+     */
+    @GetMapping("study-note/get")
+    public Response<StudyNoteResponseDTO> getStudyNote(
+            @RequestParam String userId,
+            @RequestParam String questionId) {
+        try {
+            log.info("获取错题笔记开始，userId:{} questionId:{}", userId, questionId);
+
+            // 调用领域服务
+            StudyNoteVO responseVO = studyNoteService.getStudyNote(userId, questionId);
+
+            // 转换为响应DTO
+            StudyNoteResponseDTO response = convertToStudyNoteResponseDTO(responseVO);
+
+            if (response.getSuccess()) {
+                log.info("获取错题笔记成功，userId:{} questionId:{}", userId, questionId);
+                return Response.SYSTEM_SUCCESS(response);
+            } else {
+                log.warn("获取错题笔记失败，userId:{} questionId:{} message:{}",
+                        userId, questionId, response.getMessage());
+                return Response.<StudyNoteResponseDTO>builder()
+                        .code(Response.SERVICE_ERROR().getCode())
+                        .info(response.getMessage())
+                        .data(response)
+                        .build();
+            }
+        } catch (Exception e) {
+            log.error("获取错题笔记时发生异常，userId:{} questionId:{}", userId, questionId, e);
+            return Response.SERVICE_ERROR("系统异常: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 将MistakeReasonRequestDTO转换为MistakeReasonVO
+     */
+    private MistakeReasonVO convertToMistakeReasonVO(MistakeReasonRequestDTO requestDTO) {
         return MistakeReasonVO.builder()
                 .userId(requestDTO.getUserId())
                 .questionId(requestDTO.getQuestionId())
@@ -167,9 +252,9 @@ public class MistakeReasonController {
     }
 
     /**
-     * 将领域值对象转换为响应DTO
+     * 将MistakeReasonVO转换为MistakeReasonResponseDTO
      */
-    private MistakeReasonResponseDTO convertToResponseDTO(MistakeReasonVO reasonVO) {
+    private MistakeReasonResponseDTO convertToMistakeReasonResponseDTO(MistakeReasonVO reasonVO) {
         if (reasonVO == null) {
             return MistakeReasonResponseDTO.builder()
                     .success(false)
@@ -188,6 +273,37 @@ public class MistakeReasonController {
                 .otherReasonText(reasonVO.getOtherReasonText())
                 .success(reasonVO.getSuccess())
                 .message(reasonVO.getMessage())
+                .build();
+    }
+
+    /**
+     * 将StudyNoteRequestDTO转换为StudyNoteVO
+     */
+    private StudyNoteVO convertToStudyNoteVO(StudyNoteRequestDTO requestDTO) {
+        return StudyNoteVO.builder()
+                .userId(requestDTO.getUserId())
+                .questionId(requestDTO.getQuestionId())
+                .studyNote(requestDTO.getStudyNote())
+                .build();
+    }
+
+    /**
+     * 将StudyNoteVO转换为StudyNoteResponseDTO
+     */
+    private StudyNoteResponseDTO convertToStudyNoteResponseDTO(StudyNoteVO studyNoteVO) {
+        if (studyNoteVO == null) {
+            return StudyNoteResponseDTO.builder()
+                    .success(false)
+                    .message("系统错误：响应对象为空")
+                    .build();
+        }
+
+        return StudyNoteResponseDTO.builder()
+                .userId(studyNoteVO.getUserId())
+                .questionId(studyNoteVO.getQuestionId())
+                .studyNote(studyNoteVO.getStudyNote())
+                .success(studyNoteVO.getSuccess())
+                .message(studyNoteVO.getMessage())
                 .build();
     }
 }
