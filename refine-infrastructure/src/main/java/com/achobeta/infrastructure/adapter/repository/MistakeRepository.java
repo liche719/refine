@@ -6,7 +6,7 @@ import com.achobeta.domain.question.model.po.MistakeKnowledgePO;
 import com.achobeta.api.dto.MistakeQuestionDTO;
 import com.achobeta.infrastructure.dao.MistakeQuestionMapper;
 import com.achobeta.infrastructure.dao.po.MistakePO;
-import com.achobeta.infrastructure.redis.IRedisService;
+import com.achobeta.domain.IRedisService;
 import com.achobeta.types.enums.GlobalServiceStatusCode;
 import com.achobeta.types.exception.AppException;
 import jakarta.annotation.Resource;

@@ -8,7 +8,7 @@ import cn.hutool.jwt.JWTValidator;
 import cn.hutool.jwt.signers.JWTSigner;
 import cn.hutool.jwt.signers.JWTSignerUtil;
 import com.achobeta.domain.user.service.Jwt;
-import com.achobeta.infrastructure.redis.IRedisService;
+import com.achobeta.domain.IRedisService;
 import com.achobeta.types.exception.UnauthorizedException;
 import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
