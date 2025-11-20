@@ -5,6 +5,9 @@ server:
       max: 200        # 设定处理客户请求的线程的最大数目，决定了服务器可以同时响应客户请求的数,默认200
       min-spare: 50   # 初始化线程数,最小空闲线程数,默认是10
     accept-count: 10  # 等待队列长度
+  servlet:
+    encoding:
+      charset: UTF-8
 
 # 应用配置
 app:
@@ -124,6 +127,12 @@ email:
     verify-code-expire-minute: 5
 
 langchain4j:
+  open-ai:
+    chat-model:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${API_KEY}
+      model-name: qwen-plus
+
   community:
     dashscope:
       chat-model:
@@ -141,3 +150,4 @@ jwt:
 ai:
   dashscope:
     max-concurrency: ${AI_MAX_CONCURRENCY}  # 根据实际需求设置合适的并发数
+

@@ -9,7 +9,16 @@
 
     <artifactId>refine-domain</artifactId>
 
+
     <dependencies>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-spring-boot-starter</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dashscope-sdk-java</artifactId>
@@ -50,6 +59,20 @@
         <dependency>
             <groupId>com.achobeta</groupId>
             <artifactId>refine-types</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.5.19</version>
+            <scope>compile</scope>
         </dependency>
 
         <!--BCrypt加密-->

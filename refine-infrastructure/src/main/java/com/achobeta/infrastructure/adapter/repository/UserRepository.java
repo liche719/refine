@@ -3,7 +3,7 @@ package com.achobeta.infrastructure.adapter.repository;
 import com.achobeta.domain.user.adapter.repository.IUserRepository;
 import com.achobeta.domain.user.model.entity.UserEntity;
 import com.achobeta.infrastructure.dao.UserAccountMapper;
-import com.achobeta.infrastructure.redis.IRedisService;
+import com.achobeta.domain.IRedisService;
 import com.achobeta.types.support.id.SnowflakeIdWorker;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
