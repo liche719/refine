@@ -183,8 +183,7 @@ public class KeyPointsExplanationController {
      */
     @GetMapping("/{knowledgeId}/show-tooltip")
     public ResponseEntity<ToolTipDTO> showTooltip(@PathVariable int knowledgeId, @RequestHeader("token") String token) {
-        //String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
-        String userId = "1";
+        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
         ToolTipVO tooltip = keyPointsExplanationService.gettooltipById(knowledgeId, userId);
         if(tooltip == null || tooltip.getTotal() == 0){
             return ResponseEntity.notFound().build();

@@ -96,7 +96,7 @@ public class ReviewFeedbackController {
      * 获取用户待复习题目列表
      */
     @GetMapping("/list")
-    public ResponseEntity<Page<MistakeQuestionEntity>> list(
+    public ResponseEntity<?> list(
             @RequestHeader("token") String token,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) List<String> subject,
@@ -127,7 +127,8 @@ public class ReviewFeedbackController {
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
             log.error("用户筛选获取待复习题目列表失败！userId:{}", userId, e);
-            return null;
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "请求参数无效: " + e.getMessage()));
         }
     }
 

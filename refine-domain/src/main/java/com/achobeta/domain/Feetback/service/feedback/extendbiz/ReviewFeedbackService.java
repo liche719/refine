@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.achobeta.types.enums.TimeRange.MORE_THAN_ONE_WEEK;
@@ -89,10 +90,14 @@ public class ReviewFeedbackService implements IReviewFeedbackService {
         );
 
         // 分页处理
-        int pageNum = params.getPage() != 0 ? params.getPage() : 0;
-        int pageSize = params.getSize() != 10 ? params.getSize() : 10;
+        int pageNum = Math.max(params.getPage(), 0);
+        int pageSize = params.getSize() >= 0 ? params.getSize() : 10;
         int start = pageNum * pageSize;
-        int end = Math.min(start + pageSize, list.size());
+        int total = list.size();
+        if (start >= total) {
+            return new PageImpl<>(Collections.emptyList(), PageRequest.of(pageNum, pageSize), total);
+        }
+        int end = Math.min(start + pageSize, total);
 
         List<MistakeQuestionEntity> pageList = list.subList(start, end);
 
