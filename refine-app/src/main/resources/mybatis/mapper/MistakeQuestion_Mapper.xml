@@ -93,4 +93,11 @@
         WHERE user_id = #{userId,jdbcType=VARCHAR} AND question_id = #{questionId,jdbcType=VARCHAR}
     </update>
 
+    <update id="updateStudyNote">
+        UPDATE mistake_question
+        SET study_note = #{studyNote,jdbcType=LONGVARCHAR},
+            update_time = NOW()
+        WHERE user_id = #{userId,jdbcType=VARCHAR} AND question_id = #{questionId,jdbcType=VARCHAR}
+    </update>
+
 </mapper>
