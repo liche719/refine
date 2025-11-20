@@ -77,10 +77,11 @@ public class EmailVerificationServiceImpl implements IEmailVerificationService {
         // 发送验证码邮件
         try {
             sendVerificationEmail(userEmail, code);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             // 发送失败时清理缓存,避免验证码残留
             userRepository.delValue(codeKey);
-            throw new AppException("验证码发送失败，请稍后重试");
+            log.error("验证码邮件发送失败：{}", e.getMessage());
+            throw new AppException(GlobalServiceStatusCode.USER_EMAIL_NOT_EXIST);
         }
     }
 

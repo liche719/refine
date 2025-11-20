@@ -46,6 +46,7 @@ public enum GlobalServiceStatusCode {
     USER_ACCOUNT_REGISTER_ERROR(2010, "账号注册错误"),
     USER_EMAIL_FORMAT_ERROR(2011, "邮箱格式不正确"),
     USER_EMAIL_ALREADY_EXIST(2012, "邮箱已存在"),
+    USER_EMAIL_NOT_EXIST(2013, "邮箱不存在,请查看邮箱是否有误"),
 
     USER_TYPE_EXCEPTION(2101, "用户类别异常"),
 

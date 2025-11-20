@@ -1,5 +1,6 @@
 package com.achobeta.domain.question.service;
 
+import com.achobeta.api.dto.MistakeQuestionDTO;
 import com.achobeta.api.dto.QuestionResponseDTO;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
@@ -12,6 +13,6 @@ public interface IQuestionService {
 
     void removeQuestionCache(String questionId);
 
-    Flux<ServerSentEvent<String>> aiJudge(String questionId, String answer);
+    Flux<ServerSentEvent<String>> aiJudge(String userId, String questionId, String answer);
 
 }
