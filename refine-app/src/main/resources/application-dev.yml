@@ -79,7 +79,7 @@ aliyun:
     accessKeySecret: your-aliyun-access-key-secret
     regionId: cn-shanghai
 
-# 百度智能云OCR配置
+# 百度智能云OCR配置信息
 baidu:
   ocr:
     enabled: true
