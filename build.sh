@@ -41,7 +41,7 @@ CONTAINER_NAME=refine
 
 # 启动程序模块（必须）
 services(){
-  $COMPOSE_COMMAND -f docker-compose-app.yml up
+  $COMPOSE_COMMAND -f docker-compose-app.yml up -d
 }
 
 # 关闭服务模块

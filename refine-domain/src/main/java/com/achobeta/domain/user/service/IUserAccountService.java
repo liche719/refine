@@ -3,6 +3,8 @@ package com.achobeta.domain.user.service;
 import com.achobeta.domain.user.model.valobj.UserLoginVO;
 import com.achobeta.types.exception.AppException;
 
+import java.util.Map;
+
 /**
  * @author liangchaowen
  * @description 用户领域服务接口
@@ -32,9 +34,11 @@ public interface IUserAccountService {
      */
     UserLoginVO login(String userEmail, String userPassword);
 
-    void resetPassword(String userEmail, String newPassword, String checkCode);
+    void resetPassword(String userAccount, String newPassword, String checkCode);
 
     void updatePassword(String userId, String oldPassword, String newPassword);
 
+    void logout(String refreshToken);
 
+    Map<String, String> refreshToken(String refreshToken);
 }

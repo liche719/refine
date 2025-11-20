@@ -16,6 +16,9 @@ public enum GlobalServiceStatusCode {
     /* 成功, 默认200 */
     SYSTEM_SUCCESS(200, "操作成功"),
 
+    //401, access-token 过期
+    UNAUTHORIZED(401, "access-token 过期，请用 refresh-token 刷新"),
+
     /* 系统错误 负数 */
     SYSTEM_SERVICE_FAIL(-4396, "操作失败"),
     SYSTEM_SERVICE_ERROR(-500, "系统异常"),
@@ -43,11 +46,16 @@ public enum GlobalServiceStatusCode {
     USER_ACCOUNT_REGISTER_ERROR(2010, "账号注册错误"),
     USER_EMAIL_FORMAT_ERROR(2011, "邮箱格式不正确"),
     USER_EMAIL_ALREADY_EXIST(2012, "邮箱已存在"),
+    USER_EMAIL_NOT_EXIST(2013, "邮箱不存在,请查看邮箱是否有误"),
 
     USER_TYPE_EXCEPTION(2101, "用户类别异常"),
 
     USER_NO_PERMISSION(2403, "用户无权限"),
     USER_CAPTCHA_CODE_ERROR(2500, "验证码错误"),
+
+    QUESTION_GENERATION_FAIL(10001, "题目生成失败,请稍后再试"),
+    QUESTION_IS_EXPIRED(10002, "题目已过期或不存在" )
+
     ;
 
     private Integer code;
