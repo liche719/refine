@@ -9,9 +9,7 @@ import com.achobeta.types.common.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
-import org.redisson.api.RList;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -161,7 +159,6 @@ public class KeyPointsExplanationController {
      * 保存或更新学生笔记
      */
     @PostMapping("/{knowledgeId}/notes")
-    @Scheduled(cron = "0 */5 * * * *")
     public ResponseEntity<String> saveOrUpdateStudentNote(@PathVariable int knowledgeId, @RequestBody String note, @RequestHeader("token") String token) {
         String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
         keyPointsExplanationService.savedNote(note, knowledgeId, userId);
