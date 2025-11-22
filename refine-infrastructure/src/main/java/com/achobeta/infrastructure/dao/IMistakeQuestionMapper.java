@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Select;
  * 错题数据访问接口
  */
 @Mapper
-public interface MistakeQuestionMapper {
+public interface IMistakeQuestionMapper {
 
     @Insert("INSERT INTO MistakeQuestion (user_id, question_content, subject, other_reason, knowledge_point_id,create_time, update_time) " +
             "VALUES (#{userId}, #{questionContent}, #{subject}, #{otherReason}, #{knowledgePointId}, #{createTime}, #{updateTime})")
