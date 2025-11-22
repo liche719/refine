@@ -53,8 +53,8 @@ spring:
   mail: #邮件验证码配置
     host: smtp.qq.com  # SMTP服务器地址（QQ邮箱固定）
     port: 587          # 端口（587为加密端口）
-    username: ${MAIL_SMTP_USERNAME}
-    password: ${MAIL_SMTP_PASSWORD}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties.mail.smtp.auth: true  # 启用身份验证
     properties.mail.smtp.starttls.enable: true  # 启用TLS加密
   servlet:
