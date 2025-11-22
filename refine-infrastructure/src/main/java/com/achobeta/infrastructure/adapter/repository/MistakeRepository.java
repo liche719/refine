@@ -4,7 +4,7 @@ import com.achobeta.domain.question.adapter.repository.IMistakeRepository;
 import com.achobeta.domain.question.model.entity.MistakeQuestionEntity;
 import com.achobeta.domain.question.model.po.MistakeKnowledgePO;
 import com.achobeta.api.dto.MistakeQuestionDTO;
-import com.achobeta.infrastructure.dao.MistakeQuestionMapper;
+import com.achobeta.infrastructure.dao.IMistakeQuestionMapper;
 import com.achobeta.infrastructure.dao.po.MistakePO;
 import com.achobeta.domain.IRedisService;
 import com.achobeta.types.enums.GlobalServiceStatusCode;
@@ -23,7 +23,7 @@ public class MistakeRepository implements IMistakeRepository {
     @Resource
     private IRedisService redis;
 
-    private final MistakeQuestionMapper mistakeQuestionMapper;
+    private final IMistakeQuestionMapper mistakeQuestionMapper;
 
     @Override
     public void save(MistakeQuestionEntity mistakeEntity) {
