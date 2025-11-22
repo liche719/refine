@@ -7,6 +7,8 @@ import com.achobeta.domain.ocr.model.entity.QuestionEntity;
 import com.achobeta.domain.ocr.service.IOcrService;
 import com.achobeta.domain.ocr.service.IMistakeQuestionService;
 import com.achobeta.types.Response;
+import com.achobeta.types.annotation.GlobalInterception;
+import com.achobeta.types.common.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -38,23 +40,20 @@ public class OcrController {
      * @param fileType 文件类型
      * @return 第一个问题
      */
+    @GlobalInterception
     @PostMapping(value = "extract-first", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<QuestionInfoResponseDTO> extractFirst(@RequestPart("file") MultipartFile file,
-                                                          @RequestParam(value = "fileType", required = false) String fileType,
-                                                          @RequestHeader("Authorization") String token) {
+                                                          @RequestParam(value = "fileType", required = false) String fileType) {
         try {
-            // token 验证
-            boolean success = authService.checkToken(token);
-            if (!success) {
+            // 获取用户ID
+            String userId = UserContext.getUserId();
+            if (userId == null) {
+                log.info("用户id为空！");
                 return Response.<QuestionInfoResponseDTO>builder()
                         .code(Response.SERVICE_ERROR().getCode())
                         .info(Response.SERVICE_ERROR().getInfo())
                         .build();
             }
-
-            // 解析token获取用户ID
-            String userId = authService.openid(token);
-            assert userId != null;
 
             String ft = fileType;
 
