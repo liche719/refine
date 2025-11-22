@@ -10,7 +10,9 @@ import com.achobeta.domain.Feetback.model.valobj.*;
 import com.achobeta.domain.Feetback.service.feedback.IReviewFeedbackService;
 import com.achobeta.domain.IRedisService;
 import com.achobeta.types.Response;
+import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.Constants;
+import com.achobeta.types.common.UserContext;
 import com.achobeta.types.enums.TimeRange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,15 +41,15 @@ public class ReviewFeedbackController {
 
     private final IReviewFeedbackService reviewFeedbackService;
 
-    private final IRedisService redis;
 
     /**
      * 获取用户超过一周未复习题目数量
      * @return
      */
     @GetMapping("/overdue-count")
-    public Response<OverdueReviewDTO> getOverdueReviewCount(@RequestHeader("token") String token) {
-        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
+    @GlobalInterception
+    public Response<OverdueReviewDTO> getOverdueReviewCount() {
+        String userId = UserContext.getUserId();
         try{
             log.info("用户获取待复习题目数量开始，userId:{}", userId);
             OverdueCountVO overdueCountVO = reviewFeedbackService.getOverdueCount(userId);
@@ -67,8 +69,9 @@ public class ReviewFeedbackController {
      * 获取用户近期出错多(>= 3)的知识点
      */
     @GetMapping("/tricky_knowledge")
-    public Response<List<TrickyKnowledgePointDTO>> getTrickyKnowledgePoint(@RequestHeader("token") String token){
-        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
+    @GlobalInterception
+    public Response<List<TrickyKnowledgePointDTO>> getTrickyKnowledgePoint(){
+        String userId = UserContext.getUserId();
         try{
             log.info("用户获取近期出错最多的知识点，userId:{}", userId);
             List<TrickyKnowledgePointVO> trickyKnowledgePointVOS = reviewFeedbackService.getTrickyKnowledgePoint(userId);
@@ -96,8 +99,8 @@ public class ReviewFeedbackController {
      * 获取用户待复习题目列表
      */
     @GetMapping("/list")
+    @GlobalInterception
     public ResponseEntity<?> list(
-            @RequestHeader("token") String token,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) List<String> subject,
             @RequestParam(required = false) List<String> errorType,
@@ -105,7 +108,7 @@ public class ReviewFeedbackController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
+        String userId = UserContext.getUserId();
         try {
             MistakeQueryParamsVO params = new MistakeQueryParamsVO();
             params.setUserId(userId);
@@ -136,8 +139,9 @@ public class ReviewFeedbackController {
      * 删除用户待复习题目
      */
     @DeleteMapping("/deleteBatch")
-    public ResponseEntity<String> deleteBatch(@RequestHeader("token") String token, @RequestParam List<Integer> questionIds) {
-        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
+    @GlobalInterception
+    public ResponseEntity<String> deleteBatch(@RequestParam List<Integer> questionIds) {
+        String userId = UserContext.getUserId();
         try {
             log.info("用户删除待复习题目开始，userId:{}", userId);
             reviewFeedbackService.deleteBatch(userId, questionIds);
@@ -152,8 +156,9 @@ public class ReviewFeedbackController {
      * 获取待复习题目统计信息
      */
     @GetMapping("/statistics")
-    public ResponseEntity<StatsDTO> getStatistics(@RequestHeader("token") String token) {
-        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
+    @GlobalInterception
+    public ResponseEntity<StatsDTO> getStatistics() {
+        String userId = UserContext.getUserId();
         try {
             log.info("获取待复习题目统计信息开始");
             StatsVO statsVO = reviewFeedbackService.getStatistics(userId);

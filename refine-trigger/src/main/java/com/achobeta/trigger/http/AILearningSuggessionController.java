@@ -5,7 +5,9 @@ import com.achobeta.api.dto.TrickyKnowledgePointDTO;
 import com.achobeta.domain.IRedisService;
 import com.achobeta.domain.aisuggession.model.valobj.KeyPointVO;
 import com.achobeta.domain.aisuggession.service.IAILearningSuggessionService;
+import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.Constants;
+import com.achobeta.types.common.UserContext;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +28,11 @@ import java.util.List;
 @RequestMapping("/api/${app.config.api-version}/ai_suggession")
 public class AILearningSuggessionController {
     private final IAILearningSuggessionService service;
-    private final IRedisService redis;
 
     @RequestMapping("/get_key_point")
-    public List<KeyPointDTO> getKeyPoint(@RequestHeader("token") String token) {
-        String userId = redis.getValue(Constants.USER_ID_KEY_PREFIX + token);
+    @GlobalInterception
+    public List<KeyPointDTO> getKeyPoint() {
+        String userId = UserContext.getUserId();
         log.info("用户获取AI学习建议，userId:{}", userId);
         List<KeyPointVO> keyPointVOS = service.getKeyPoint(userId);
         List<KeyPointDTO> keyPointDTOS = keyPointVOS.stream()

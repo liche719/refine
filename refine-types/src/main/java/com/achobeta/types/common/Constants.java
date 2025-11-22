@@ -24,7 +24,6 @@ public class Constants {
     // 密码正则
     public static final String REGEX_PASSWORD = "^(?=.*\\d)(?=.*[a-zA-Z])[\\da-zA-Z~!@#$%^&*_]{8,18}$";
 
-    public static final String USER_ID_KEY_PREFIX = "user:id:";
 
 
 }
