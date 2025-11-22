@@ -5,6 +5,8 @@ services:
     restart: on-failure
     ports:
       - "8091:8091"
+    env_file:
+      - ./.env
     environment:
       - TZ=PRC
       - SERVER_PORT=8091
