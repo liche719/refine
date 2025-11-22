@@ -137,10 +137,10 @@ langchain4j:
     dashscope:
       chat-model:
         model-name: qwen-max
-        api-key: ${DASH_SCOPE_API_KEY}
+        api-key: ${DASHSCOPE_API_KEY}
       streaming-chat-model:
         model-name: qwen-max
-        api-key: ${DASH_SCOPE_API_KEY}
+        api-key: ${DASHSCOPE_API_KEY}
 
 jwt:
   secret: ${JWT_SECRET}
