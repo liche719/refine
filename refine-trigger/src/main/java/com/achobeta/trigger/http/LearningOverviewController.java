@@ -3,6 +3,7 @@ package com.achobeta.trigger.http;
 
 import com.achobeta.api.dto.StudyOverviewDTO;
 import com.achobeta.domain.IRedisService;
+import com.achobeta.domain.overview.model.valobj.LearningDynamicVO;
 import com.achobeta.domain.overview.service.ILearningOverviewService;
 import com.achobeta.domain.overview.model.valobj.StudyOverviewVO;
 import com.achobeta.types.annotation.GlobalInterception;
@@ -11,6 +12,7 @@ import com.achobeta.types.common.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +48,19 @@ public class LearningOverviewController {
         } catch (Exception e) {
             log.error("getOverview error", e);
             return null;
+        }
+    }
+    @GetMapping("/get_study_dynamic")
+    @GlobalInterception
+    public ResponseEntity<LearningDynamicVO> getStudyDynamic(){
+        String userId = UserContext.getUserId();
+        try {
+            log.info("用户获取学习动画，userId:{}", userId);
+            LearningDynamicVO result = service.getStudyDynamic(userId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("getStudyDynamic error", e);
+            throw new RuntimeException(e);
         }
     }
 }
