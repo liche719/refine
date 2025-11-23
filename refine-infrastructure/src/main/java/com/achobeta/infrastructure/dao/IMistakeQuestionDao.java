@@ -61,4 +61,14 @@ public interface IMistakeQuestionDao {
      * @return 影响行数
      */
     int updateOtherReasonText(String userId, String questionId, String otherReasonText);
+
+    /**
+     * 更新学习笔记
+     *
+     * @param userId 用户ID
+     * @param questionId 题目ID
+     * @param studyNote 学习笔记内容
+     * @return 影响行数
+     */
+    int updateStudyNote(String userId, String questionId, String studyNote);
 }

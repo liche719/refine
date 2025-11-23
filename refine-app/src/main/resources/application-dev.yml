@@ -5,6 +5,9 @@ server:
       max: 200        # 设定处理客户请求的线程的最大数目，决定了服务器可以同时响应客户请求的数,默认200
       min-spare: 50   # 初始化线程数,最小空闲线程数,默认是10
     accept-count: 10  # 等待队列长度
+  servlet:
+    encoding:
+      charset: UTF-8
 
 # 应用配置
 app:
@@ -29,13 +32,13 @@ thread:
 spring:
   autoconfigure:
     exclude:
-      - org.redisson.spring.starter.RedissonAutoConfigurationV2
+      #      - org.redisson.spring.starter.RedissonAutoConfigurationV2
       # 如需使用 RabbitMQ 就开开这个
       - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://127.0.0.1:3306/achobeta-refine?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    url: jdbc:mysql://${MYSQL_IP:mysql}:3306/achobeta_refine?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
@@ -47,14 +50,57 @@ spring:
       max-lifetime: 1800000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
       connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
       connection-test-query: SELECT 1
+  mail: #邮件验证码配置
+    host: smtp.qq.com  # SMTP服务器地址（QQ邮箱固定）
+    port: 587          # 端口（587为加密端口）
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties.mail.smtp.auth: true  # 启用身份验证
+    properties.mail.smtp.starttls.enable: true  # 启用TLS加密
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB    # 百度OCR单文件限制
+      max-request-size: 5MB
+  # 阿里百炼 DashScope 配置
+  ai:
+    dashscope:
+      api-key: ${DASHSCOPE_API_KEY}
+      chat:
+        options:
+          model: qwen3-max
+
+# OCR服务配置
+ocr:
+  provider: baidu  # 设置OCR服务提供商，可选值：baidu, aliyun
+
+# 阿里云OCR配置（已弃用，保留兼容）
+aliyun:
+  ocr:
+    enabled: false
+    accessKeyId: your-aliyun-access-key-id
+    accessKeySecret: your-aliyun-access-key-secret
+    regionId: cn-shanghai
+
+# 百度智能云OCR配置信息
+baidu:
+  ocr:
+    enabled: true
+    apiKey: ${BAIDU_OCR_API_KEY}
+    secretKey: ${BAIDU_OCR_SECRET_KEY}
+
+# 保留原有的自定义配置（如果其他地方有使用）
+dashscope:
+  apiKey: ${DASHSCOPE_API_KEY}
+  MODEL_NAME: qwen3-max
 
 # Redis【如需使用请打开】
 redis:
   sdk:
     # 开关
-    enabled: false
+    enabled: true
     config:
-      host: 127.0.0.1
+      host: ${REDIS_IP:redis}
       port: 6379
       pool-size: 10
       min-idle-size: 5
@@ -75,3 +121,31 @@ logging:
   level:
     root: info
   config: classpath:logback-spring.xml
+
+email:
+  config:
+    verify-code-expire-minute: 5
+
+langchain4j:
+  open-ai:
+    chat-model:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${API_KEY}
+      model-name: qwen-plus
+  community:
+    dashscope:
+      chat-model:
+        model-name: qwen-max
+        api-key: ${DASHSCOPE_API_KEY}
+      streaming-chat-model:
+        model-name: qwen-max
+        api-key: ${DASHSCOPE_API_KEY}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-ttl: 2h
+  refresh-token-ttl: 2d
+
+ai:
+  dashscope:
+    max-concurrency: ${AI_MAX_CONCURRENCY}  # 根据实际需求设置合适的并发数

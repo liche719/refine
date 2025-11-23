@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.achobeta.domain.Feetback.adapter.repository.MistakeQuestionMapper">
+
+    <select id="selectByCondition"
+            resultType="com.achobeta.domain.Feetback.model.entity.MistakeQuestionEntity">
+        select m.id, question_content, update_time , subject, k.knowledge_desc, is_calculate_err, is_careless, is_time_shortage, is_unfamiliar, other_reason
+        from mistakequestion m join knowledgepoint k on m.knowledge_point_id = k.knowledge_point_id
+        <where>
+        m.user_id = #{userId}
+        <if test="keyword != null">
+            and (
+                question_content like concat('%',#{keyword},'%')
+                or k.knowledge_desc like concat('%',#{keyword},'%')
+                or other_reason like concat('%',#{keyword},'%')
+            )
+        </if>
+        <!-- 多选学科 -->
+        <if test="subjects != null and !subjects.isEmpty()">
+            and subject in
+            <foreach item="subj" collection="subjects" open="(" separator="," close=")">
+                #{subj}
+            </foreach>
+        </if>
+        <!-- 多选错因：OR 条件 -->
+        <if test="errorTypeFields != null and !errorTypeFields.isEmpty()">
+            and (
+            <foreach item="field" index="index" collection="errorTypeFields"
+                     separator=" OR ">
+                ${field} = 1
+            </foreach>
+            )
+        </if>
+        <if test="startDate != null">
+            and update_time >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            and update_time &lt;= #{endDate}
+        </if>
+        and question_status = 0
+        </where>
+    </select>
+
+</mapper>
