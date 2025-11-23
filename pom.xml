@@ -52,6 +52,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- spring ai alibaba -->
+            <dependency>
+                <groupId>com.alibaba.cloud.ai</groupId>
+                <artifactId>spring-ai-alibaba-starter</artifactId>
+                <version>1.0.0-M5.1</version>
+            </dependency>
             <!-- 阿里云 SDK -->
             <dependency>
                 <groupId>com.alibaba</groupId>
