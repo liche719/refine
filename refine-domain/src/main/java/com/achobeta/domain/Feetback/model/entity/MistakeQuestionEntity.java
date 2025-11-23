@@ -25,6 +25,7 @@ public class MistakeQuestionEntity {
     private Integer is_unfamiliar;
     private Integer is_calculate_err;
     private Integer is_time_shortage;
+    private String other_reason;
     /**
      * 创建时间
      */
@@ -37,5 +38,6 @@ public class MistakeQuestionEntity {
      * 所属知识点
      */
     private String knowledge_desc;
+
 
 }
