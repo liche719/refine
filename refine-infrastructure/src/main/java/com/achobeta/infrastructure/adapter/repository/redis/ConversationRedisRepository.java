@@ -2,7 +2,7 @@ package com.achobeta.infrastructure.adapter.repository.redis;
 
 import com.achobeta.domain.conversation.adapter.port.redis.IConversationRedisRepository;
 import com.achobeta.domain.conversation.model.entity.ConversationMessageEntity;
-import com.achobeta.infrastructure.redis.IRedisService;
+import com.achobeta.domain.IRedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
