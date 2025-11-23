@@ -52,8 +52,14 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         MistakeKnowledgePO po = mistakeRepository.findSubjectAndKnowledgeIdById(mistakeQuestionId);
         String subject = po.getSubject();
         Integer knowledgeId = po.getKnowledgeId();
-        String knowledgePointName = knowledgeRepository.findKnowledgeNameById(po.getKnowledgeId());
+        String knowledgePointName = knowledgeRepository.findKnowledgeNameById(knowledgeId);
 
+        if (null == subject) {
+            throw new AppException("找不到题目所属科目");
+        }
+        if (null == knowledgePointName) {
+            throw new AppException("找不到该题知识点名称");
+        }
         String toAi = "你是一位" + subject + "老师，请根据\"" + knowledgePointName + "\"知识点出一道题目";
 
         // 调用外部接口生成新题目
@@ -137,7 +143,7 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         }
 
         String questionContent = value.getQuestionContent();
-        String chat = "请根据题目:\"" + questionContent + "\"以及正确答案:\"" + correctAnswer + "\"判断答案:\"" + correctAnswer + "\"是否正确，并给出解析。";
+        String chat = "请根据题目:\"" + questionContent + "\"以及正确答案:\"" + correctAnswer + "\"，判断答案:\"" + correctAnswer + "\"是否正确，并给出解析。";
 
         // 将ai流式调用提交到自定义线程池
         return Flux.defer(() -> aiGenerationService.aiJudgeStream(chat))

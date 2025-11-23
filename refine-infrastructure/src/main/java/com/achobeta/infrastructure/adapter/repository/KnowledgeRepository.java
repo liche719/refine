@@ -16,9 +16,5 @@ public class KnowledgeRepository implements IKnowledgeRepository {
         return knowledgeMapper.findKnowledgeNameById(knowledgePointId);
     }
 
-    @Override
-    public String findSubjectById(Integer knowledgePointId) {
-        return knowledgeMapper.findSubjectById(knowledgePointId);
-    }
 
 }

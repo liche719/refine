@@ -32,13 +32,13 @@ thread:
 spring:
   autoconfigure:
     exclude:
-#      - org.redisson.spring.starter.RedissonAutoConfigurationV2
+      #      - org.redisson.spring.starter.RedissonAutoConfigurationV2
       # 如需使用 RabbitMQ 就开开这个
       - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://${MYSQL_IP:mysql}:3306/achobeta-refine?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    url: jdbc:mysql://${MYSQL_IP:mysql}:3306/achobeta_refine?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
@@ -132,7 +132,6 @@ langchain4j:
       base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
       api-key: ${API_KEY}
       model-name: qwen-plus
-
   community:
     dashscope:
       chat-model:
@@ -150,4 +149,3 @@ jwt:
 ai:
   dashscope:
     max-concurrency: ${AI_MAX_CONCURRENCY}  # 根据实际需求设置合适的并发数
-

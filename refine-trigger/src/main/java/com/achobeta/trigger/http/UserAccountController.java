@@ -9,6 +9,7 @@ import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.Constants;
 import com.achobeta.types.common.UserContext;
+import com.achobeta.types.exception.AppException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -42,28 +43,45 @@ public class UserAccountController {
      */
     @PostMapping("/sendEmailCode")
     public Response sendEmailCode(@NotBlank(message = "接收验证码邮箱不能为空") String userAccount) {
-        emailVerificationService.sendEmailCode(userAccount);
+        try {
+            emailVerificationService.sendEmailCode(userAccount);
+        } catch (Exception e) {
+            throw new AppException(e.getMessage());
+        }
         return Response.SYSTEM_SUCCESS();
     }
 
     @PostMapping("/register")
     public Response register(@RequestBody RegisterRequestDTO request) {
-        userAccountService.register(request.getUserAccount(), request.getUserPassword(), request.getUserName(), request.getCheckCode());
+        try {
+            userAccountService.register(request.getUserAccount(), request.getUserPassword(), request.getUserName(), request.getCheckCode());
+        } catch (Exception e) {
+            throw new AppException(e.getMessage());
+        }
         return Response.SYSTEM_SUCCESS();
     }
 
     @PostMapping("/login")
     public Response<UserLoginVO> login(@RequestBody LoginRequestDTO request) {
-        UserLoginVO user = userAccountService.login(request.getUserAccount(), request.getUserPassword());
-        log.info("用户 {} 登录", request.getUserAccount());
+        UserLoginVO user = null;
+        try {
+            user = userAccountService.login(request.getUserAccount(), request.getUserPassword());
+            log.info("用户 {} 登录", request.getUserAccount());
+        } catch (Exception e) {
+            throw new AppException(e.getMessage());
+        }
         return Response.SYSTEM_SUCCESS(user);
     }
 
     @GlobalInterception
     @PostMapping("/logout")
     public Response logout(@RequestHeader("refresh-token") String refreshToken) {
-        userAccountService.logout(refreshToken);
-        log.info("用户 {} 登出", UserContext.getUserId());
+        try {
+            userAccountService.logout(refreshToken);
+            log.info("用户 {} 登出", UserContext.getUserId());
+        } catch (Exception e) {
+            throw new AppException(e.getMessage());
+        }
         return Response.SYSTEM_SUCCESS();
     }
 
@@ -73,8 +91,12 @@ public class UserAccountController {
     @PostMapping("/resetPassword")
     @Validated
     public Response resetPassword(@NotBlank String userAccount, @NotBlank @Pattern(regexp = Constants.REGEX_PASSWORD) String newPassword, @NotBlank String checkCode) {
-        userAccountService.resetPassword(userAccount, newPassword, checkCode);
-        log.info("账号 {} 重置密码", userAccount);
+        try {
+            userAccountService.resetPassword(userAccount, newPassword, checkCode);
+            log.info("账号 {} 重置密码", userAccount);
+        } catch (Exception e) {
+            throw new AppException(e.getMessage());
+        }
         return Response.SYSTEM_SUCCESS();
     }
 
@@ -85,16 +107,25 @@ public class UserAccountController {
     @PostMapping("/updatePassword")
     public Response updatePassword(@NotBlank String oldPassword, @NotBlank @Pattern(regexp = Constants.REGEX_PASSWORD) String newPassword) {
         String userId = UserContext.getUserId();
-        userAccountService.updatePassword(userId, oldPassword, newPassword);
-        log.info("userId {} 修改密码", userId);
+        try {
+            userAccountService.updatePassword(userId, oldPassword, newPassword);
+            log.info("userId {} 修改密码", userId);
+        } catch (Exception e) {
+            throw new AppException(e.getMessage());
+        }
         return Response.SYSTEM_SUCCESS();
     }
 
 
     @PostMapping("/refreshToken")
     public Response<Map<String, String>> refreshToken(@RequestHeader("refresh-token") String refreshToken) {
-        Map<String, String> newToken = userAccountService.refreshToken(refreshToken);
-        log.info("用户刷新access-token");
+        Map<String, String> newToken = null;
+        try {
+            newToken = userAccountService.refreshToken(refreshToken);
+            log.info("用户刷新access-token");
+        } catch (Exception e) {
+            throw new AppException(e.getMessage());
+        }
         return Response.SYSTEM_SUCCESS(newToken);
     }
 

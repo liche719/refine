@@ -14,6 +14,4 @@ public interface KnowledgeMapper {
     @Select("SELECT knowledge_desc FROM knowledgePoint WHERE knowledge_point_id = #{knowledgePointId}")
     String findKnowledgeNameById(Integer knowledgePointId);
 
-    @Select("SELECT subject FROM knowledgePoint WHERE knowledge_point_id = #{knowledgePointId}")
-    String findSubjectById(Integer knowledgePointId);
 }
