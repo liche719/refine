@@ -63,6 +63,7 @@ jobs:
             git checkout develop
             echo "pull completed."
             echo "Deploying..."
+            sh build.sh stop
             sh build.sh rm && sh build.sh rmi
             sh build.sh base && sh build.sh services
             echo "Deployment completed."
