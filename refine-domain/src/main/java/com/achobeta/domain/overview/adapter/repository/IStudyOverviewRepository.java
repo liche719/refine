@@ -2,6 +2,7 @@ package com.achobeta.domain.overview.adapter.repository;
 
 import com.achobeta.domain.overview.model.valobj.StudyOverviewVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDateTime;
@@ -14,8 +15,8 @@ public interface IStudyOverviewRepository {
     StudyOverviewVO queryStudyOverview(String userId);
 
     @Select("select count(*) from mistakequestion where user_id = #{userId} and create_time > #{localDateTime}")
-    Integer countByUserIdAndCreateTimeAfter(String userId, LocalDateTime localDateTime);
+    Integer countByUserIdAndCreateTimeAfter(@Param("userId") String userId, LocalDateTime localDateTime);
 
     @Select("select count(*) from mistakequestion where user_id = #{userId} and update_time between #{localDateTime} and #{localDateTime1}")
-    Integer countByUserIdAndUpdateTimeBetween(String userId, LocalDateTime localDateTime, LocalDateTime localDateTime1);
+    Integer countByUserIdAndUpdateTimeBetween(@Param("userId") String userId, LocalDateTime localDateTime, LocalDateTime localDateTime1);
 }

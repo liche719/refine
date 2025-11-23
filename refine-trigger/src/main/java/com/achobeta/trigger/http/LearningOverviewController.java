@@ -51,10 +51,9 @@ public class LearningOverviewController {
         }
     }
     @GetMapping("/get_study_dynamic")
-    //@GlobalInterception
+    @GlobalInterception
     public ResponseEntity<LearningDynamicVO> getStudyDynamic(){
-        //String userId = UserContext.getUserId();
-        String userId = "1";
+        String userId = UserContext.getUserId();
         try {
             log.info("用户获取学习动画，userId:{}", userId);
             LearningDynamicVO result = service.getStudyDynamic(userId);
