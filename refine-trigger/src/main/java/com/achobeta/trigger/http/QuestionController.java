@@ -5,6 +5,7 @@ import com.achobeta.domain.question.service.impl.QuestionServiceImpl;
 import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.UserContext;
+import com.achobeta.types.exception.AppException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class QuestionController {
             return Response.SYSTEM_SUCCESS(responseDTO);
         } catch (Exception e) {
             log.error("用户id: {} 生成题目失败，题目id: {}", userId, mistakeQuestionId, e);
-            throw new RuntimeException(e);
+            throw new AppException(e.getMessage());
         }
     }
 
@@ -63,7 +64,7 @@ public class QuestionController {
             return questionService.aiJudge(userId, questionId, answer);
         } catch (Exception e) {
             log.error("用户id: {} 调用ai判题失败，题目id: {}", userId, questionId, e);
-            throw new RuntimeException(e);
+            throw new AppException(e.getMessage());
         }
     }
 
@@ -81,7 +82,7 @@ public class QuestionController {
             return Response.SYSTEM_SUCCESS("已加入错题");
         } catch (Exception e) {
             log.error("用户 {} 记录错题失败，题目id: {}", userId, questionId, e);
-            throw new RuntimeException(e);
+            throw new AppException(e.getMessage());
         }
     }
 
