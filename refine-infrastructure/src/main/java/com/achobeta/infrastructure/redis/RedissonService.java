@@ -1,5 +1,6 @@
 package com.achobeta.infrastructure.redis;
 
+import com.achobeta.domain.IRedisService;
 import org.redisson.api.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;

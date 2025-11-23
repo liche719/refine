@@ -43,5 +43,6 @@ data/log
 */data/log
 
 /docs/dev-ops/.env
+.env
 
 .idea/*
