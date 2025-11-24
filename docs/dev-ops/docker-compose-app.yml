@@ -3,8 +3,8 @@ version: '3.8'
 # docker-compose -f docker-compose-app.yml up -d
 # 你需要修改system为你自身系统的仓库名
 services:
-  refine:
-    image: docker.cnb.cool/hamster-yhz/refine:latest
+  polaris:
+    image: ghcr.io/bantanger/achobeta/refine:latest
     container_name: refine
     restart: on-failure
     ports:
