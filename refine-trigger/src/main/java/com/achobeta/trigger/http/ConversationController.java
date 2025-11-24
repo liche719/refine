@@ -3,6 +3,8 @@ package com.achobeta.trigger.http;
 import com.achobeta.domain.auth.service.IAuthService;
 import com.achobeta.domain.conversation.service.IConversationService;
 import com.achobeta.types.Response;
+import com.achobeta.types.annotation.GlobalInterception;
+import com.achobeta.types.common.UserContext;
 import com.achobeta.types.conversation.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +29,6 @@ import java.io.IOException;
 public class ConversationController {
 
     private final IConversationService conversationService;
-    private final IAuthService authService;
 
     /**
      * 发送消息并获取AI回复（流式）
@@ -80,21 +81,13 @@ public class ConversationController {
     /**
      * 基于错题ID的AI对话接口（支持上下文记忆）
      */
+    @GlobalInterception
     @PostMapping("solve-with-context")
-    public SseEmitter solveWithContext(@Valid @RequestBody SolveWithContextRequestDTO requestDTO,
-                                       @RequestHeader("Authorization") String token) {
+    public SseEmitter solveWithContext(@Valid @RequestBody SolveWithContextRequestDTO requestDTO) {
         SseEmitter emitter = new SseEmitter();
 
         try {
-            // token 验证
-            boolean authSuccess = authService.checkToken(token);
-            if (!authSuccess) {
-                emitter.completeWithError(new RuntimeException("认证失败"));
-                return emitter;
-            }
-
-            // 解析token获取用户ID
-            String userId = authService.openid(token);
+            String userId = UserContext.getUserId();
             if (userId == null) {
                 emitter.completeWithError(new RuntimeException("用户信息获取失败"));
                 return emitter;
