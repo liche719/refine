@@ -39,9 +39,10 @@ public class aiService implements IAiService {
     private static final Logger logger = LoggerFactory.getLogger(aiService.class);
 
     /**
-     * 用于收集所有content内容的StringBuilder
+     * 用于收集所有content内容的StringBuilder（线程安全）
+     * 使用ThreadLocal确保每个线程都有自己独立的StringBuilder实例
      */
-    private static final StringBuilder completeResponse = new StringBuilder();
+    private static final ThreadLocal<StringBuilder> completeResponse = ThreadLocal.withInitial(StringBuilder::new);
 
     /**
      * API密钥，用于访问大模型服务。
@@ -225,7 +226,7 @@ public class aiService implements IAiService {
     public void aiSolveQuestionWithContext(String questionId, String question, List<ConversationMessageEntity> conversationHistory, Consumer<String> contentCallback) {
         try {
             // 清空之前的响应内容
-            completeResponse.setLength(0);
+            completeResponse.get().setLength(0);
             
             // 创建大模型实例
             Generation gen = new Generation();
@@ -250,13 +251,13 @@ public class aiService implements IAiService {
             System.out.println();
             // 打印完整的收集内容
             System.out.println("\n=== 完整的AI回复内容 ===");
-            System.out.println(completeResponse.toString());
+            System.out.println(completeResponse.get().toString());
             
             // 通知调用方AI回复已完成，让应用服务层保存到Redis
             if (contentCallback != null) {
                 // 通过回调通知AI回复完成，让上层服务保存到Redis
                 // 使用特殊标记来区分普通流式输出和最终完成通知
-                contentCallback.accept("###AI_RESPONSE_END###" + completeResponse.toString());
+                contentCallback.accept("###AI_RESPONSE_END###" + completeResponse.get().toString());
             }
         } catch (ApiException | NoApiKeyException | InputRequiredException e) {
             logger.error("An exception occurred: {}", e.getMessage());
@@ -359,7 +360,7 @@ public class aiService implements IAiService {
             // 只获取content内容并追加到StringBuilder
             if (message != null && message.getContent() != null) {
                 String content = message.getContent();
-                completeResponse.append(content);
+                completeResponse.get().append(content);
                 // 实时打印当前片段，便于观察流式输出过程
                 System.out.print(content);
 
@@ -377,7 +378,7 @@ public class aiService implements IAiService {
     public void _streamCallWithMessage(Generation gen, Message userMsg, Consumer<String> contentCallback)
             throws NoApiKeyException, ApiException, InputRequiredException {
         // 清空之前的响应内容
-        completeResponse.setLength(0);
+        completeResponse.get().setLength(0);
         
         GenerationParam param = _buildGenerationParam(userMsg);
         Flowable<GenerationResult> result = gen.streamCall(param);
@@ -387,7 +388,7 @@ public class aiService implements IAiService {
         System.out.println();
         // 打印完整的收集内容
         System.out.println("\n=== 完整的AI回复内容 ===");
-        System.out.println(completeResponse.toString());
+        System.out.println(completeResponse.get().toString());
         
         // 通知调用方AI回复已完成，让应用服务层保存到Redis
         // 注意：这个方法主要用于单次问答，不带上下文的场景
@@ -395,7 +396,7 @@ public class aiService implements IAiService {
         if (contentCallback != null) {
             // 通过回调通知AI回复完成，让上层服务保存到Redis
             // 使用特殊标记来区分普通流式输出和最终完成通知
-            contentCallback.accept("###AI_RESPONSE_END###" + completeResponse.toString());
+            contentCallback.accept("###AI_RESPONSE_END###" + completeResponse.get().toString());
         }
     }
 }
