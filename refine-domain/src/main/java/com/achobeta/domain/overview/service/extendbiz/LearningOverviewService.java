@@ -22,7 +22,16 @@ public class LearningOverviewService implements ILearningOverviewService{
     private IStudyOverviewRepository repository;
     @Override
     public StudyOverviewVO getOverview(String userId) {
-        return repository.queryStudyOverview(userId);
+        StudyOverviewVO vo = repository.queryStudyOverview(userId);
+        if(vo == null){
+            return StudyOverviewVO.builder()
+                    .questionsNum(0)
+                    .reviewRate(0)
+                    .hardQuestions(0)
+                    .studyTime(0)
+                    .build();
+        }
+        return vo;
     }
 
     @Override

@@ -26,5 +26,5 @@ public class StudyOverviewDTO {
     /**
      * 累计学习时长（小时）
      */
-    private LocalDateTime studyTime;
+    private int studyTime;
 }
