@@ -1,14 +1,13 @@
 package com.achobeta.trigger.http;
 
 import com.achobeta.api.dto.QuestionInfoResponseDTO;
-import com.achobeta.api.dto.UserInfoRequestDTO;
-import com.achobeta.domain.auth.service.AuthService;
 import com.achobeta.domain.ocr.model.entity.QuestionEntity;
-import com.achobeta.domain.ocr.service.IOcrService;
 import com.achobeta.domain.ocr.service.IMistakeQuestionService;
+import com.achobeta.domain.ocr.service.IOcrService;
 import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.UserContext;
+import com.achobeta.types.enums.GlobalServiceStatusCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -30,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class OcrController {
 
     private final IOcrService ocrService;
-    private final AuthService authService;
     private final IMistakeQuestionService mistakeQuestionService;
 
     /**
@@ -50,8 +48,8 @@ public class OcrController {
             if (userId == null) {
                 log.info("用户id为空！");
                 return Response.<QuestionInfoResponseDTO>builder()
-                        .code(Response.SERVICE_ERROR().getCode())
-                        .info(Response.SERVICE_ERROR().getInfo())
+                        .code(GlobalServiceStatusCode.USER_ID_IS_NULL.getCode())
+                        .info(GlobalServiceStatusCode.USER_ID_IS_NULL.getMessage())
                         .build();
             }
 
@@ -75,8 +73,8 @@ public class OcrController {
 
             // 返回响应
             return Response.<QuestionInfoResponseDTO>builder()
-                    .code(Response.SYSTEM_SUCCESS().getCode())
-                    .info(Response.SYSTEM_SUCCESS().getInfo())
+                    .code(GlobalServiceStatusCode.SYSTEM_SUCCESS.getCode())
+                    .info(GlobalServiceStatusCode.SYSTEM_SUCCESS.getMessage())
                     .data(QuestionInfoResponseDTO.builder()
                             .questionText(questionEntity.getQuestionText())
                             .questionId(questionEntity.getQuestionId())
@@ -86,8 +84,8 @@ public class OcrController {
             // 记录OCR提取失败的日志并返回错误响应
             log.error("OCR 提取题目失败", e);
             return Response.<QuestionInfoResponseDTO>builder()
-                    .code(Response.SERVICE_ERROR().getCode())
-                    .info(Response.SERVICE_ERROR().getInfo())
+                    .code(GlobalServiceStatusCode.OCR_ERROR.getCode())
+                    .info(GlobalServiceStatusCode.OCR_ERROR.getMessage())
                     .build();
         }
     }
