@@ -1,3 +1,7 @@
+# /usr/local/bin/docker-compose -f /docs/dev-ops/docker-compose-app.yml up -d
+version: '3.8'
+# docker-compose -f docker-compose-app.yml up -d
+# 你需要修改system为你自身系统的仓库名
 services:
   refine:
     image: docker.cnb.cool/hamster-yhz/refine:latest
