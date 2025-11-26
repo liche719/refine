@@ -27,7 +27,7 @@ public interface KeyPointsMapper {
     WrongQuestionVO getRelatedWrongQuecstions(int knowledgeId, String userId);
 
     @Select("select k.parent_knowledge_point_id as id, k1.knowledge_point_name as keyPoints from knowledgePoint k " +
-            "join knowledgepoint k1 on k.parent_knowledge_point_id = k1.knowledge_point_id" +
+            "join knowledgePoint k1 on k.parent_knowledge_point_id = k1.knowledge_point_id" +
             " where k.knowledge_point_id = #{knowledgeId} and k.user_id = #{userId}")
     KeyPointsVO getParentKeyPoints(int knowledgeId, String userId);
     
