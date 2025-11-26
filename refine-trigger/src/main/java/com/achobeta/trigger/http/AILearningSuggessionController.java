@@ -1,17 +1,12 @@
 package com.achobeta.trigger.http;
 
 import com.achobeta.api.dto.KeyPointDTO;
-import com.achobeta.api.dto.TrickyKnowledgePointDTO;
-import com.achobeta.domain.IRedisService;
 import com.achobeta.domain.aisuggession.model.valobj.KeyPointVO;
 import com.achobeta.domain.aisuggession.service.IAILearningSuggessionService;
 import com.achobeta.types.annotation.GlobalInterception;
-import com.achobeta.types.common.Constants;
 import com.achobeta.types.common.UserContext;
-import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
