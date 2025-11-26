@@ -11,7 +11,7 @@ public interface KnowledgeMapper {
      * @param knowledgePointId 知识点ID
      * @return 知识点名称
      */
-    @Select("SELECT knowledge_desc FROM knowledgePoint WHERE knowledge_point_id = #{knowledgePointId}")
+    @Select("SELECT knowledge_point_name FROM knowledgePoint WHERE knowledge_point_id = #{knowledgePointId}")
     String findKnowledgeNameById(Integer knowledgePointId);
 
 }
