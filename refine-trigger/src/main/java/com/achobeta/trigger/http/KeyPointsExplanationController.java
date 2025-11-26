@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,7 +42,7 @@ public class KeyPointsExplanationController {
         log.info("用户获取中心知识点，subject:{}", subject);
         List<KeyPointsVO> keyPoints = keyPointsExplanationService.getKeyPoints(subject, userId);
         if (keyPoints == null || keyPoints.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(new ArrayList<>());
         }
         return ResponseEntity.ok(keyPoints.stream()
                 .map(keyPointsVO -> KeyPointsDTO.builder()
@@ -64,7 +65,7 @@ public class KeyPointsExplanationController {
         List<KeyPointsVO> keyPointsVOs = keyPointsExplanationService.getSonKeyPoints(knowledgeId, userId);
         //空值判断
         if (keyPointsVOs == null || keyPointsVOs.isEmpty()) {
-            return null;
+            return new ArrayList<>();
         }
         return keyPointsVOs.stream()
                 .map(keyPointsVO -> KeyPointsDTO.builder()
@@ -83,7 +84,7 @@ public class KeyPointsExplanationController {
         String userId = UserContext.getUserId();
         String point = keyPointsExplanationService.getKnowledgedescById(knowledgeId, userId);
         if (point == null || point.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok("暂无知识点详情");
         }
         return ResponseEntity.ok(point);
     }
@@ -118,7 +119,10 @@ public class KeyPointsExplanationController {
         String userId = UserContext.getUserId();
         RelateQuestionVO relatedQuestions = keyPointsExplanationService.getRelatedWrongQuestions(knowledgeId, userId);
         if (relatedQuestions == null){
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(RelateQeustionDTO.builder()
+                    .questions(new ArrayList<>())
+                    .note("")
+                    .build());
         }
         return ResponseEntity.ok(RelateQeustionDTO.builder()
                 .questions(relatedQuestions.getQestions().stream()
@@ -153,7 +157,7 @@ public class KeyPointsExplanationController {
 
         List<KeyPointsVO> relatedPoints = keyPointsExplanationService.getRelatedKnowledgePoints(knowledgeId, userId);
         if (relatedPoints == null || relatedPoints.isEmpty()){
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(new ArrayList<>());
         }
         return ResponseEntity.ok(relatedPoints.stream()
                 .map(relatedPoint -> KeyPointsDTO.builder()
@@ -190,11 +194,16 @@ public class KeyPointsExplanationController {
      */
     @GetMapping("/{knowledgeId}/show-tooltip")
     @GlobalInterception
-    public ResponseEntity<ToolTipDTO> showTooltip(@PathVariable int knowledgeId ) {
+    public ResponseEntity<?> showTooltip(@PathVariable int knowledgeId ) {
         String userId = UserContext.getUserId();
         ToolTipVO tooltip = keyPointsExplanationService.gettooltipById(knowledgeId, userId);
         if(tooltip == null || tooltip.getTotal() == 0){
-            return ResponseEntity.notFound().build();
+            ToolTipDTO tooltipDTO = ToolTipDTO.builder()
+                    .count(0)
+                    .lastReviewTime("")
+                    .degreeOfProficiency(0)
+                    .build();
+            return ResponseEntity.ok(tooltipDTO);
         }
         double degreeOfProficiency = 1.0 * tooltip.getCount() / tooltip.getTotal();
         return ResponseEntity.ok(ToolTipDTO.builder()

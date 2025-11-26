@@ -50,6 +50,11 @@ public class LearningOverviewController {
             return null;
         }
     }
+
+    /**
+     * 获取学习动态
+     * @return 学习动态
+     */
     @GetMapping("/get_study_dynamic")
     @GlobalInterception
     public ResponseEntity<LearningDynamicVO> getStudyDynamic(){

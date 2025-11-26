@@ -1,7 +1,6 @@
 package com.achobeta.domain.overview.model.valobj;
 
 import com.achobeta.api.dto.TrendDataDTO;
-import com.achobeta.api.dto.WrongQuestionDTO;
 import lombok.*;
 
 import java.util.List;
