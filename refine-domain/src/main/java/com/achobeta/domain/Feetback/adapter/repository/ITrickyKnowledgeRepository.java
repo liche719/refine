@@ -13,8 +13,8 @@ public interface ITrickyKnowledgeRepository {
      * @param userId
      * @return
      */
-    @Select("select m.knowledge_point_id, k.knowledge_desc from mistakequestion m" +
-            " join knowledgepoint k on m.knowledge_point_id = k.knowledge_point_id " +
+    @Select("select m.knowledge_point_id, k.knowledge_desc from MistakeQuestion m" +
+            " join knowledgePoint k on m.knowledge_point_id = k.knowledge_point_id " +
             "where m.user_id = #{userId} and question_status = 0 and m.create_time >= subdate(now(), 14)" +
             "group by m.knowledge_point_id, k.knowledge_desc " +
             "having count(m.knowledge_point_id) >= 3")

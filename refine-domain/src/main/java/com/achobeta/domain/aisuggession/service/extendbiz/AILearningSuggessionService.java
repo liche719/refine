@@ -3,8 +3,8 @@ package com.achobeta.domain.aisuggession.service.extendbiz;
 import com.achobeta.domain.aisuggession.adapter.repository.AILearningSuggessionRepository;
 import com.achobeta.domain.aisuggession.model.entity.KnowledgePointEntity;
 import com.achobeta.domain.aisuggession.model.valobj.KeyPointVO;
-import com.achobeta.domain.aisuggession.service.ConsultantService;
 import com.achobeta.domain.aisuggession.service.IAILearningSuggessionService;
+import com.achobeta.domain.question.adapter.port.AiGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class AILearningSuggessionService implements IAILearningSuggessionService
     private AILearningSuggessionRepository repository;
 
     @Autowired
-    private ConsultantService consultantService;
+    private AiGenerationService consultantService;
 
     @Override
     public List<KeyPointVO> getKeyPoint(String userId) {
