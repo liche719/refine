@@ -17,4 +17,7 @@ public interface AiGenerationService {
     @SystemMessage(fromResource = "AiAnalyze.txt")
     Flux<String> aiJudgeStream(@UserMessage String message);
 
+    // 会话
+    String chat(String message);
+
 }
