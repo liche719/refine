@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 /**
@@ -38,10 +39,7 @@ public class aiService implements IAiService {
      */
     private static final Logger logger = LoggerFactory.getLogger(aiService.class);
 
-    /**
-     * 用于收集所有content内容的StringBuilder
-     */
-    private static final StringBuilder completeResponse = new StringBuilder();
+    
 
     /**
      * API密钥，用于访问大模型服务。
@@ -224,8 +222,8 @@ public class aiService implements IAiService {
     @Override
     public void aiSolveQuestionWithContext(String questionId, String question, List<ConversationMessageEntity> conversationHistory, Consumer<String> contentCallback) {
         try {
-            // 清空之前的响应内容
-            completeResponse.setLength(0);
+            // 使用无锁的并发队列来收集响应片段
+            ConcurrentLinkedQueue<String> responseQueue = new ConcurrentLinkedQueue<>();
             
             // 创建大模型实例
             Generation gen = new Generation();
@@ -244,10 +242,18 @@ public class aiService implements IAiService {
 
             // 流式调用
             Flowable<GenerationResult> result = gen.streamCall(param);
-            result.blockingForEach(resultItem -> _handleGenerationResult(resultItem, contentCallback));
+            result.blockingForEach(resultItem -> _handleGenerationResult(resultItem, contentCallback, responseQueue));
 
             // 流式输出结束后换行
             System.out.println();
+            
+            // 将队列中的所有片段合并为完整响应
+            StringBuilder completeResponse = new StringBuilder();
+            String fragment;
+            while ((fragment = responseQueue.poll()) != null) {
+                completeResponse.append(fragment);
+            }
+            
             // 打印完整的收集内容
             System.out.println("\n=== 完整的AI回复内容 ===");
             System.out.println(completeResponse.toString());
@@ -343,7 +349,41 @@ public class aiService implements IAiService {
     }
 
     /**
-     * 处理大模型返回的答案结果
+     * 处理大模型返回的答案结果（使用无锁队列版本）
+     */
+    private static void _handleGenerationResult(GenerationResult result, Consumer<String> contentCallback, ConcurrentLinkedQueue<String> responseQueue) {
+        try {
+            // 检查结果是否为空
+            if (result == null || result.getOutput() == null || result.getOutput().getChoices() == null ||
+                    result.getOutput().getChoices().isEmpty()) {
+                return;
+            }
+
+            // 获取第一个choice的message内容
+            Message message = result.getOutput().getChoices().get(0).getMessage();
+
+            // 只获取content内容并添加到无锁队列
+            if (message != null && message.getContent() != null) {
+                String content = message.getContent();
+                // 使用无锁的ConcurrentLinkedQueue，性能更好
+                responseQueue.offer(content);
+                
+                // 实时打印当前片段，便于观察流式输出过程
+                System.out.print(content);
+
+                // 通过回调函数将内容传递给Controller
+                if (contentCallback != null) {
+                    contentCallback.accept(content);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("处理GenerationResult时出错: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * 处理大模型返回的答案结果（简化版本，仅用于流式输出）
+     * 用于不需要收集完整响应的场景，如 aiSolveQuestion 方法
      */
     private static void _handleGenerationResult(GenerationResult result, Consumer<String> contentCallback) {
         try {
@@ -356,10 +396,10 @@ public class aiService implements IAiService {
             // 获取第一个choice的message内容
             Message message = result.getOutput().getChoices().get(0).getMessage();
 
-            // 只获取content内容并追加到StringBuilder
+            // 只获取content内容并直接处理
             if (message != null && message.getContent() != null) {
                 String content = message.getContent();
-                completeResponse.append(content);
+                
                 // 实时打印当前片段，便于观察流式输出过程
                 System.out.print(content);
 
@@ -376,8 +416,6 @@ public class aiService implements IAiService {
     // 流式调用大模型
     public void _streamCallWithMessage(Generation gen, Message userMsg, Consumer<String> contentCallback)
             throws NoApiKeyException, ApiException, InputRequiredException {
-        // 清空之前的响应内容
-        completeResponse.setLength(0);
         
         GenerationParam param = _buildGenerationParam(userMsg);
         Flowable<GenerationResult> result = gen.streamCall(param);
@@ -385,18 +423,10 @@ public class aiService implements IAiService {
 
         // 流式输出结束后换行
         System.out.println();
-        // 打印完整的收集内容
-        System.out.println("\n=== 完整的AI回复内容 ===");
-        System.out.println(completeResponse.toString());
         
-        // 通知调用方AI回复已完成，让应用服务层保存到Redis
         // 注意：这个方法主要用于单次问答，不带上下文的场景
-        // 对于带上下文的问答，Redis保存逻辑已在aiSolveQuestionWithContext方法中实现
-        if (contentCallback != null) {
-            // 通过回调通知AI回复完成，让上层服务保存到Redis
-            // 使用特殊标记来区分普通流式输出和最终完成通知
-            contentCallback.accept("###AI_RESPONSE_END###" + completeResponse.toString());
-        }
+        // 对于这种场景，通常不需要保存完整响应到Redis，只需要流式输出即可
+        // 如果需要完整响应，请使用 aiSolveQuestionWithContext 方法
     }
 }
 
