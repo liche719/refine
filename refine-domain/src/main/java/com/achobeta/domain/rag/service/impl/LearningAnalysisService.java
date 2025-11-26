@@ -52,7 +52,7 @@ public class LearningAnalysisService {
     }
     
     /**
-     * 获取用户学习洞察 - 供前端调用
+     * 获取用户学习洞察
      */
     public List<LearningInsightVO> getUserLearningInsights(String userId) {
         try {
@@ -82,7 +82,7 @@ public class LearningAnalysisService {
     }
     
     /**
-     * 获取用户学习动态 - 供前端调用
+     * 获取用户学习动态
      */
     public List<LearningDynamicVO> getUserLearningDynamics(String userId) {
         try {
@@ -95,7 +95,7 @@ public class LearningAnalysisService {
     }
     
     /**
-     * 获取用户薄弱点分析 - 供前端调用
+     * 获取用户薄弱点分析
      */
     public List<LearningInsightVO> getUserWeaknesses(String userId) {
         try {
@@ -108,7 +108,7 @@ public class LearningAnalysisService {
     }
     
     /**
-     * 获取用户学习推荐 - 供前端调用
+     * 获取用户学习推荐
      */
     public List<LearningInsightVO> getUserRecommendations(String userId) {
         try {
@@ -121,7 +121,7 @@ public class LearningAnalysisService {
     }
     
     /**
-     * 手动触发用户学习分析 - 供前端调用
+     * 手动触发用户学习分析
      */
     public boolean triggerUserAnalysis(String userId) {
         try {

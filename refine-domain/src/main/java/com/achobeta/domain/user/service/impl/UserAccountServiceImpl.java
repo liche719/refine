@@ -1,6 +1,7 @@
 package com.achobeta.domain.user.service.impl;
 
 import com.achobeta.domain.user.adapter.repository.IUserRepository;
+import com.achobeta.domain.user.event.UserLoginEvent;
 import com.achobeta.domain.user.model.entity.UserEntity;
 import com.achobeta.domain.user.model.valobj.UserLoginVO;
 import com.achobeta.domain.user.service.IEmailVerificationService;
@@ -11,12 +12,12 @@ import com.achobeta.types.exception.AppException;
 import com.achobeta.types.support.util.StringTools;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
-
-import static com.achobeta.types.common.Constants.USER_REFRESH_TOKEN_KEY;
 
 /**
  * 用户领域服务实现
@@ -31,6 +32,8 @@ public class UserAccountServiceImpl implements IUserAccountService {
     private final IUserRepository userRepository;
 
     private final Jwt jwt;
+    
+    private final ApplicationEventPublisher eventPublisher;
 
 
     /**
@@ -92,6 +95,12 @@ public class UserAccountServiceImpl implements IUserAccountService {
         // 生成token, refresh-token自动写入Redis
         String accessToken = jwt.createAccessToken(user.getUserId(), null);
         String refreshToken = jwt.createRefreshToken(user.getUserId());
+
+        // 发布用户登录事件
+        String loginTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        UserLoginEvent loginEvent = new UserLoginEvent(this, user.getUserId(), loginTime);
+        eventPublisher.publishEvent(loginEvent);
+        log.info("用户登录事件已发布，userId:{}, loginTime:{}", user.getUserId(), loginTime);
 
         return UserLoginVO.builder()
                 .userId(user.getUserId())

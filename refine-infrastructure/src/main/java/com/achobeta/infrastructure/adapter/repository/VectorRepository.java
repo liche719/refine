@@ -5,7 +5,7 @@ import com.achobeta.domain.rag.model.valobj.SimilarQuestionVO;
 import com.achobeta.domain.rag.model.valobj.LearningInsightVO;
 import com.achobeta.infrastructure.dao.IVectorDao;
 import com.achobeta.infrastructure.dao.po.LearningVector;
-import com.achobeta.infrastructure.gateway.DashScopeEmbeddingService; // 使用DashScope嵌入服务
+import com.achobeta.infrastructure.gateway.DashScopeEmbeddingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
