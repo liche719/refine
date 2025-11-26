@@ -35,6 +35,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+        <langchain4j.version>1.1.0-beta7</langchain4j.version>
     </properties>
 
     <licenses>
@@ -184,7 +185,13 @@
             <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-reactor</artifactId>
-                <version>1.1.0-beta7</version>
+                <version>${langchain4j.version}</version>
+            </dependency>
+            <!--向量数据库-->
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-pgvector</artifactId>
+                <version>${langchain4j.version}</version>
             </dependency>
 
 
