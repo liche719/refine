@@ -3,8 +3,8 @@
 <mapper namespace="com.achobeta.domain.aisuggession.adapter.repository.AILearningSuggessionRepository">
 
     <select id="getKeyPoint" resultType="com.achobeta.domain.aisuggession.model.entity.KnowledgePointEntity">
-        select question_content as context, k.knowledge_desc as knowledgePoint, m.question_status as status from mistakequestion m
-        join knowledgepoint k on m.knowledge_point_id = k.knowledge_point_id
-        where user_id = #{userId} and update_time >= date_sub(now(), interval 14 day)
+        select question_content as context, k.knowledge_desc as knowledgePoint, m.question_status as status from MistakeQuestion m
+        join knowledgePoint k on m.knowledge_point_id = k.knowledge_point_id
+        where m.user_id = #{userId} and m.knowledge_point_id = (select knowledge_point_id from achobeta_refine.knowledgePoint) and update_time >= date_sub(now(), interval 14 day)
     </select>
 </mapper>
