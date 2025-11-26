@@ -13,29 +13,40 @@ import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @Slf4j
+@EnableConfigurationProperties(RagConfigProperties.class)
 public class RagConfig {
 
     @Resource
     private EmbeddingModel qwenEmbeddingModel;
+
+    @Resource
+    private RagConfigProperties ragConfigProperties;
 
     private EmbeddingStore<TextSegment> embeddingStore;
 
     @PostConstruct
     public void initialize() {
         this.embeddingStore = PgVectorEmbeddingStore.builder()
-                .host("156.225.19.144")
-                .port(15432)
-                .database("postgres")
-                .user("root")
-                .password("123456")
+                .host(ragConfigProperties.getHost())
+                .port(ragConfigProperties.getPort())
+                .database(ragConfigProperties.getDatabase())
+                .user(ragConfigProperties.getUser())
+                .password(ragConfigProperties.getPassword())
                 .table("knowledge_embeddings")
                 .dimension(qwenEmbeddingModel.dimension())
                 .build();
@@ -60,6 +71,16 @@ public class RagConfig {
             File[] files = docDir.listFiles(File::isFile);
             if (files != null && files.length > 0) {
                 List<Document> documents = FileSystemDocumentLoader.loadDocuments(docPath);
+                // 提取所有待加载的文件名（从Document的metadata中获取）
+                List<String> fileNames = documents.stream()
+                        .map(doc -> doc.metadata().getString("file_name")) // FileSystemDocumentLoader自动添加file_name元数据
+                        .distinct() // 去重（避免同一文件多次删除）
+                        .collect(Collectors.toList());
+                log.info("待加载的文件列表：{}", fileNames);
+                if (!fileNames.isEmpty()) {
+                    deleteExistingDataByFileNames(fileNames);
+                }
+
                 // 文档分段
                 DocumentByParagraphSplitter documentSplitter = new DocumentByParagraphSplitter(800, 350);
                 // 自定义文档加载器，把文档转换成向量并存储到向量数据库中
@@ -90,5 +111,39 @@ public class RagConfig {
                 .minScore(0.75) // 过滤掉分数小于0.75的结果
                 .build();
         return retriever;
+    }
+
+    /**
+     * 核心方法：删除数据库中指定文件名对应的所有旧数据
+     * 利用PostgreSQL JSONB语法匹配metadata中的file_name字段
+     */
+    private void deleteExistingDataByFileNames(List<String> fileNames) {
+        // SQL：删除metadata->>'file_name'在指定列表中的数据（JSONB字段取值）
+        String sql = String.format(
+                "DELETE FROM %s WHERE metadata->>'file_name' = ANY (?)",
+                "knowledge_embeddings" // 表名
+        );
+
+        try (
+                // 1. 获取数据库连接（复用pgvector配置）
+                Connection conn = DriverManager.getConnection(
+                        String.format("jdbc:postgresql://%s:%d/%s", "156.225.19.144", 15432, "postgres"),
+                        "root",
+                        "123456"
+                );
+                // 2. 预处理SQL（避免SQL注入）
+                PreparedStatement pstmt = conn.prepareStatement(sql)
+        ) {
+            // 3. 设置参数：文件名列表（PostgreSQL的ANY接收数组参数）
+            pstmt.setArray(1, conn.createArrayOf("varchar", fileNames.toArray()));
+
+            // 4. 执行删除，返回删除行数
+            int deletedRows = pstmt.executeUpdate();
+            log.info("删除数据库中已存在的旧数据成功，共删除 {} 条记录（涉及文件：{}）", deletedRows, fileNames);
+
+        } catch (SQLException e) {
+            log.error("删除旧数据失败（文件列表：{}）", fileNames, e);
+            throw new RuntimeException("删除旧数据异常，终止文档入库", e); // 中断流程，避免重复数据
+        }
     }
 }

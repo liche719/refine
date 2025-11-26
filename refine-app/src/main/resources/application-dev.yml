@@ -111,6 +111,14 @@ redis:
       ping-interval: 60000
       keep-alive: true
 
+pgvector:
+  config:
+    host: ${PGVECTOR_IP:pgvector}
+    port: 5432
+    database: postgres
+    user: root
+    password: 123456
+
 # MyBatis 配置【如需使用记得打开】
 mybatis:
   mapper-locations: classpath:/mybatis/mapper/*.xml
