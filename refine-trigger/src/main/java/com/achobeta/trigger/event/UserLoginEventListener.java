@@ -2,6 +2,7 @@ package com.achobeta.trigger.event;
 
 import com.achobeta.domain.rag.service.impl.LearningAnalysisService;
 import com.achobeta.domain.rag.model.valobj.LearningDynamicVO;
+import com.achobeta.domain.user.event.UserLoginEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
