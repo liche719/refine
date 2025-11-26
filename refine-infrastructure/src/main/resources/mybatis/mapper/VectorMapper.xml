@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.achobeta.infrastructure.dao.IVectorDao">
+
+    <!-- 插入学习向量 -->
+    <insert id="insertLearningVector" parameterType="com.achobeta.infrastructure.dao.po.LearningVector">
+        INSERT INTO user_learning_vectors 
+        (user_id, question_id, action_type, question_content, subject, knowledge_point_id, embedding, metadata)
+        VALUES 
+        (#{userId}, #{questionId}, #{actionType}, #{questionContent}, #{subject}, #{knowledgePointId}, 
+         #{embedding}::vector, #{metadata}::jsonb)
+    </insert>
+
+    <!-- 向量相似度搜索 -->
+    <select id="searchSimilarVectors" resultType="com.achobeta.infrastructure.dao.po.LearningVector">
+        SELECT 
+            id, user_id, question_id, action_type, question_content, subject, knowledge_point_id,
+            embedding, metadata, created_at, updated_at,
+            1 - (embedding <> #{queryVector}::vector) as similarity
+        FROM user_learning_vectors 
+        WHERE user_id = #{userId}
+        ORDER BY embedding <> #{queryVector}::vector
+        LIMIT #{limit}
+    </select>
+
+    <!-- 根据行为类型获取用户向量 -->
+    <select id="getUserVectorsByActionType" resultType="com.achobeta.infrastructure.dao.po.LearningVector">
+        SELECT * FROM user_learning_vectors 
+        WHERE user_id = #{userId} AND action_type = #{actionType}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 获取用户所有向量 -->
+    <select id="getUserAllVectors" resultType="com.achobeta.infrastructure.dao.po.LearningVector">
+        SELECT * FROM user_learning_vectors 
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 保存学习洞察 -->
+    <insert id="saveLearningInsight">
+        INSERT INTO learning_insights 
+        (user_id, insight_type, title, description, confidence_score)
+        VALUES 
+        (#{userId}, #{insight.type}, #{insight.title}, #{insight.description}, #{insight.confidenceScore})
+    </insert>
+
+    <!-- 获取用户学习洞察 -->
+    <select id="getUserLearningInsights" resultType="com.achobeta.domain.rag.model.valobj.LearningInsightVO">
+        SELECT insight_type as type, title, description, confidence_score as confidenceScore, created_at as createdAt
+        FROM learning_insights 
+        WHERE user_id = #{userId} 
+        <if test="insightType != null">
+            AND insight_type = #{insightType}
+        </if>
+        AND is_active = true
+        ORDER BY created_at DESC
+    </select>
+    <!-- 获取用户最近N天的学习向量数据 -->
+    <select id="getUserRecentLearningData" resultType="com.achobeta.infrastructure.dao.po.LearningVector">
+        SELECT * FROM user_learning_vectors 
+        WHERE user_id = #{userId}
+        AND created_at >= NOW() - INTERVAL #{days} DAY
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 获取用户最近N天的学习统计数据 -->
+    <select id="getUserLearningStatistics" resultType="java.util.Map">
+        SELECT 
+            COUNT(*) as total_activities,
+            COUNT(DISTINCT action_type) as action_types_count,
+            COUNT(DISTINCT subject) as subjects_count,
+            COUNT(DISTINCT DATE(created_at)) as active_days,
+            MIN(created_at) as first_activity,
+            MAX(created_at) as last_activity
+        FROM user_learning_vectors
+        WHERE user_id = #{userId} 
+        AND created_at >= NOW() - INTERVAL #{days} DAY
+    </select>
+    <!-- 获取用户最近N天按科目分组的学习数据 -->
+    <select id="getUserLearningDataBySubject" resultType="java.util.Map">
+        SELECT 
+            COALESCE(subject, '未分类') as subject,
+            COUNT(*) as activity_count,
+            COUNT(DISTINCT action_type) as action_types,
+            GROUP_CONCAT(DISTINCT action_type) as action_list
+        FROM user_learning_vectors
+        WHERE user_id = #{userId} 
+        AND created_at >= NOW() - INTERVAL #{days} DAY
+        GROUP BY subject
+        ORDER BY activity_count DESC
+    </select>
+    <!-- 获取用户最近N天按行为类型分组的学习数据 -->
+    <select id="getUserLearningDataByActionType" resultType="java.util.Map">
+        SELECT 
+            action_type,
+            COUNT(*) as activity_count,
+            COUNT(DISTINCT subject) as subjects_count,
+            COUNT(DISTINCT DATE(created_at)) as active_days
+        FROM user_learning_vectors 
+        WHERE user_id = #{userId}
+        AND created_at >= NOW() - INTERVAL #{days} DAY
+        GROUP BY action_type
+        ORDER BY activity_count DESC
+    </select>
+
+</mapper>
