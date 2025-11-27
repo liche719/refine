@@ -27,7 +27,7 @@ public class DashScopeEmbeddingService {
     private String apiKey;
     
     private static final String EMBEDDING_MODEL = "text-embedding-v1";
-    private static final int VECTOR_DIMENSION = 384; // 与pgvector表结构保持一致
+    private static final int VECTOR_DIMENSION = 384;
     
     /**
      * 生成文本嵌入向量
