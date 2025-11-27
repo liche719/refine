@@ -125,7 +125,7 @@ redis:
 
 pgvector:
   config:
-    host: ${PGVECTOR_IP:pgvector}
+    host: ${PGVECTOR_IP:postgres}
     port: 5432
     database: postgres
     user: root
