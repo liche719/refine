@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.achobeta.types.enums.ActionType.MISTAKE;
+
 /**
  * 向量数据库适配器实现
  */
@@ -115,7 +117,7 @@ public class VectorRepository implements IVectorService {
     public List<LearningInsightVO> getUserWeaknesses(String userId) {
         try {
             // 分析用户错题模式
-            List<LearningVector> userVectors = vectorDao.getUserVectorsByActionType(userId, "mistake");
+            List<LearningVector> userVectors = vectorDao.getUserVectorsByActionType(userId, MISTAKE.getActionType());
 
             // 使用聚类分析找出薄弱点
             return analyzeWeaknesses(userVectors);
