@@ -28,7 +28,7 @@ public class DefaultOcrService implements IOcrService {
 
     private final IFilePreprocessPort filePreprocessPort;
     private final IOcrPort ocrPort;
-    private final IAiService aiTransferService;
+    private final IAiService aiService;
     private final IVectorService vectorService;
 
     /**
@@ -99,7 +99,7 @@ public class DefaultOcrService implements IOcrService {
         }
 
         // 使用 AI 模型尝试提取第一个问题
-        recognizedText = aiTransferService.extractTheFirstQuestion(recognizedText);
+        recognizedText = aiService.extractTheFirstQuestion(recognizedText);
         String uuid = UUID.fastUUID().toString();
 
         // 创建问题实体
