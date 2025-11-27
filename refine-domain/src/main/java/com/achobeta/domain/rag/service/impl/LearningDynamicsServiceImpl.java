@@ -49,7 +49,7 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
             List<LearningDynamicVO> dynamics = new ArrayList<>();
             // 异步执行AI分析任务，解析题目并生成学习动态
             CompletableFuture<Void> aiAnalysis = CompletableFuture.runAsync(() -> {
-                aiService.aiSolveQuestion(analysisPrompt, response -> {
+                aiService.aiChat(analysisPrompt, response -> {
                     try {
                         // 解析AI返回的JSON格式学习动态
                         List<LearningDynamicVO> parsedDynamics = parseAIResponse(response);

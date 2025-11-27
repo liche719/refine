@@ -210,6 +210,25 @@ public class aiService implements IAiService {
         }
     }
 
+    @Override
+    public void aiChat(String question, Consumer<String> contentCallback) {
+        try {
+            // 创建大模型实例
+            Generation gen = new Generation();
+
+            // 构建用户消息，将问题传入
+            Message combineMsg = Message.builder()
+                    .role(Role.USER.getValue())
+                    .content(question)
+                    .build();
+
+            // 构建调用参数
+            _streamCallWithMessage(gen, combineMsg, contentCallback);
+        } catch (ApiException | NoApiKeyException | InputRequiredException e) {
+            logger.error("An exception occurred: {}", e.getMessage());
+        }
+    }
+
     /**
      * 使用大模型进行问题解答（带上下文）
      *

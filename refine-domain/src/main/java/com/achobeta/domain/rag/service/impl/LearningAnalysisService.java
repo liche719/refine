@@ -23,9 +23,6 @@ public class LearningAnalysisService {
     private IVectorService vectorService;
 
     @Autowired
-    private IAiService aiService;
-
-    @Autowired
     private ILearningDynamicsService learningDynamicsService;
 
     /**
