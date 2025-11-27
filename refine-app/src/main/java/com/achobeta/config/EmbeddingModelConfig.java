@@ -13,10 +13,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class EmbeddingModelConfig {
 
-    @Value("${langchain4j.community.dashscope.embedding-model.api-key}")
+    @Value("${DASHSCOPE_API_KEY}")
     private String apiKey;
 
-    @Value("${langchain4j.community.dashscope.embedding-model.model-name}")
+    @Value("${langchain4j.community.dashscope.embedding-model.model-name:text-embedding-v4}")
     private String modelName;
 
     /**
