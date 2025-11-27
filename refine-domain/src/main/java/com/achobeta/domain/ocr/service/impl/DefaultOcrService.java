@@ -7,6 +7,7 @@ import com.achobeta.domain.ocr.adapter.port.IOcrPort;
 import com.achobeta.domain.ocr.model.entity.QuestionEntity;
 import com.achobeta.domain.ocr.service.IOcrService;
 import com.achobeta.domain.rag.service.IVectorService;
+import com.achobeta.types.enums.ActionType;
 import com.achobeta.types.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -114,7 +115,7 @@ public class DefaultOcrService implements IOcrService {
                     userId,
                     uuid,
                     recognizedText,
-                    "upload",
+                    ActionType.UPLOAD.getActionType(),
                     null,
                     null
             );
