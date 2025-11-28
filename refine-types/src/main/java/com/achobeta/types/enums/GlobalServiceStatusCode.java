@@ -86,7 +86,7 @@ public enum GlobalServiceStatusCode {
     SAVE_OR_UPDATE_NOTE_FAIL(10017, "保存或更新笔记失败,请稍后再试"),
     RENAME_NODE_FAIL(10018, "重命名节点失败,请稍后再试"),
     SHOW_TOOLTIP_FAIL(10019, "显示提示失败,请稍后再试"),
-    ADD_SON_POINT_FAIL(10020, "添加子知识点失败,请稍后再试")
+    ADD_SON_POINT_FAIL(10020, "添加子知识点失败,请稍后再试"),
     /* 错因管理相关状态码 11001-11100 */
     MISTAKE_REASON_SUCCESS(11001, "错因操作成功"),
     MISTAKE_REASON_TOGGLE_SUCCESS(11002, "错因状态切换成功"),
@@ -100,7 +100,7 @@ public enum GlobalServiceStatusCode {
     MISTAKE_REASON_UPDATE_FAILED(11103, "错因状态更新失败"),
     MISTAKE_REASON_TOGGLE_FAILED(11104, "错因状态切换失败"),
     STUDY_NOTE_UPDATE_FAILED(11105, "错题笔记更新失败"),
-    MISTAKE_REASON_SYSTEM_ERROR(11106, "错因管理系统异常")
+    MISTAKE_REASON_SYSTEM_ERROR(11106, "错因管理系统异常"),
     ;
 
     private Integer code;
