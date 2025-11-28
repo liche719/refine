@@ -63,9 +63,7 @@ jobs:
             git checkout develop
             echo "pull completed."
             echo "Deploying..."
-            sh build.sh stop
-            sh build.sh rm && sh build.sh rmi
+            echo "Pulling latest Docker image..."
+            docker pull docker.cnb.cool/hamster-yhz/refine:latest
             sh build.sh base && sh build.sh services
             echo "Deployment completed."
-
-
