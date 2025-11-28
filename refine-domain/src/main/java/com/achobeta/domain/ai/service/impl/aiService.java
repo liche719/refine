@@ -212,6 +212,15 @@ public class aiService implements IAiService {
             _streamCallWithMessage(gen, combineMsg, contentCallback);
         } catch (ApiException | NoApiKeyException | InputRequiredException e) {
             logger.error("An exception occurred: {}", e.getMessage());
+            // 通知回调函数发生了错误
+            if (contentCallback != null) {
+                contentCallback.accept("抱歉，AI服务暂时不可用，请稍后重试。");
+            }
+        } catch (Exception e) {
+            logger.error("Unexpected error in aiSolveQuestion: {}", e.getMessage(), e);
+            if (contentCallback != null) {
+                contentCallback.accept("抱歉，处理您的问题时发生了错误，请稍后重试。");
+            }
         }
     }
 
@@ -428,11 +437,19 @@ public class aiService implements IAiService {
 
                 // 通过回调函数将内容传递给Controller
                 if (contentCallback != null) {
-                    contentCallback.accept(content);
+                    try {
+                        contentCallback.accept(content);
+                    } catch (Exception callbackException) {
+                        // 如果回调函数抛出异常（比如连接断开），记录日志但不中断流式处理
+                        logger.warn("回调函数执行失败，可能是连接已断开: {}", callbackException.getMessage());
+                        // 可以选择在这里中断流式处理
+                        throw new RuntimeException("Connection lost", callbackException);
+                    }
                 }
             }
         } catch (Exception e) {
             logger.error("处理GenerationResult时出错: {}", e.getMessage());
+            throw e; // 重新抛出异常以中断流式处理
         }
     }
 
@@ -442,7 +459,18 @@ public class aiService implements IAiService {
 
         GenerationParam param = _buildGenerationParam(userMsg);
         Flowable<GenerationResult> result = gen.streamCall(param);
-        result.blockingForEach(resultItem -> _handleGenerationResult(resultItem, contentCallback));
+        
+        try {
+            result.blockingForEach(resultItem -> _handleGenerationResult(resultItem, contentCallback));
+        } catch (RuntimeException e) {
+            // 检查是否是连接断开导致的异常
+            if (e.getMessage() != null && e.getMessage().contains("Connection lost")) {
+                logger.warn("检测到连接断开，停止流式输出");
+                return; // 优雅地停止流式输出
+            }
+            // 其他异常继续抛出
+            throw e;
+        }
 
         // 流式输出结束后换行
         System.out.println();
