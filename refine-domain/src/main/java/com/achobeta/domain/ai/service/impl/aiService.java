@@ -65,6 +65,8 @@ public class aiService implements IAiService {
             log.warn("输入内容为空，无法提取问题");
             return "";
         }
+        
+        log.info("开始AI提取题目，输入内容长度: {}", content.length());
 
         try {
             Generation gen = new Generation();
@@ -132,15 +134,18 @@ public class aiService implements IAiService {
             if (result != null && result.getOutput() != null
                     && !result.getOutput().getChoices().isEmpty()
                     && result.getOutput().getChoices().get(0).getMessage() != null) {
-                return result.getOutput().getChoices().get(0).getMessage().getContent().trim();
+                String extractedContent = result.getOutput().getChoices().get(0).getMessage().getContent().trim();
+                log.info("AI模型返回内容: {}", extractedContent);
+                return extractedContent;
             } else {
-                log.warn("模型返回结果为空或格式异常");
+                log.warn("模型返回结果为空或格式异常，result: {}", result);
                 return "";
             }
 
         } catch (Exception e) {
             // 记录异常日志便于排查问题
-            log.error("调用大模型提取问题失败，输入内容: {}", content, e);
+            log.error("调用大模型提取问题失败，输入内容长度: {}, 异常信息: {}", 
+                content != null ? content.length() : 0, e.getMessage(), e);
             return "";
         }
     }
