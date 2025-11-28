@@ -95,6 +95,7 @@ public enum GlobalServiceStatusCode {
     STUDY_NOTE_SUBMIT_SUCCESS(11005, "错题笔记提交成功"),
     STUDY_NOTE_GET_SUCCESS(11006, "错题笔记获取成功"),
 
+
     MISTAKE_REASON_NOT_FOUND(11101, "未找到对应的错题记录"),
     MISTAKE_REASON_INVALID_PARAM(11102, "错因参数无效"),
     MISTAKE_REASON_UPDATE_FAILED(11103, "错因状态更新失败"),
