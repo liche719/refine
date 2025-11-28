@@ -46,7 +46,7 @@ public class UserAccountController {
         try {
             emailVerificationService.sendEmailCode(userAccount);
         } catch (AppException e) {
-            throw new AppException(e.getCode(), e.getMessage());
+            return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -58,7 +58,7 @@ public class UserAccountController {
         try {
             userAccountService.register(request.getUserAccount(), request.getUserPassword(), request.getUserName(), request.getCheckCode());
         } catch (AppException e) {
-            throw new AppException(e.getCode(), e.getMessage());
+            return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -72,7 +72,7 @@ public class UserAccountController {
             user = userAccountService.login(request.getUserAccount(), request.getUserPassword());
             log.info("用户 {} 登录", request.getUserAccount());
         } catch (AppException e) {
-            throw new AppException(e.getCode(), e.getMessage());
+            return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -86,7 +86,7 @@ public class UserAccountController {
             userAccountService.logout(refreshToken);
             log.info("用户 {} 登出", UserContext.getUserId());
         } catch (AppException e) {
-            throw new AppException(e.getCode(), e.getMessage());
+            return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -102,7 +102,7 @@ public class UserAccountController {
             userAccountService.resetPassword(userAccount, newPassword, checkCode);
             log.info("账号 {} 重置密码", userAccount);
         } catch (AppException e) {
-            throw new AppException(e.getCode(), e.getMessage());
+            return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -120,7 +120,7 @@ public class UserAccountController {
             userAccountService.updatePassword(userId, oldPassword, newPassword);
             log.info("userId {} 修改密码", userId);
         } catch (AppException e) {
-            throw new AppException(e.getCode(), e.getMessage());
+            return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -135,7 +135,7 @@ public class UserAccountController {
             newToken = userAccountService.refreshToken(refreshToken);
             log.info("用户刷新access-token");
         } catch (AppException e) {
-            throw new AppException(e.getCode(), e.getMessage());
+            return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         }
         return Response.SYSTEM_SUCCESS(newToken);
     }
