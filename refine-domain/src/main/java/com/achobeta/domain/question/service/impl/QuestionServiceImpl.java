@@ -60,18 +60,10 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         if (null == knowledgePointName) {
             throw new AppException("找不到该题知识点名称,mistakeQuestionId" + mistakeQuestionId);
         }
+        String toAi = "你是一位" + subject + "老师，请根据\"" + knowledgePointName + "\"知识点出一道题目";
 
         // 调用外部接口生成新题目
-        String toAi;
-        QuestionResponseDTO question;
-        if (subject.equals("未分类")) {
-            toAi = "你是一位专业出题老师，请根据\"" + knowledgePointName + "\"知识点出一道题目";
-            question = aiGenerationService.Generation(toAi);
-        } else {
-            toAi = "你是一位" + subject + "老师，请根据\"" + knowledgePointName + "\"知识点出一道题目";
-            question = aiGenerationService.Generation(subject, toAi);
-        }
-
+        QuestionResponseDTO question = aiGenerationService.Generation(subject, toAi);
         if (null == question.getContent() || null == question.getAnswer()) {
             throw new AppException(GlobalServiceStatusCode.QUESTION_GENERATION_FAIL);
         }
@@ -155,22 +147,12 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
 
         // 将ai流式调用提交到自定义线程池
         String subject = value.getSubject();
-        if (subject.equals("未分类")) {
-            return Flux.defer(() -> aiGenerationService.aiJudgeStream(chat))
-                    .subscribeOn(Schedulers.fromExecutor(aiExclusiveThreadPool))
-                    .doOnError(e -> log.error("流式聊天异常：用户Id={},题目id={}, 用户判题回答={}", userId, questionId, userAnswer, e))
-                    .map(chunk -> ServerSentEvent.<String>builder()
-                            .data(chunk)
-                            .build());
-        } else {
-            return Flux.defer(() -> aiGenerationService.aiJudgeStream(subject, chat))
-                    .subscribeOn(Schedulers.fromExecutor(aiExclusiveThreadPool))
-                    .doOnError(e -> log.error("流式聊天异常：用户Id={},题目id={}, 用户判题回答={}", userId, questionId, userAnswer, e))
-                    .map(chunk -> ServerSentEvent.<String>builder()
-                            .data(chunk)
-                            .build());
-        }
-
+        return Flux.defer(() -> aiGenerationService.aiJudgeStream(subject, chat))
+                .subscribeOn(Schedulers.fromExecutor(aiExclusiveThreadPool))
+                .doOnError(e -> log.error("流式聊天异常：用户Id={},题目id={}, 用户判题回答={}", userId, questionId, userAnswer, e))
+                .map(chunk -> ServerSentEvent.<String>builder()
+                        .data(chunk)
+                        .build());
     }
 
     private void autoRecord(String userId, String questionId, String answer, String correctAnswer) {
