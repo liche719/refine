@@ -45,6 +45,8 @@ public class UserAccountController {
     public Response sendEmailCode(@NotBlank(message = "接收验证码邮箱不能为空") String userAccount) {
         try {
             emailVerificationService.sendEmailCode(userAccount);
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -55,6 +57,8 @@ public class UserAccountController {
     public Response register(@RequestBody RegisterRequestDTO request) {
         try {
             userAccountService.register(request.getUserAccount(), request.getUserPassword(), request.getUserName(), request.getCheckCode());
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -67,6 +71,8 @@ public class UserAccountController {
         try {
             user = userAccountService.login(request.getUserAccount(), request.getUserPassword());
             log.info("用户 {} 登录", request.getUserAccount());
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -79,6 +85,8 @@ public class UserAccountController {
         try {
             userAccountService.logout(refreshToken);
             log.info("用户 {} 登出", UserContext.getUserId());
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -89,11 +97,12 @@ public class UserAccountController {
      * 重置密码（忘记密码）
      */
     @PostMapping("/resetPassword")
-    @Validated
     public Response resetPassword(@NotBlank String userAccount, @NotBlank @Pattern(regexp = Constants.REGEX_PASSWORD) String newPassword, @NotBlank String checkCode) {
         try {
             userAccountService.resetPassword(userAccount, newPassword, checkCode);
             log.info("账号 {} 重置密码", userAccount);
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -110,6 +119,8 @@ public class UserAccountController {
         try {
             userAccountService.updatePassword(userId, oldPassword, newPassword);
             log.info("userId {} 修改密码", userId);
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
@@ -123,8 +134,8 @@ public class UserAccountController {
         try {
             newToken = userAccountService.refreshToken(refreshToken);
             log.info("用户刷新access-token");
-        } catch (Exception e) {
-            throw new AppException(e.getMessage());
+        } catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
         }
         return Response.SYSTEM_SUCCESS(newToken);
     }
