@@ -130,7 +130,7 @@ public class JwtTool implements Jwt {
             throw new UnauthorizedException("未登录：token为空");
         }
 
-        JWT jwt;
+        JWT jwt = null;
         try {
             // 2. 解析Token
             jwt = JWT.of(token).setSigner(jwtSigner);
@@ -141,8 +141,6 @@ public class JwtTool implements Jwt {
             // 细分异常：过期/签名无效
             if (e.getMessage().contains("is before now:")) {
                 throw new UnauthorizedException(expectedType + "-token已过期", e);
-            } else {
-                throw new UnauthorizedException(expectedType + "-token签名无效", e);
             }
         } catch (Exception e) {
             throw new UnauthorizedException("无效的" + expectedType + "-token：格式错误", e);
