@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.achobeta.types.common.Constants.USER_REFRESH_TOKEN_KEY;
+import static com.achobeta.types.common.Constants.USER_TOKEN_ID_KEY;
 
 @Component
 @EnableConfigurationProperties(JwtProperties.class)
@@ -79,6 +80,11 @@ public class JwtTool implements Jwt {
                 userId,
                 jwtProperties.getRefreshTokenTtl().toMillis()
         );
+        redis.setValue(
+                USER_TOKEN_ID_KEY + userId,
+                refreshToken,
+                jwtProperties.getRefreshTokenTtl().toMillis()
+        );
         return refreshToken;
     }
 
@@ -86,7 +92,7 @@ public class JwtTool implements Jwt {
      * 通用Token生成方法
      */
     private String createToken(Map<String, Object> claims, Duration ttl) {
-        claims.put("iat", System.currentTimeMillis()); // 添加签发时间,毫秒值
+        claims.put("iat", System.currentTimeMillis()/1000); // 添加签发时间,毫秒值
         return JWT.create()
                 .addPayloads(claims) // 设置载荷
                 .setExpiresAt(new Date(System.currentTimeMillis() + ttl.toMillis())) // 过期时间
@@ -130,7 +136,7 @@ public class JwtTool implements Jwt {
             throw new UnauthorizedException("未登录：token为空");
         }
 
-        JWT jwt = null;
+        JWT jwt;
         try {
             // 2. 解析Token
             jwt = JWT.of(token).setSigner(jwtSigner);
@@ -141,6 +147,8 @@ public class JwtTool implements Jwt {
             // 细分异常：过期/签名无效
             if (e.getMessage().contains("is before now:")) {
                 throw new UnauthorizedException(expectedType + "-token已过期", e);
+            } else {
+                throw new UnauthorizedException(expectedType + "-token签名无效", e);
             }
         } catch (Exception e) {
             throw new UnauthorizedException("无效的" + expectedType + "-token：格式错误", e);
@@ -232,6 +240,11 @@ public class JwtTool implements Jwt {
      */
     public Long getRefreshTokenIat(String refreshToken) {
         return parseToken(refreshToken, "refresh").getIat();
+    }
+
+
+    public String getRefreshToken4UserId(String userId) {
+        return redis.getValue(USER_TOKEN_ID_KEY + userId);
     }
 
 

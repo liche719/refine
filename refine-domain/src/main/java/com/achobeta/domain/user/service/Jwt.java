@@ -18,4 +18,6 @@ public interface Jwt {
 
     Long getRefreshTokenIat(String refreshToken);
 
+    String getRefreshToken4UserId(String userId);
+
 }

@@ -55,15 +55,15 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         String knowledgePointName = knowledgeRepository.findKnowledgeNameById(knowledgeId);
 
         if (null == subject) {
-            throw new AppException("找不到题目所属科目");
+            throw new AppException("找不到题目所属科目,mistakeQuestionId" + mistakeQuestionId);
         }
         if (null == knowledgePointName) {
-            throw new AppException("找不到该题知识点名称");
+            throw new AppException("找不到该题知识点名称,mistakeQuestionId" + mistakeQuestionId);
         }
         String toAi = "你是一位" + subject + "老师，请根据\"" + knowledgePointName + "\"知识点出一道题目";
 
         // 调用外部接口生成新题目
-        QuestionResponseDTO question = aiGenerationService.Generation(toAi);
+        QuestionResponseDTO question = aiGenerationService.Generation(subject, toAi);
         if (null == question.getContent() || null == question.getAnswer()) {
             throw new AppException(GlobalServiceStatusCode.QUESTION_GENERATION_FAIL);
         }
@@ -138,7 +138,7 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         String correctAnswer = value.getAnswer();
 
         Integer auto = 0;    // 用户可选是否自动录入TODO
-        if (auto==1){
+        if (auto == 1) {
             autoRecord(userId, questionId, userAnswer, correctAnswer);
         }
 
@@ -146,8 +146,10 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         String chat = "请根据题目:\"" + questionContent + "\"以及正确答案:\"" + correctAnswer + "\"，判断答案:\"" + correctAnswer + "\"是否正确，并给出解析。";
 
         // 将ai流式调用提交到自定义线程池
-        return Flux.defer(() -> aiGenerationService.aiJudgeStream(chat))
+        String subject = value.getSubject();
+        return Flux.defer(() -> aiGenerationService.aiJudgeStream(subject, chat))
                 .subscribeOn(Schedulers.fromExecutor(aiExclusiveThreadPool))
+                .doOnError(e -> log.error("流式聊天异常：用户Id={},题目id={}, 用户判题回答={}", userId, questionId, userAnswer, e))
                 .map(chunk -> ServerSentEvent.<String>builder()
                         .data(chunk)
                         .build());

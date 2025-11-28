@@ -37,7 +37,7 @@ public class MistakeRepository implements IMistakeRepository {
     public MistakeKnowledgePO findSubjectAndKnowledgeIdById(Integer mistakeQuestionId) {
         MistakeKnowledgePO po = mistakeQuestionMapper.findSubjectAndKnowledgeIdById(mistakeQuestionId);
         if (null == po) {
-            throw new AppException(GlobalServiceStatusCode.PARAM_NOT_VALID);
+            throw new AppException("可能是数据库一致性问题,mistakeQuestionId:"+mistakeQuestionId);
         }
         return po;
     }

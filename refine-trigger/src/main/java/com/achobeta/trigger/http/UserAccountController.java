@@ -56,13 +56,12 @@ public class UserAccountController {
     @PostMapping("/register")
     public Response register(@RequestBody RegisterRequestDTO request) {
         try {
-            userAccountService.register(request.getUserAccount(), request.getUserPassword(), request.getUserName(), request.getCheckCode());
+            return userAccountService.register(request.getUserAccount(), request.getUserPassword(), request.getUserName(), request.getCheckCode());
         } catch (AppException e) {
             return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
-        return Response.SYSTEM_SUCCESS();
     }
 
     @PostMapping("/login")
@@ -119,25 +118,26 @@ public class UserAccountController {
         try {
             userAccountService.updatePassword(userId, oldPassword, newPassword);
             log.info("userId {} 修改密码", userId);
+            return Response.SYSTEM_SUCCESS("修改密码成功，请重新登录");
         } catch (AppException e) {
             return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
-        return Response.SYSTEM_SUCCESS();
     }
 
 
     @PostMapping("/refreshToken")
     public Response<Map<String, String>> refreshToken(@RequestHeader("refresh-token") String refreshToken) {
-        Map<String, String> newToken = null;
+        Map<String, String> newToken;
         try {
             newToken = userAccountService.refreshToken(refreshToken);
             log.info("用户刷新access-token");
+            return Response.SYSTEM_SUCCESS(newToken);
         } catch (AppException e) {
             return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         }
-        return Response.SYSTEM_SUCCESS(newToken);
+
     }
 
 }
