@@ -6,6 +6,7 @@ services:
   refine:
     image: docker.cnb.cool/hamster-yhz/refine:latest
     container_name: refine
+    pull_policy: always
     restart: on-failure
     ports:
       - "8091:8091"
@@ -26,6 +27,11 @@ services:
         max-file: "3"
     networks:
       - my-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 networks:
   my-network:

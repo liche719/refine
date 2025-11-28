@@ -58,10 +58,15 @@ jobs:
           script: |
             set -e
             cd ./refine
+            
             echo "pulling latest code..."
-            git pull
-            git checkout develop
+            git fetch --all
+            BRANCH_NAME="${{ github.ref_name }}"
+            echo "Detected branch: $BRANCH_NAME"
+            git checkout $BRANCH_NAME
+            git pull origin $BRANCH_NAME
             echo "pull completed."
+            
             echo "Deploying..."
             echo "Pulling latest Docker image..."
             docker pull docker.cnb.cool/hamster-yhz/refine:latest
