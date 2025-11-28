@@ -67,7 +67,7 @@ public class KeyPointsExplanationController {
      */
     @GetMapping("/get_son_key_points")
     @GlobalInterception
-    public Response<List<KeyPointsDTO>> getSonKeyPoints(@Param("knowledgeId") int knowledgeId) {
+    public Response<List<KeyPointsDTO>> getSonKeyPoints(@Param("knowledgeId") String knowledgeId) {
         String userId = UserContext.getUserId();
         List<KeyPointsVO> keyPointsVOs = null;
         try {
@@ -93,7 +93,7 @@ public class KeyPointsExplanationController {
      */
     @GetMapping("/{knowledgeId}")
     @GlobalInterception
-    public Response<String> getKnowledgePoint(@PathVariable int knowledgeId ) {
+    public Response<String> getKnowledgePoint(@PathVariable String knowledgeId ) {
         String userId = UserContext.getUserId();
         String point = null;
         try {
@@ -114,7 +114,7 @@ public class KeyPointsExplanationController {
     @GetMapping("/{knowledgeId}/related-questions-statistic")
     @GlobalInterception
     public Response<String> getRelatedWrongQuestionsStatistic(
-            @PathVariable int knowledgeId ) {
+            @PathVariable String knowledgeId ) {
         String userId = UserContext.getUserId();
         WrongQuestionVO questions = null;
 
@@ -138,7 +138,7 @@ public class KeyPointsExplanationController {
     @GetMapping("/{knowledgeId}/related-questions")
     @GlobalInterception
     public Response<RelateQeustionDTO> getRelatedWrongQuestions(
-            @PathVariable int knowledgeId ) {
+            @PathVariable String knowledgeId ) {
         String userId = UserContext.getUserId();
         RelateQuestionVO relatedQuestions = null;
         try {
@@ -168,7 +168,7 @@ public class KeyPointsExplanationController {
      */
     @PostMapping("/{knowledgeId}/mark-as-mastered")
     @GlobalInterception
-    public Response<String> markAsMastered(@PathVariable int knowledgeId ) {
+    public Response<String> markAsMastered(@PathVariable String knowledgeId ) {
         String userId = UserContext.getUserId();
         try {
             keyPointsExplanationService.markAsMastered(knowledgeId, userId);
@@ -184,7 +184,7 @@ public class KeyPointsExplanationController {
     @GetMapping("/{knowledgeId}/related-points")
     @GlobalInterception
     public Response<List<KeyPointsDTO>> getRelatedKnowledgePoints(
-            @PathVariable int knowledgeId ) {
+            @PathVariable String knowledgeId ) {
         String userId = UserContext.getUserId();
         List<KeyPointsVO> relatedPoints = null;
         try {
@@ -208,7 +208,7 @@ public class KeyPointsExplanationController {
      */
     @PostMapping("/{knowledgeId}/notes")
     @GlobalInterception
-    public Response<String> saveOrUpdateStudentNote(@PathVariable int knowledgeId, @RequestBody String note ) {
+    public Response<String> saveOrUpdateStudentNote(@PathVariable String knowledgeId, @RequestBody String note ) {
         String userId = UserContext.getUserId();
         try {
             keyPointsExplanationService.savedNote(note, knowledgeId, userId);
@@ -223,7 +223,7 @@ public class KeyPointsExplanationController {
      */
     @PostMapping("/{knowledgeId}/rename")
     @GlobalInterception
-    public Response<String> renameNode(@PathVariable int knowledgeId, @RequestBody String newName ) {
+    public Response<String> renameNode(@PathVariable String knowledgeId, @RequestBody String newName ) {
         String userId = UserContext.getUserId();
         try {
             keyPointsExplanationService.renameNode(knowledgeId, newName, userId);
@@ -238,7 +238,7 @@ public class KeyPointsExplanationController {
      */
     @GetMapping("/{knowledgeId}/show-tooltip")
     @GlobalInterception
-    public Response<?> showTooltip(@PathVariable int knowledgeId ) {
+    public Response<?> showTooltip(@PathVariable String knowledgeId ) {
         String userId = UserContext.getUserId();
         ToolTipVO tooltip = null;
         try {
