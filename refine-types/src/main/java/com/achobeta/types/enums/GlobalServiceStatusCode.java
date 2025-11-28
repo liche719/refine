@@ -57,10 +57,35 @@ public enum GlobalServiceStatusCode {
     QUESTION_GENERATION_FAIL(10001, "题目生成失败,请稍后再试"),
     QUESTION_IS_EXPIRED(10002, "题目已过期或不存在" ),
     OCR_ERROR(10003, "OCR图片识别错误"),
+
+    /**
+     * 主页错误返回码
+     */
     GET_STUDY_DYNAMIC_FAIL(10004, "获取学习动态失败,请稍后再试"),
     GET_OVERDUE_REVIEW_COUNT_FAIL(10005, "获取待复习题目数量失败,请稍后再试"),
     GET_TRICKY_KNOWLEDGE_POINT_FAIL(10006, "获取易错知识点失败,请稍后再试"),
-    AI_RESPONSE_TIMEOUT(10007, "AI响应超时")
+    AI_RESPONSE_TIMEOUT(10007, "AI响应超时"),
+
+    /**
+     * 待复习题目错误返回码
+     */
+    GET_REVIEW_QUESTION_LIST_FAIL(10008, "获取待复习题目列表失败,请稍后再试"),
+    DELETE_REVIEW_QUESTION_FAIL(10009, "删除待复习题目失败,请稍后再试"),
+    GET_STATISTICS_FAIL(10010, "获取待复习题目统计信息失败,请稍后再试"),
+
+    /**
+     * 知识点脑图错误返回码
+     */
+    GET_KEY_POINTS_FAIL(10011, "获取中心知识点失败,请稍后再试"),
+    GET_SON_KEY_POINTS_FAIL(10012, "获取子知识点失败,请稍后再试"),
+    GET_KNOWLEDGE_POINT_DESC_FAIL(10013, "获取知识点描述失败,请稍后再试"),
+    GET_RELATED_MESSAGES_FAIL(10014, "获取知识点相关信息失败,请稍后再试"),
+    MARK_AS_MASTERED_FAIL(10015, "标记为已掌握失败,请稍后再试"),
+    GET_RELATED_POINTS_FAIL(10016, "获取相关知识点失败,请稍后再试"),
+    SAVE_OR_UPDATE_NOTE_FAIL(10017, "保存或更新笔记失败,请稍后再试"),
+    RENAME_NODE_FAIL(10018, "重命名节点失败,请稍后再试"),
+    SHOW_TOOLTIP_FAIL(10019, "显示提示失败,请稍后再试"),
+    ADD_SON_POINT_FAIL(10020, "添加子知识点失败,请稍后再试")
     ;
 
     private Integer code;
