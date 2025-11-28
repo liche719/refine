@@ -45,7 +45,7 @@ public class LearningOverviewController {
             log.info("用户获取学习概览，userId:{}", userId);
             vo = service.getOverview(userId);
         } catch (Exception e) {
-            throw new AppException(REQUEST_NOT_VALID);
+            return Response.CUSTOMIZE_ERROR(REQUEST_NOT_VALID);
         }
         return Response.SYSTEM_SUCCESS(StudyOverviewDTO.builder()
                 .questionsNum(vo.getQuestionsNum())
@@ -62,7 +62,7 @@ public class LearningOverviewController {
      */
     @GetMapping("/get_study_dynamic")
     @GlobalInterception
-    public ResponseEntity<LearningDynamicVO> getStudyDynamic(){
+    public Response<LearningDynamicVO> getStudyDynamic(){
         String userId = UserContext.getUserId();
         LearningDynamicVO result = null;
         try {
@@ -70,8 +70,8 @@ public class LearningOverviewController {
             result = service.getStudyDynamic(userId);
         } catch (Exception e) {
             log.error("getStudyDynamic error", e);
-            throw new AppException(GET_STUDY_DYNAMIC_FAIL);
+            return Response.CUSTOMIZE_ERROR(GET_STUDY_DYNAMIC_FAIL);
         }
-        return ResponseEntity.ok(result);
+        return Response.SYSTEM_SUCCESS(result);
     }
 }

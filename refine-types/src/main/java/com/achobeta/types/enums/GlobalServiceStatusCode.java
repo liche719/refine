@@ -61,7 +61,22 @@ public enum GlobalServiceStatusCode {
     GET_STUDY_DYNAMIC_FAIL(10004, "获取学习动态失败,请稍后再试"),
     GET_OVERDUE_REVIEW_COUNT_FAIL(10005, "获取待复习题目数量失败,请稍后再试"),
     GET_TRICKY_KNOWLEDGE_POINT_FAIL(10006, "获取易错知识点失败,请稍后再试"),
-    AI_RESPONSE_TIMEOUT(10007, "AI响应超时")
+    AI_RESPONSE_TIMEOUT(10007, "AI响应超时"),
+
+    /* 错因管理相关状态码 11001-11100 */
+    MISTAKE_REASON_SUCCESS(11001, "错因操作成功"),
+    MISTAKE_REASON_TOGGLE_SUCCESS(11002, "错因状态切换成功"),
+    MISTAKE_REASON_UPDATE_SUCCESS(11003, "错因信息更新成功"),
+    MISTAKE_REASON_GET_SUCCESS(11004, "错因信息获取成功"),
+    STUDY_NOTE_SUBMIT_SUCCESS(11005, "错题笔记提交成功"),
+    STUDY_NOTE_GET_SUCCESS(11006, "错题笔记获取成功"),
+
+    MISTAKE_REASON_NOT_FOUND(11101, "未找到对应的错题记录"),
+    MISTAKE_REASON_INVALID_PARAM(11102, "错因参数无效"),
+    MISTAKE_REASON_UPDATE_FAILED(11103, "错因状态更新失败"),
+    MISTAKE_REASON_TOGGLE_FAILED(11104, "错因状态切换失败"),
+    STUDY_NOTE_UPDATE_FAILED(11105, "错题笔记更新失败"),
+    MISTAKE_REASON_SYSTEM_ERROR(11106, "错因管理系统异常")
     ;
 
     private Integer code;
