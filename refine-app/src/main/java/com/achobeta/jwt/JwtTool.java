@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.achobeta.types.common.Constants.USER_REFRESH_TOKEN_KEY;
+import static com.achobeta.types.common.Constants.USER_TOKEN_ID_KEY;
 
 @Component
 @EnableConfigurationProperties(JwtProperties.class)
@@ -77,6 +78,11 @@ public class JwtTool implements Jwt {
         redis.setValue(
                 USER_REFRESH_TOKEN_KEY + jti,
                 userId,
+                jwtProperties.getRefreshTokenTtl().toMillis()
+        );
+        redis.setValue(
+                USER_TOKEN_ID_KEY + userId,
+                refreshToken,
                 jwtProperties.getRefreshTokenTtl().toMillis()
         );
         return refreshToken;
@@ -234,6 +240,11 @@ public class JwtTool implements Jwt {
      */
     public Long getRefreshTokenIat(String refreshToken) {
         return parseToken(refreshToken, "refresh").getIat();
+    }
+
+
+    public String getRefreshToken4UserId(String userId) {
+        return redis.getValue(USER_TOKEN_ID_KEY + userId);
     }
 
 

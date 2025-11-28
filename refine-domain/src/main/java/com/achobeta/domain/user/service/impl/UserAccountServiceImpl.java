@@ -141,6 +141,7 @@ public class UserAccountServiceImpl implements IUserAccountService {
         }
         user.encryptPassword(newPassword);
         userRepository.updateByUserAccount(user, user.getUserAccount());
+        logout(jwt.getRefreshToken4UserId(userId));
     }
 
     @Override
