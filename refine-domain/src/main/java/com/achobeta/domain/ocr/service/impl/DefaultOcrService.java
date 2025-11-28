@@ -101,6 +101,7 @@ public class DefaultOcrService implements IOcrService {
         // 使用 AI 模型尝试提取第一个问题
         recognizedText = aiService.extractTheFirstQuestion(recognizedText);
         String uuid = UUID.fastUUID().toString();
+        log.info("成功识别出第一个问题:{}", recognizedText);
 
         // 创建问题实体
         QuestionEntity questionEntity = new QuestionEntity();
