@@ -60,7 +60,7 @@ public class ReviewFeedbackController {
             log.info("用户获取待复习题目数量结束，userId:{} count:{}", userId, overdueCountVO.getCount());
         }catch (Exception e){
             log.error("用户获取待复习题目数量失败！userId:{}", userId, e);
-            throw new AppException(GET_OVERDUE_REVIEW_COUNT_FAIL);
+            return Response.CUSTOMIZE_ERROR(GET_OVERDUE_REVIEW_COUNT_FAIL);
         }
         return Response.SYSTEM_SUCCESS(OverdueReviewDTO.builder()
                 .count(overdueCountVO.getCount())
@@ -82,7 +82,7 @@ public class ReviewFeedbackController {
             trickyKnowledgePointVOS = reviewFeedbackService.getTrickyKnowledgePoint(userId);
         }catch (Exception e){
             log.error("用户获取近期出错最多的知识点失败！userId:{}", userId, e);
-            throw new AppException(GET_TRICKY_KNOWLEDGE_POINT_FAIL);
+            return Response.CUSTOMIZE_ERROR(GET_TRICKY_KNOWLEDGE_POINT_FAIL);
         }
 
         List<TrickyKnowledgePointDTO> trickyKnowledgePointDTOS = trickyKnowledgePointVOS.stream()
