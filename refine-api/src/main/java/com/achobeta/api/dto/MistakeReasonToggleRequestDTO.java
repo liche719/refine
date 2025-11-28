@@ -22,10 +22,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class MistakeReasonToggleRequestDTO implements Serializable {
 
-    @NotBlank(message = "用户ID不能为空")
-    @FieldDesc(name = "用户ID")
-    private String userId;
-
     @NotBlank(message = "题目ID不能为空")
     @FieldDesc(name = "题目ID")
     private String questionId;

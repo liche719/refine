@@ -10,6 +10,8 @@ import com.achobeta.domain.mistake.model.valobj.StudyNoteVO;
 import com.achobeta.domain.mistake.service.IMistakeReasonService;
 import com.achobeta.domain.mistake.service.IStudyNoteService;
 import com.achobeta.types.Response;
+import com.achobeta.types.annotation.GlobalInterception;
+import com.achobeta.types.common.UserContext;
 import com.achobeta.types.enums.GlobalServiceStatusCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -140,16 +142,18 @@ public class MistakeReasonController {
      * @param requestDTO 简化错因切换请求DTO
      * @return 错因管理响应
      */
+    @GlobalInterception
     @PostMapping("toggle")
     public Response<MistakeReasonResponseDTO> toggleMistakeReasonSimple(
             @Valid @RequestBody MistakeReasonToggleRequestDTO requestDTO) {
+        String userId = UserContext.getUserId();
         try {
             log.info("用户简化切换错因状态开始，userId:{} questionId:{} reasonName:{}",
-                    requestDTO.getUserId(), requestDTO.getQuestionId(), requestDTO.getReasonName());
+                    userId, requestDTO.getQuestionId(), requestDTO.getReasonName());
 
             // 调用领域服务
             MistakeReasonVO responseVO = mistakeReasonService.toggleMistakeReasonByName(
-                    requestDTO.getUserId(), 
+                    userId,
                     requestDTO.getQuestionId(), 
                     requestDTO.getReasonName());
 
@@ -158,7 +162,7 @@ public class MistakeReasonController {
 
             if (response.getSuccess()) {
                 log.info("用户简化切换错因状态成功，userId:{} questionId:{} reasonName:{}",
-                        requestDTO.getUserId(), requestDTO.getQuestionId(), requestDTO.getReasonName());
+                        userId, requestDTO.getQuestionId(), requestDTO.getReasonName());
                 return Response.<MistakeReasonResponseDTO>builder()
                         .code(GlobalServiceStatusCode.MISTAKE_REASON_TOGGLE_SUCCESS.getCode())
                         .info(GlobalServiceStatusCode.MISTAKE_REASON_TOGGLE_SUCCESS.getMessage())
@@ -166,7 +170,7 @@ public class MistakeReasonController {
                         .build();
             } else {
                 log.warn("用户简化切换错因状态失败，userId:{} questionId:{} reasonName:{} message:{}",
-                        requestDTO.getUserId(), requestDTO.getQuestionId(), requestDTO.getReasonName(), response.getMessage());
+                        userId, requestDTO.getQuestionId(), requestDTO.getReasonName(), response.getMessage());
                 return Response.<MistakeReasonResponseDTO>builder()
                         .code(GlobalServiceStatusCode.MISTAKE_REASON_TOGGLE_FAILED.getCode())
                         .info(response.getMessage())
@@ -175,7 +179,7 @@ public class MistakeReasonController {
             }
         } catch (Exception e) {
             log.error("用户简化切换错因状态时发生异常，userId:{} questionId:{} reasonName:{}",
-                    requestDTO.getUserId(), requestDTO.getQuestionId(), requestDTO.getReasonName(), e);
+                    userId, requestDTO.getQuestionId(), requestDTO.getReasonName(), e);
             return Response.<MistakeReasonResponseDTO>builder()
                     .code(GlobalServiceStatusCode.MISTAKE_REASON_SYSTEM_ERROR.getCode())
                     .info("系统异常: " + e.getMessage())
