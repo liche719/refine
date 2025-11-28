@@ -2,6 +2,7 @@ package com.achobeta.trigger.http;
 
 import com.achobeta.api.dto.MistakeReasonRequestDTO;
 import com.achobeta.api.dto.MistakeReasonResponseDTO;
+import com.achobeta.api.dto.MistakeReasonToggleRequestDTO;
 import com.achobeta.api.dto.StudyNoteRequestDTO;
 import com.achobeta.api.dto.StudyNoteResponseDTO;
 import com.achobeta.domain.mistake.model.valobj.MistakeReasonVO;
@@ -9,6 +10,7 @@ import com.achobeta.domain.mistake.model.valobj.StudyNoteVO;
 import com.achobeta.domain.mistake.service.IMistakeReasonService;
 import com.achobeta.domain.mistake.service.IStudyNoteService;
 import com.achobeta.types.Response;
+import com.achobeta.types.enums.GlobalServiceStatusCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,12 +60,16 @@ public class MistakeReasonController {
             if (response.getSuccess()) {
                 log.info("用户切换错因状态成功，userId:{} questionId:{} reasonName:{}",
                         requestDTO.getUserId(), requestDTO.getQuestionId(), reasonName);
-                return Response.SYSTEM_SUCCESS(response);
+                return Response.<MistakeReasonResponseDTO>builder()
+                        .code(GlobalServiceStatusCode.MISTAKE_REASON_TOGGLE_SUCCESS.getCode())
+                        .info(GlobalServiceStatusCode.MISTAKE_REASON_TOGGLE_SUCCESS.getMessage())
+                        .data(response)
+                        .build();
             } else {
                 log.warn("用户切换错因状态失败，userId:{} questionId:{} reasonName:{} message:{}",
                         requestDTO.getUserId(), requestDTO.getQuestionId(), reasonName, response.getMessage());
                 return Response.<MistakeReasonResponseDTO>builder()
-                        .code(Response.SERVICE_ERROR().getCode())
+                        .code(GlobalServiceStatusCode.MISTAKE_REASON_TOGGLE_FAILED.getCode())
                         .info(response.getMessage())
                         .data(response)
                         .build();
@@ -71,7 +77,10 @@ public class MistakeReasonController {
         } catch (Exception e) {
             log.error("用户切换错因状态时发生异常，userId:{} questionId:{} reasonName:{}",
                     requestDTO.getUserId(), requestDTO.getQuestionId(), reasonName, e);
-            return Response.SERVICE_ERROR("系统异常: " + e.getMessage());
+            return Response.<MistakeReasonResponseDTO>builder()
+                    .code(GlobalServiceStatusCode.MISTAKE_REASON_SYSTEM_ERROR.getCode())
+                    .info("系统异常: " + e.getMessage())
+                    .build();
         }
     }
 
@@ -100,12 +109,16 @@ public class MistakeReasonController {
             if (response.getSuccess()) {
                 log.info("用户更新其他原因成功，userId:{} questionId:{}",
                         requestDTO.getUserId(), requestDTO.getQuestionId());
-                return Response.SYSTEM_SUCCESS(response);
+                return Response.<MistakeReasonResponseDTO>builder()
+                        .code(GlobalServiceStatusCode.MISTAKE_REASON_UPDATE_SUCCESS.getCode())
+                        .info(GlobalServiceStatusCode.MISTAKE_REASON_UPDATE_SUCCESS.getMessage())
+                        .data(response)
+                        .build();
             } else {
                 log.warn("用户更新其他原因失败，userId:{} questionId:{} message:{}",
                         requestDTO.getUserId(), requestDTO.getQuestionId(), response.getMessage());
                 return Response.<MistakeReasonResponseDTO>builder()
-                        .code(Response.SERVICE_ERROR().getCode())
+                        .code(GlobalServiceStatusCode.MISTAKE_REASON_UPDATE_FAILED.getCode())
                         .info(response.getMessage())
                         .data(response)
                         .build();
@@ -113,7 +126,60 @@ public class MistakeReasonController {
         } catch (Exception e) {
             log.error("用户更新其他原因时发生异常，userId:{} questionId:{}",
                     requestDTO.getUserId(), requestDTO.getQuestionId(), e);
-            return Response.SERVICE_ERROR("系统异常: " + e.getMessage());
+            return Response.<MistakeReasonResponseDTO>builder()
+                    .code(GlobalServiceStatusCode.MISTAKE_REASON_SYSTEM_ERROR.getCode())
+                    .info("系统异常: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    /**
+     * 简化的错因状态切换接口
+     * 只需传入错因参数名，自动查询数据库并切换状态（0变1，1变0）
+     *
+     * @param requestDTO 简化错因切换请求DTO
+     * @return 错因管理响应
+     */
+    @PostMapping("toggle")
+    public Response<MistakeReasonResponseDTO> toggleMistakeReasonSimple(
+            @Valid @RequestBody MistakeReasonToggleRequestDTO requestDTO) {
+        try {
+            log.info("用户简化切换错因状态开始，userId:{} questionId:{} reasonName:{}",
+                    requestDTO.getUserId(), requestDTO.getQuestionId(), requestDTO.getReasonName());
+
+            // 调用领域服务
+            MistakeReasonVO responseVO = mistakeReasonService.toggleMistakeReasonByName(
+                    requestDTO.getUserId(), 
+                    requestDTO.getQuestionId(), 
+                    requestDTO.getReasonName());
+
+            // 转换为响应DTO
+            MistakeReasonResponseDTO response = convertToMistakeReasonResponseDTO(responseVO);
+
+            if (response.getSuccess()) {
+                log.info("用户简化切换错因状态成功，userId:{} questionId:{} reasonName:{}",
+                        requestDTO.getUserId(), requestDTO.getQuestionId(), requestDTO.getReasonName());
+                return Response.<MistakeReasonResponseDTO>builder()
+                        .code(GlobalServiceStatusCode.MISTAKE_REASON_TOGGLE_SUCCESS.getCode())
+                        .info(GlobalServiceStatusCode.MISTAKE_REASON_TOGGLE_SUCCESS.getMessage())
+                        .data(response)
+                        .build();
+            } else {
+                log.warn("用户简化切换错因状态失败，userId:{} questionId:{} reasonName:{} message:{}",
+                        requestDTO.getUserId(), requestDTO.getQuestionId(), requestDTO.getReasonName(), response.getMessage());
+                return Response.<MistakeReasonResponseDTO>builder()
+                        .code(GlobalServiceStatusCode.MISTAKE_REASON_TOGGLE_FAILED.getCode())
+                        .info(response.getMessage())
+                        .data(response)
+                        .build();
+            }
+        } catch (Exception e) {
+            log.error("用户简化切换错因状态时发生异常，userId:{} questionId:{} reasonName:{}",
+                    requestDTO.getUserId(), requestDTO.getQuestionId(), requestDTO.getReasonName(), e);
+            return Response.<MistakeReasonResponseDTO>builder()
+                    .code(GlobalServiceStatusCode.MISTAKE_REASON_SYSTEM_ERROR.getCode())
+                    .info("系统异常: " + e.getMessage())
+                    .build();
         }
     }
 
@@ -139,19 +205,26 @@ public class MistakeReasonController {
 
             if (response.getSuccess()) {
                 log.info("获取错因信息成功，userId:{} questionId:{}", userId, questionId);
-                return Response.SYSTEM_SUCCESS(response);
+                return Response.<MistakeReasonResponseDTO>builder()
+                        .code(GlobalServiceStatusCode.MISTAKE_REASON_GET_SUCCESS.getCode())
+                        .info(GlobalServiceStatusCode.MISTAKE_REASON_GET_SUCCESS.getMessage())
+                        .data(response)
+                        .build();
             } else {
                 log.warn("获取错因信息失败，userId:{} questionId:{} message:{}",
                         userId, questionId, response.getMessage());
                 return Response.<MistakeReasonResponseDTO>builder()
-                        .code(Response.SERVICE_ERROR().getCode())
+                        .code(GlobalServiceStatusCode.MISTAKE_REASON_NOT_FOUND.getCode())
                         .info(response.getMessage())
                         .data(response)
                         .build();
             }
         } catch (Exception e) {
             log.error("获取错因信息时发生异常，userId:{} questionId:{}", userId, questionId, e);
-            return Response.SERVICE_ERROR("系统异常: " + e.getMessage());
+            return Response.<MistakeReasonResponseDTO>builder()
+                    .code(GlobalServiceStatusCode.MISTAKE_REASON_SYSTEM_ERROR.getCode())
+                    .info("系统异常: " + e.getMessage())
+                    .build();
         }
     }
 
@@ -180,12 +253,16 @@ public class MistakeReasonController {
             if (response.getSuccess()) {
                 log.info("用户提交错题笔记成功，userId:{} questionId:{}",
                         requestDTO.getUserId(), requestDTO.getQuestionId());
-                return Response.SYSTEM_SUCCESS(response);
+                return Response.<StudyNoteResponseDTO>builder()
+                        .code(GlobalServiceStatusCode.STUDY_NOTE_SUBMIT_SUCCESS.getCode())
+                        .info(GlobalServiceStatusCode.STUDY_NOTE_SUBMIT_SUCCESS.getMessage())
+                        .data(response)
+                        .build();
             } else {
                 log.warn("用户提交错题笔记失败，userId:{} questionId:{} message:{}",
                         requestDTO.getUserId(), requestDTO.getQuestionId(), response.getMessage());
                 return Response.<StudyNoteResponseDTO>builder()
-                        .code(Response.SERVICE_ERROR().getCode())
+                        .code(GlobalServiceStatusCode.STUDY_NOTE_UPDATE_FAILED.getCode())
                         .info(response.getMessage())
                         .data(response)
                         .build();
@@ -193,7 +270,10 @@ public class MistakeReasonController {
         } catch (Exception e) {
             log.error("用户提交错题笔记时发生异常，userId:{} questionId:{}",
                     requestDTO.getUserId(), requestDTO.getQuestionId(), e);
-            return Response.SERVICE_ERROR("系统异常: " + e.getMessage());
+            return Response.<StudyNoteResponseDTO>builder()
+                    .code(GlobalServiceStatusCode.MISTAKE_REASON_SYSTEM_ERROR.getCode())
+                    .info("系统异常: " + e.getMessage())
+                    .build();
         }
     }
 
@@ -219,19 +299,26 @@ public class MistakeReasonController {
 
             if (response.getSuccess()) {
                 log.info("获取错题笔记成功，userId:{} questionId:{}", userId, questionId);
-                return Response.SYSTEM_SUCCESS(response);
+                return Response.<StudyNoteResponseDTO>builder()
+                        .code(GlobalServiceStatusCode.STUDY_NOTE_GET_SUCCESS.getCode())
+                        .info(GlobalServiceStatusCode.STUDY_NOTE_GET_SUCCESS.getMessage())
+                        .data(response)
+                        .build();
             } else {
                 log.warn("获取错题笔记失败，userId:{} questionId:{} message:{}",
                         userId, questionId, response.getMessage());
                 return Response.<StudyNoteResponseDTO>builder()
-                        .code(Response.SERVICE_ERROR().getCode())
+                        .code(GlobalServiceStatusCode.MISTAKE_REASON_NOT_FOUND.getCode())
                         .info(response.getMessage())
                         .data(response)
                         .build();
             }
         } catch (Exception e) {
             log.error("获取错题笔记时发生异常，userId:{} questionId:{}", userId, questionId, e);
-            return Response.SERVICE_ERROR("系统异常: " + e.getMessage());
+            return Response.<StudyNoteResponseDTO>builder()
+                    .code(GlobalServiceStatusCode.MISTAKE_REASON_SYSTEM_ERROR.getCode())
+                    .info("系统异常: " + e.getMessage())
+                    .build();
         }
     }
 
