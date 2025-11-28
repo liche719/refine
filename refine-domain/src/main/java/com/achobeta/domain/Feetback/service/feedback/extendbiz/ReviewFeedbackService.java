@@ -131,9 +131,7 @@ public class ReviewFeedbackService implements IReviewFeedbackService {
      */
     @Override
     public List<TrickyKnowledgePointVO> getTrickyKnowledgePoint(String userId) {
-        List<TrickyKnowledgePointVO> TrickyKnowledgePointVOs= trickyKnowledgeRepository.getTrickyKnowledgePoints(userId);
-        trickyKnowledgeRepository.setTrickyKnowledgePointsCnt(userId, TrickyKnowledgePointVOs.size());
-        return TrickyKnowledgePointVOs;
+        return trickyKnowledgeRepository.getTrickyKnowledgePoints(userId);
     }
 
 }

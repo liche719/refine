@@ -172,6 +172,44 @@ public class MistakeReasonServiceImpl implements IMistakeReasonService {
         }
     }
 
+    @Override
+    public MistakeReasonVO updateOtherReasonTextWithValidation(String userId, String questionId, String otherReasonText) {
+        try {
+            log.info("开始带验证的更新其他原因文本: userId={}, questionId={}", userId, questionId);
+
+            // 获取当前错题信息
+            var currentReasons = mistakeReasonRepository.getMistakeReasons(userId, questionId);
+
+            if (currentReasons == null) {
+                return MistakeReasonVO.error(userId, questionId, "未找到对应的错题记录");
+            }
+
+            // 检查错题ID标志位是否为1
+            if (currentReasons.getOtherReason() == null || currentReasons.getOtherReason() != 1) {
+                return MistakeReasonVO.error(userId, questionId, "错题其他原因标志位不为1，无法更新文本");
+            }
+
+            // 验证文本内容
+            if (otherReasonText == null || otherReasonText.trim().isEmpty()) {
+                return MistakeReasonVO.error(userId, questionId, "其他原因描述不能为空");
+            }
+
+            // 更新数据库
+            boolean success = mistakeReasonRepository.updateOtherReasonText(userId, questionId, otherReasonText);
+
+            if (success) {
+                // 重新获取更新后的数据
+                var updatedReasons = mistakeReasonRepository.getMistakeReasons(userId, questionId);
+                return MistakeReasonVO.success(updatedReasons);
+            } else {
+                return MistakeReasonVO.error(userId, questionId, "更新其他原因失败");
+            }
+        } catch (Exception e) {
+            log.error("带验证的更新其他原因时发生异常: userId={}, questionId={}", userId, questionId, e);
+            return MistakeReasonVO.error(userId, questionId, "系统异常: " + e.getMessage());
+        }
+    }
+
     /**
      * 根据错因名称切换状态
      * @param reasonVO 错因值对象
