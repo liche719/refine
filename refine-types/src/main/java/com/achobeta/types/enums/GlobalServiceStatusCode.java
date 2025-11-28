@@ -36,7 +36,7 @@ public enum GlobalServiceStatusCode {
     /* 用户错误 2001-3000 */
     USER_NOT_LOGIN(2001, "用户未登录"),
     USER_ACCOUNT_EXPIRED(2002, "账号已过期"),
-    USER_CREDENTIALS_ERROR(2003, "密码错误"),
+    USER_CREDENTIALS_ERROR(2003, "账号或密码错误"),
     USER_CREDENTIALS_EXPIRED(2004, "密码过期"),
     USER_ACCOUNT_DISABLE(2005, "账号不可用"),
     USER_ACCOUNT_LOCKED(2006, "账号被锁定"),
@@ -48,6 +48,7 @@ public enum GlobalServiceStatusCode {
     USER_EMAIL_ALREADY_EXIST(2012, "邮箱已存在"),
     USER_EMAIL_NOT_EXIST(2013, "邮箱不存在,请查看邮箱是否有误"),
     USER_ID_IS_NULL(2014, "用户id为空"),
+    USER_EMAIL_VERIFY_CODE_ERROR(2100, "验证码已过期，请重新获取"),
 
     USER_TYPE_EXCEPTION(2101, "用户类别异常"),
 

@@ -56,13 +56,12 @@ public class UserAccountController {
     @PostMapping("/register")
     public Response register(@RequestBody RegisterRequestDTO request) {
         try {
-            userAccountService.register(request.getUserAccount(), request.getUserPassword(), request.getUserName(), request.getCheckCode());
+            return userAccountService.register(request.getUserAccount(), request.getUserPassword(), request.getUserName(), request.getCheckCode());
         } catch (AppException e) {
             return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
             throw new AppException(e.getMessage());
         }
-        return Response.SYSTEM_SUCCESS();
     }
 
     @PostMapping("/login")
