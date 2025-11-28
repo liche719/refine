@@ -5,6 +5,8 @@ import com.achobeta.domain.aisuggession.model.valobj.KeyPointVO;
 import com.achobeta.domain.aisuggession.service.IAILearningSuggessionService;
 import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.UserContext;
+import com.achobeta.types.enums.GlobalServiceStatusCode;
+import com.achobeta.types.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -28,8 +30,13 @@ public class AILearningSuggessionController {
     @GlobalInterception
     public List<KeyPointDTO> getKeyPoint() {
         String userId = UserContext.getUserId();
-        log.info("用户获取AI学习建议，userId:{}", userId);
-        List<KeyPointVO> keyPointVOS = service.getKeyPoint(userId);
+        List<KeyPointVO> keyPointVOS = null;
+        try {
+            log.info("用户获取AI学习建议，userId:{}", userId);
+            keyPointVOS = service.getKeyPoint(userId);
+        } catch (Exception e) {
+            throw new AppException(GlobalServiceStatusCode.AI_RESPONSE_TIMEOUT);
+        }
         List<KeyPointDTO> keyPointDTOS = keyPointVOS.stream()
                 .map(keyPointVO -> KeyPointDTO.builder()
                         .knowledgePoint(keyPointVO.getKnowledgePoint())

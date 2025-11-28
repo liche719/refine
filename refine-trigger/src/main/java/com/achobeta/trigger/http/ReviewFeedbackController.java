@@ -14,6 +14,7 @@ import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.Constants;
 import com.achobeta.types.common.UserContext;
 import com.achobeta.types.enums.TimeRange;
+import com.achobeta.types.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.achobeta.types.enums.GlobalServiceStatusCode.*;
 
 /**
  * 待复习题目反馈接口
@@ -50,19 +53,20 @@ public class ReviewFeedbackController {
     @GlobalInterception
     public Response<OverdueReviewDTO> getOverdueReviewCount() {
         String userId = UserContext.getUserId();
+        OverdueCountVO overdueCountVO = null;
         try{
             log.info("用户获取待复习题目数量开始，userId:{}", userId);
-            OverdueCountVO overdueCountVO = reviewFeedbackService.getOverdueCount(userId);
+            overdueCountVO = reviewFeedbackService.getOverdueCount(userId);
             log.info("用户获取待复习题目数量结束，userId:{} count:{}", userId, overdueCountVO.getCount());
-
-            return Response.SYSTEM_SUCCESS(OverdueReviewDTO.builder()
-                    .count(overdueCountVO.getCount())
-                    .description(overdueCountVO.getDescription())
-                    .build());
         }catch (Exception e){
             log.error("用户获取待复习题目数量失败！userId:{}", userId, e);
-            return Response.SERVICE_ERROR(e.getMessage());
+            throw new AppException(GET_OVERDUE_REVIEW_COUNT_FAIL);
         }
+        return Response.SYSTEM_SUCCESS(OverdueReviewDTO.builder()
+                .count(overdueCountVO.getCount())
+                .description(overdueCountVO.getDescription())
+                .build());
+
     }
 
     /**
@@ -72,27 +76,30 @@ public class ReviewFeedbackController {
     @GlobalInterception
     public Response<List<TrickyKnowledgePointDTO>> getTrickyKnowledgePoint(){
         String userId = UserContext.getUserId();
+        List<TrickyKnowledgePointVO> trickyKnowledgePointVOS = null;
         try{
             log.info("用户获取近期出错最多的知识点，userId:{}", userId);
-            List<TrickyKnowledgePointVO> trickyKnowledgePointVOS = reviewFeedbackService.getTrickyKnowledgePoint(userId);
-            List<TrickyKnowledgePointDTO> trickyKnowledgePointDTOS = trickyKnowledgePointVOS.stream()
-                    .map(trickyKnowledgePointVO -> {
-                        if (trickyKnowledgePointVO == null) {
-                            return TrickyKnowledgePointDTO.builder()
-                                    .knowledgeId("")
-                                    .knowledgeName("未知")
-                                    .build();
-                        }
-                        return TrickyKnowledgePointDTO.builder()
-                                .knowledgeId(trickyKnowledgePointVO.getKnowledgeId())
-                                .knowledgeName(trickyKnowledgePointVO.getKnowledgeName())
-                                .build();
-                    }).toList();
-            return Response.SYSTEM_SUCCESS(trickyKnowledgePointDTOS);
+            trickyKnowledgePointVOS = reviewFeedbackService.getTrickyKnowledgePoint(userId);
         }catch (Exception e){
             log.error("用户获取近期出错最多的知识点失败！userId:{}", userId, e);
-            return Response.SERVICE_ERROR(e.getMessage());
+            throw new AppException(GET_TRICKY_KNOWLEDGE_POINT_FAIL);
         }
+
+        List<TrickyKnowledgePointDTO> trickyKnowledgePointDTOS = trickyKnowledgePointVOS.stream()
+                .map(trickyKnowledgePointVO -> {
+                    if (trickyKnowledgePointVO == null) {
+                        return TrickyKnowledgePointDTO.builder()
+                                .knowledgeId("")
+                                .knowledgeName("未知")
+                                .build();
+                    }
+                    return TrickyKnowledgePointDTO.builder()
+                            .knowledgeId(trickyKnowledgePointVO.getKnowledgeId())
+                            .knowledgeName(trickyKnowledgePointVO.getKnowledgeName())
+                            .build();
+                }).toList();
+        return Response.SYSTEM_SUCCESS(trickyKnowledgePointDTOS);
+
     }
 
     /**

@@ -19,4 +19,7 @@ public interface ITrickyKnowledgeRepository {
             "group by m.knowledge_point_id, k.knowledge_desc " +
             "having count(m.knowledge_point_id) >= 3")
     List<TrickyKnowledgePointVO> getTrickyKnowledgePoints(String userId);
+
+    @Select("insert into UserData (user_id, hard_questions) values (#{userId}, #{size})")
+    void setTrickyKnowledgePointsCnt(String userId, int size);
 }

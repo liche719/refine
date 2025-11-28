@@ -57,7 +57,10 @@ public enum GlobalServiceStatusCode {
     QUESTION_GENERATION_FAIL(10001, "题目生成失败,请稍后再试"),
     QUESTION_IS_EXPIRED(10002, "题目已过期或不存在" ),
     OCR_ERROR(10003, "OCR图片识别错误"),
-
+    GET_STUDY_DYNAMIC_FAIL(10004, "获取学习动态失败,请稍后再试"),
+    GET_OVERDUE_REVIEW_COUNT_FAIL(10005, "获取待复习题目数量失败,请稍后再试"),
+    GET_TRICKY_KNOWLEDGE_POINT_FAIL(10006, "获取易错知识点失败,请稍后再试"),
+    AI_RESPONSE_TIMEOUT(10007, "AI响应超时")
     ;
 
     private Integer code;
