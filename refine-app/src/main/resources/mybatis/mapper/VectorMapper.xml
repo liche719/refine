@@ -16,10 +16,10 @@
         SELECT 
             id, user_id, question_id, action_type, question_content, subject, knowledge_point_id,
             embedding, metadata, created_at, updated_at,
-            1 - (embedding <> #{queryVector}::vector) as similarity
+            1 - (embedding &lt;&gt; #{queryVector}::vector) as similarity
         FROM user_learning_vectors 
         WHERE user_id = #{userId}
-        ORDER BY embedding <> #{queryVector}::vector
+        ORDER BY embedding &lt;&gt; #{queryVector}::vector
         LIMIT #{limit}
     </select>
 
