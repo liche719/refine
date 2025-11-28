@@ -1,6 +1,8 @@
 package com.achobeta.trigger.http;
 
+import com.achobeta.api.dto.AiSolveRequestDTO;
 import com.achobeta.domain.ai.service.IAiService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -27,7 +29,8 @@ public class AiSolveController {
     private final IAiService aiService;
 
     @PostMapping("stream")
-    public SseEmitter stream(@RequestParam("question") String question) {
+    public SseEmitter stream(@Valid @RequestBody AiSolveRequestDTO requestDTO) {
+        String question = requestDTO.getQuestion();
         // 设置超时时间为5分钟
         SseEmitter emitter = new SseEmitter(300000L);
         
