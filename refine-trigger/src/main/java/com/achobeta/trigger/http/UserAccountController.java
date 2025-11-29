@@ -1,7 +1,9 @@
 package com.achobeta.trigger.http;
 
+import cn.hutool.core.date.DateTime;
 import com.achobeta.api.dto.LoginRequestDTO;
 import com.achobeta.api.dto.RegisterRequestDTO;
+import com.achobeta.domain.overview.service.extendbiz.UserOverviewService;
 import com.achobeta.domain.user.model.valobj.UserLoginVO;
 import com.achobeta.domain.user.service.IEmailVerificationService;
 import com.achobeta.domain.user.service.IUserAccountService;
@@ -17,7 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author liangchaowen
@@ -33,6 +37,9 @@ public class UserAccountController {
     private final IEmailVerificationService emailVerificationService;
 
     private final IUserAccountService userAccountService;
+
+    private final UserOverviewService userOverviewService;
+    private final Map<String, DateTime> sessionMap = new ConcurrentHashMap<>();
 
 
     /**
@@ -70,6 +77,7 @@ public class UserAccountController {
         try {
             user = userAccountService.login(request.getUserAccount(), request.getUserPassword());
             log.info("用户 {} 登录", request.getUserAccount());
+            sessionMap.put(user.getUserId(), DateTime.now());
         } catch (AppException e) {
             return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
@@ -84,6 +92,9 @@ public class UserAccountController {
         try {
             userAccountService.logout(refreshToken);
             log.info("用户 {} 登出", UserContext.getUserId());
+            int duration = (int) (DateTime.now().getTime() - sessionMap.get(UserContext.getUserId()).getTime()) / 3600;
+            userOverviewService.updateUserDuration(UserContext.getUserId(), duration);
+            sessionMap.remove(UserContext.getUserId());
         } catch (AppException e) {
             return Response.CUSTOMIZE_MSG_ERROR(e.getCode(), e.getMessage(), null);
         } catch (Exception e) {
@@ -132,6 +143,9 @@ public class UserAccountController {
         Map<String, String> newToken;
         try {
             newToken = userAccountService.refreshToken(refreshToken);
+            int duration = (int) (DateTime.now().getTime() - sessionMap.get(UserContext.getUserId()).getTime()) / 3600;
+            userOverviewService.updateUserDuration(UserContext.getUserId(), duration);
+            sessionMap.put(UserContext.getUserId(), DateTime.now());
             log.info("用户刷新access-token");
             return Response.SYSTEM_SUCCESS(newToken);
         } catch (AppException e) {

@@ -26,17 +26,7 @@ public class LearningOverviewService implements ILearningOverviewService{
     private IReviewFeedbackService reviewFeedbackService;
     @Override
     public StudyOverviewVO getOverview(String userId) {
-        StudyOverviewVO vo = new StudyOverviewVO();
-        vo.setQuestionsNum(repository.queryQuestionsNum(userId));
-        vo.setStudyTime(repository.queryStudyTime(userId));
-        vo.setHardQuestions(reviewFeedbackService.getTrickyKnowledgePoint(userId).size());
-
-        if (vo.getQuestionsNum() == 0) {
-            vo.setReviewRate(0);
-            return vo;
-        }
-
-        vo.setReviewRate(repository.queryMasteredQuestions(userId)*1.0 / vo.getQuestionsNum());
+        StudyOverviewVO vo = repository.queryStudyOverview(userId);
         return vo;
     }
 
