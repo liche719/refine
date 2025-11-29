@@ -1,5 +1,6 @@
 package com.achobeta.trigger.event;
 
+import com.achobeta.domain.overview.service.extendbiz.UserOverviewService;
 import com.achobeta.domain.rag.service.impl.LearningAnalysisService;
 import com.achobeta.domain.rag.model.valobj.LearningDynamicVO;
 import com.achobeta.domain.user.event.UserLoginEvent;

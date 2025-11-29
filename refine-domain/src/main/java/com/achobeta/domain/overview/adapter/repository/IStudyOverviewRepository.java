@@ -20,12 +20,5 @@ public interface IStudyOverviewRepository {
     @Select("select count(*) from MistakeQuestion where user_id = #{userId} and update_time between #{localDateTime} and #{localDateTime1}")
     Integer countByUserIdAndUpdateTimeBetween(@Param("userId") String userId, LocalDateTime localDateTime, LocalDateTime localDateTime1);
 
-    @Select("select count(question_id) from MistakeQuestion where user_id = #{userId}")
-    int queryQuestionsNum(String userId);
 
-    @Select("select count(question_id) from MistakeQuestion where user_id = #{userId} and question_status = 1")
-    int queryMasteredQuestions(String userId);
-
-    @Select("select study_time from UserData where user_id = #{userId}")
-    int queryStudyTime(String userId);
 }

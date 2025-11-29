@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 用户领域服务实现
@@ -35,7 +36,6 @@ public class UserAccountServiceImpl implements IUserAccountService {
     private final Jwt jwt;
     
     private final ApplicationEventPublisher eventPublisher;
-
 
     /**
      * 用户注册（添加验证码验证逻辑）
