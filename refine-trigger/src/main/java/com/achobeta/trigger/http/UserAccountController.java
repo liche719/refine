@@ -149,7 +149,7 @@ public class UserAccountController {
                 sessionMap.put(UserContext.getUserId(), DateTime.now());
             }else{
                 // 其实时长应该double比较合适，改换为int可能学几天也未必有1小时
-                int duration = (int) (DateTime.now().getTime() - sessionMap.get(UserContext.getUserId()).getTime()) / 3600;
+                int duration = (int) (DateTime.now().getTime() - sessionMap.get(UserContext.getUserId()).getTime()) / (1000 * 3600);
                 userOverviewService.updateUserDuration(UserContext.getUserId(), duration);
                 sessionMap.put(UserContext.getUserId(), DateTime.now());
             }
