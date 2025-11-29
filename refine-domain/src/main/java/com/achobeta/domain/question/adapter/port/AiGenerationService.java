@@ -27,4 +27,8 @@ public interface AiGenerationService {
     // 会话
     String chat(String message);
 
+    // 知识点分析
+    @SystemMessage(fromResource = "AnalyzeKnowledge.txt")
+    String knowledgeAnalysis(String questionText);
+
 }

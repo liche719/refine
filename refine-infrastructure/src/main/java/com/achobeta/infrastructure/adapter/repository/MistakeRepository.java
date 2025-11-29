@@ -1,5 +1,6 @@
 package com.achobeta.infrastructure.adapter.repository;
 
+import cn.hutool.core.lang.UUID;
 import com.achobeta.domain.question.adapter.repository.IMistakeRepository;
 import com.achobeta.domain.question.model.entity.MistakeQuestionEntity;
 import com.achobeta.domain.question.model.po.MistakeKnowledgePO;
