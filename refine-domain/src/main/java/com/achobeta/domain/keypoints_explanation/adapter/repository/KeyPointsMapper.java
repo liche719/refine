@@ -2,6 +2,7 @@ package com.achobeta.domain.keypoints_explanation.adapter.repository;
 
 import cn.hutool.core.date.DateTime;
 import com.achobeta.domain.keypoints_explanation.model.valobj.*;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -60,4 +61,9 @@ public interface KeyPointsMapper {
     @Select("insert into knowledgePoint(knowledge_point_id, knowledge_point_name, knowledge_desc, parent_knowledge_point_id, user_id)" +
             " values(#{node.pointId}, #{node.pointName}, #{node.pointDesc}, #{parentId}, #{userId})")
     void saveMindMapTree(String userId, SonPointVO node, String parentId);
+
+    @Insert("insert into knowledgePoint(knowledge_point_id, knowledge_point_name, user_id)" +
+            " values(#{knowledgePointId}, #{knowledgePointName}, #{userId})")
+    void insertNewPoint4MistakeQuestion(String userId, String knowledgePointId, String knowledgePointName);
+
 }

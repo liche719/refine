@@ -1,5 +1,6 @@
 package com.achobeta.domain.question.service.impl;
 
+import cn.hutool.core.lang.UUID;
 import com.achobeta.domain.question.adapter.port.AiGenerationService;
 import com.achobeta.domain.question.adapter.repository.IKnowledgeRepository;
 import com.achobeta.domain.question.adapter.repository.IMistakeRepository;
@@ -55,10 +56,10 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         String knowledgePointName = knowledgeRepository.findKnowledgeNameById(knowledgeId);
 
         if (null == subject) {
-            throw new AppException("找不到题目所属科目,mistakeQuestionId" + mistakeQuestionId);
+            throw new AppException("（ai出题）找不到题目所属科目,mistakeQuestionId" + mistakeQuestionId);
         }
         if (null == knowledgePointName) {
-            throw new AppException("找不到该题知识点名称,mistakeQuestionId" + mistakeQuestionId);
+            throw new AppException("（ai出题）找不到该题知识点名称,mistakeQuestionId" + mistakeQuestionId);
         }
 
         // 调用外部接口生成新题目
@@ -77,7 +78,7 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         }
 
         // 构建错题实体
-        String questionId = String.valueOf(mistakeQuestionId + System.currentTimeMillis());
+        String questionId = UUID.fastUUID().toString().substring(0, 19)+ System.currentTimeMillis();
 
         MistakeQuestionDTO dto = new MistakeQuestionDTO();
         dto.setUserId(userId);
@@ -112,6 +113,7 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
 
         mistakeRepository.save(MistakeQuestionEntity.builder()
                 .userId(userId)
+                .questionId(questionId)
                 .questionContent(value.getQuestionContent())
                 .subject(value.getSubject())
                 .knowledgePointId(value.getKnowledgePointId())
