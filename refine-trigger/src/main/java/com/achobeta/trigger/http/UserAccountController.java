@@ -143,9 +143,16 @@ public class UserAccountController {
         Map<String, String> newToken;
         try {
             newToken = userAccountService.refreshToken(refreshToken);
-            int duration = (int) (DateTime.now().getTime() - sessionMap.get(UserContext.getUserId()).getTime()) / 3600;
-            userOverviewService.updateUserDuration(UserContext.getUserId(), duration);
-            sessionMap.put(UserContext.getUserId(), DateTime.now());
+            if(sessionMap.get(UserContext.getUserId()) == null){
+                // 这里异常状态其实用心跳机制或websocket比较好，但是服务器不知道能不能行，因此默认1小时
+                userOverviewService.updateUserDuration(UserContext.getUserId(), 1);
+                sessionMap.put(UserContext.getUserId(), DateTime.now());
+            }else{
+                // 其实时长应该double比较合适，改换为int可能学几天也未必有1小时
+                int duration = (int) (DateTime.now().getTime() - sessionMap.get(UserContext.getUserId()).getTime()) / 3600;
+                userOverviewService.updateUserDuration(UserContext.getUserId(), duration);
+                sessionMap.put(UserContext.getUserId(), DateTime.now());
+            }
             log.info("用户刷新access-token");
             return Response.SYSTEM_SUCCESS(newToken);
         } catch (AppException e) {
