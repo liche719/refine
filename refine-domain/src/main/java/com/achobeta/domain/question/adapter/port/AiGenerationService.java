@@ -14,9 +14,15 @@ public interface AiGenerationService {
     @SystemMessage(fromResource = "AiGeneration.txt")
     QuestionResponseDTO Generation(@MemoryId String subject, @UserMessage String message);
 
+    @SystemMessage(fromResource = "AiGeneration.txt")
+    QuestionResponseDTO Generation(@UserMessage String message);
+
     //流式输出
     @SystemMessage(fromResource = "AiAnalyze.txt")
     Flux<String> aiJudgeStream(@MemoryId String subject, @UserMessage String message);
+
+    @SystemMessage(fromResource = "AiAnalyze.txt")
+    Flux<String> aiJudgeStream(@UserMessage String message);
 
     // 会话
     String chat(String message);
