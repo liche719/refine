@@ -28,7 +28,7 @@ public class ChatModelListenerConfig {
 
             @Override
             public void onError(ChatModelErrorContext errorContext) {
-                log.warn("onError(): {}", errorContext.error().getMessage());
+                log.info("onError(): {}", errorContext.error().getMessage());
             }
         };
     }
