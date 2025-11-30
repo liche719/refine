@@ -161,6 +161,7 @@ langchain4j:
         model-name: text-embedding-v4
         api-key: ${DASHSCOPE_API_KEY}
 
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-ttl: 100d
