@@ -8,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class QuestionVO {
-    private int id;// 问题id
+    private String id;// 问题id
     private String question;//  问题
 }
