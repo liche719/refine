@@ -181,7 +181,7 @@ public class KeyPointsExplanationService implements IKeyPointsExplanationService
     @Override
     public void undoDeleteKnowledgePoint(String knowledgeId, String userId) {
         if(knowledgeId != null){
-            List<KeyPointsVO> knowledges = keyPointsMapper.getSonKeyPoints(knowledgeId, userId);
+            List<KeyPointsVO> knowledges = keyPointsMapper.getPreDelSonKeyPoints(knowledgeId, userId);
             keyPointsMapper.undoDeleteKnowledgePoint(knowledgeId, userId);
             for (KeyPointsVO knowledge : knowledges) {
                 undoDeleteKnowledgePoint(knowledge.getId(), userId);
