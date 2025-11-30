@@ -18,10 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.achobeta.types.enums.GlobalServiceStatusCode.*;
@@ -170,6 +167,16 @@ public class ReviewFeedbackController {
             log.error("获取待复习题目统计信息失败！", e);
             return Response.CUSTOMIZE_ERROR(GET_STATISTICS_FAIL);
         }
+        if (statsVO == null) {
+            // 构造一个空的 StatsDTO
+            StatsDTO emptyStats = StatsDTO.builder()
+                    .subjectDistribution(Collections.emptyList())
+                    .knowledgeDistribution(Collections.emptyList())
+                    .reviewTrend(List.of(ReviewTrendDTO.builder()
+                            .month("0").total(0).reviewed(0).completionRate(0.0).build()))
+                    .build();
+            return Response.SYSTEM_SUCCESS(emptyStats);
+        }
         List<ReviewTrendDTO> reviewTrendDTOS = new ArrayList<>();
         if(statsVO.getReviewTrend() == null || statsVO.getReviewTrend().isEmpty()){
             reviewTrendDTOS.add(ReviewTrendDTO.builder()
@@ -201,12 +208,14 @@ public class ReviewFeedbackController {
         StatsDTO statsDTO = StatsDTO.builder()
                 .subjectDistribution(statsVO.getSubjectDistribution().stream().map(count -> {
                     Map<String, Integer> map = new HashMap<>();
-                    map.put(count.getName(), count.getCount());
+                    String name = Optional.ofNullable(count.getName()).orElse("未知");
+                    map.put(name, count.getCount());
                     return map;
                 }).collect(Collectors.toList()))
                 .knowledgeDistribution(statsVO.getKnowledgeDistribution().stream().map(count -> {
                     Map<String, Integer> map = new HashMap<>();
-                    map.put(count.getName(), count.getCount());
+                    String name = Optional.ofNullable(count.getName()).orElse("未知");
+                    map.put(name, count.getCount());
                     return map;
                 }).collect(Collectors.toList()))
                 .reviewTrend(reviewTrendDTOS).build();
