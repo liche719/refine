@@ -181,8 +181,9 @@ public class ReviewFeedbackController {
         }else{
             reviewTrendDTOS = statsVO.getReviewTrend().stream().map(reviewTrendVO -> {
                 if(reviewTrendVO == null || reviewTrendVO.getTotal() == 0){
+                    String month = (reviewTrendVO != null) ? reviewTrendVO.getMonth() : "N/A";
                     return ReviewTrendDTO.builder()
-                            .month(reviewTrendVO.getMonth())
+                            .month(month)
                             .total(0)
                             .reviewed(0)
                             .completionRate(0.0)
