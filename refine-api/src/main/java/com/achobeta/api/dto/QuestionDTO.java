@@ -8,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class QuestionDTO {
-    private int id;// 题目id
+    private String id;// 题目id
     private String question;// 题目
 }
