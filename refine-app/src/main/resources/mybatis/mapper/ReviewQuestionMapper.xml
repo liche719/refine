@@ -15,7 +15,7 @@
         group by subject
     </select>
     <select id="countByKnowledge" resultType="com.achobeta.domain.Feetback.model.valobj.CountByTypeVO">
-        select k.knowledge_desc as name, count(m.id) as count
+        select k.knowledge_point_name as name, count(m.id) as count
         from MistakeQuestion m join knowledgePoint k on m.knowledge_point_id = k.knowledge_point_id
         where m.user_id = #{userId} and question_status = 0
         group by m.knowledge_point_id
