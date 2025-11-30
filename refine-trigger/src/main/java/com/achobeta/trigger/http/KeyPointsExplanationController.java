@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateTime;
 import com.achobeta.api.dto.*;
 import com.achobeta.domain.IRedisService;
 import com.achobeta.domain.keypoints_explanation.adapter.repository.KeyPointsMapper;
+import com.achobeta.domain.keypoints_explanation.model.aggregate.DeleteListAggregate;
 import com.achobeta.domain.keypoints_explanation.model.valobj.*;
 import com.achobeta.domain.keypoints_explanation.service.IKeyPointsExplanationService;
 import com.achobeta.types.Response;
@@ -41,7 +42,7 @@ import static com.achobeta.types.enums.GlobalServiceStatusCode.*;
 @RequestMapping("/api/${app.config.api-version}/keypoints_explanation")
 public class KeyPointsExplanationController {
     private final IKeyPointsExplanationService keyPointsExplanationService;
-    private final Map<String, LocalDateTime> deleteList = new HashMap<>();
+    private final List<DeleteListAggregate> deleteList = new ArrayList<>();
 
     /**
      * 根据学科获取中心知识点
@@ -295,7 +296,11 @@ public class KeyPointsExplanationController {
         String userId = UserContext.getUserId();
         try {
             log.info("删除知识点:{}", knowledgeId);
-            deleteList.put(knowledgeId, LocalDateTime.now());
+            DeleteListAggregate deleteListAggregate = new DeleteListAggregate();
+            deleteListAggregate.setUserId(userId);
+            deleteListAggregate.setKnowledgeId(knowledgeId);
+            deleteListAggregate.setDeletedAt(LocalDateTime.now());
+            deleteList.add(deleteListAggregate);
             keyPointsExplanationService.deleteKnowledgePoint(knowledgeId, userId);
         } catch (Exception e) {
             return Response.CUSTOMIZE_ERROR(DELETE_KNOWLEDGE_POINT_FAIL);
@@ -306,18 +311,23 @@ public class KeyPointsExplanationController {
     /**
      * 撤销删除知识点
      */
-    @PostMapping("/{knowledgeId}/undo-delete")
+    @PostMapping("/undo-delete")
     @GlobalInterception
-    public Response<String> undoDeleteKnowledgePoint(@PathVariable String knowledgeId ) {
+    public Response<String> undoDeleteKnowledgePoint() {
         String userId = UserContext.getUserId();
         try {
-            log.info("撤销删除知识点:{}", knowledgeId);
-            if(LocalDateTime.now().isAfter(deleteList.get(knowledgeId).minusMinutes(30))){
-                deleteList.remove(knowledgeId);
-                keyPointsExplanationService.undoDeleteKnowledgePoint(knowledgeId, userId);
-            }else{
-                deleteList.remove(knowledgeId);
-                return Response.SYSTEM_SUCCESS("删除超过30mins,撤销删除失败");
+            for(int i = deleteList.size()-1; i >= 0; i--){
+                if(deleteList.get(i).getUserId().equals(userId)){
+                    String knowledgeId = deleteList.get(i).getKnowledgeId();
+                    log.info("撤销删除知识点:{}", knowledgeId);
+                    if(LocalDateTime.now().isAfter(deleteList.get(i).getDeletedAt().minusMinutes(30))){
+                        deleteList.remove(i);
+                        keyPointsExplanationService.undoDeleteKnowledgePoint(knowledgeId, userId);
+                    }else{
+                        deleteList.remove(i);
+                        return Response.SYSTEM_SUCCESS("删除超过30mins,撤销删除失败");
+                    }
+                }
             }
         } catch (Exception e) {
             return Response.CUSTOMIZE_ERROR(UNDO_DELETE_KNOWLEDGE_POINT_FAIL);
