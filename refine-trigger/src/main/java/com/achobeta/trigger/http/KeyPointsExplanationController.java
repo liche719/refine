@@ -294,6 +294,7 @@ public class KeyPointsExplanationController {
     public Response<String> deleteKnowledgePoint(@PathVariable String knowledgeId ) {
         String userId = UserContext.getUserId();
         try {
+            log.info("删除知识点:{}", knowledgeId);
             deleteList.put(knowledgeId, LocalDateTime.now());
             keyPointsExplanationService.deleteKnowledgePoint(knowledgeId, userId);
         } catch (Exception e) {
@@ -310,6 +311,7 @@ public class KeyPointsExplanationController {
     public Response<String> undoDeleteKnowledgePoint(@PathVariable String knowledgeId ) {
         String userId = UserContext.getUserId();
         try {
+            log.info("撤销删除知识点:{}", knowledgeId);
             if(LocalDateTime.now().isAfter(deleteList.get(knowledgeId).minusMinutes(30))){
                 deleteList.remove(knowledgeId);
                 keyPointsExplanationService.undoDeleteKnowledgePoint(knowledgeId, userId);
