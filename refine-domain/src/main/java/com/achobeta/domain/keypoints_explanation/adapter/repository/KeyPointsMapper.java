@@ -49,7 +49,7 @@ public interface KeyPointsMapper {
     @Select("select max(update_time) from MistakeQuestion where knowledge_point_id = #{knowledgeId} and user_id = #{userId}")
     String getLastReviewTimeById(String knowledgeId, String userId);
 
-    @Select("select id as id, question_content as question from MistakeQuestion" +
+    @Select("select question_id as id, question_content as question from MistakeQuestion" +
             " where knowledge_point_id = #{knowledgeId} and user_id = #{userId} limit 3")
     List<QuestionVO> getRelatedQuestions(String knowledgeId, String userId);
 
