@@ -74,7 +74,7 @@ public class GlobalOperationAspect {
         // 从请求头获取token
         String token = request.getHeader("access-token");
         if (StringTools.isEmpty(token)) {
-            throw new AppException(401, "token为空"); // token为空，未登录
+            throw new AppException(401, "access-token为空"); // token为空，未登录 //抛异常，方便报错时前端排查
         }
 
         // 先JWT技术验证，验签名、过期时间

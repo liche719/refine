@@ -21,6 +21,11 @@ public class MistakeQuestionEntity {
     private String userId;
 
     /**
+     * 错题ID
+     */
+    private String questionId;
+
+    /**
      * 错题内容
      */
     private String questionContent;
@@ -42,7 +47,7 @@ public class MistakeQuestionEntity {
     /**
      * 知识点归属ID
      */
-    private Integer knowledgePointId;
+    private String knowledgePointId;
 
     /**
      * 学习笔记

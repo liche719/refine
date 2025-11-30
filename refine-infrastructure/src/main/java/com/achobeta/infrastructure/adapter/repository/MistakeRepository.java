@@ -1,5 +1,6 @@
 package com.achobeta.infrastructure.adapter.repository;
 
+import cn.hutool.core.lang.UUID;
 import com.achobeta.domain.question.adapter.repository.IMistakeRepository;
 import com.achobeta.domain.question.model.entity.MistakeQuestionEntity;
 import com.achobeta.domain.question.model.po.MistakeKnowledgePO;
@@ -11,6 +12,7 @@ import com.achobeta.types.enums.GlobalServiceStatusCode;
 import com.achobeta.types.exception.AppException;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Repository;
 
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class MistakeRepository implements IMistakeRepository {
 
     @Resource
@@ -34,10 +37,10 @@ public class MistakeRepository implements IMistakeRepository {
     }
 
     @Override
-    public MistakeKnowledgePO findSubjectAndKnowledgeIdById(Integer mistakeQuestionId) {
+    public MistakeKnowledgePO findSubjectAndKnowledgeIdById(String mistakeQuestionId) {
         MistakeKnowledgePO po = mistakeQuestionMapper.findSubjectAndKnowledgeIdById(mistakeQuestionId);
         if (null == po) {
-            throw new AppException("可能是数据库一致性问题,mistakeQuestionId:"+mistakeQuestionId);
+            log.warn("可能是数据库一致性问题,mistakeQuestionId:"+mistakeQuestionId);
         }
         return po;
     }

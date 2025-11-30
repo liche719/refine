@@ -33,7 +33,7 @@ public class UserLoginEventListener {
             log.info("检测到用户登录，开始分析学习动态，userId:{}", userId);
 
             // 异步分析用户学习动态
-            List<LearningDynamicVO> dynamics = learningAnalysisService.onUserLogin(userId);
+            learningAnalysisService.onUserLogin(userId);
         } catch (Exception e) {
             log.error("处理用户登录事件失败", e);
         }

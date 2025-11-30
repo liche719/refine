@@ -37,15 +37,15 @@ public class MistakeQuestionRepository implements IMistakeQuestionRepository {
             mistakeQuestion.setUserId(questionEntity.getUserId());
             mistakeQuestion.setQuestionId(questionEntity.getQuestionId());
             mistakeQuestion.setQuestionContent(questionEntity.getQuestionText());
+            mistakeQuestion.setKnowledgePointId(questionEntity.getKnowledgePointId());
+            mistakeQuestion.setSubject(questionEntity.getSubject());
 
             // 设置默认值
-            mistakeQuestion.setSubject("未分类"); // 默认学科
             mistakeQuestion.setIsCareless(0);
             mistakeQuestion.setIsUnfamiliar(0);
             mistakeQuestion.setIsCalculateErr(0);
             mistakeQuestion.setIsTimeShortage(0);
             mistakeQuestion.setOtherReason("");
-            mistakeQuestion.setKnowledgePointId("");
             mistakeQuestion.setStudyNote("");
             mistakeQuestion.setQuestionStatus(0); // 默认未理解状态
 

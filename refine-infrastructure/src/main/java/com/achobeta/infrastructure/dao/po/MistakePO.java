@@ -18,10 +18,11 @@ import java.time.LocalDateTime;
 public class MistakePO {
 
     private String userId;
+    private String questionId;
     private String questionContent;
     private String subject;
     private String otherReason;
-    private Integer knowledgePointId;
+    private String knowledgePointId;
     private LocalDateTime createTime;
     private LocalDateTime updateTime; // 领域层Entity无需关注的字段
 }
