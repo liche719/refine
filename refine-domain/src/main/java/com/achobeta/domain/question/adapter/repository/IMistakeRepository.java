@@ -11,7 +11,7 @@ public interface IMistakeRepository {
     // 保存错题
     void save(MistakeQuestionEntity mistakeEntity);
 
-    MistakeKnowledgePO findSubjectAndKnowledgeIdById(Integer mistakeQuestionId);
+    MistakeKnowledgePO findSubjectAndKnowledgeIdById(String mistakeQuestionId);
 
     void setValue(String s, MistakeQuestionDTO mistakeQuestionDTO, Long expired);
 

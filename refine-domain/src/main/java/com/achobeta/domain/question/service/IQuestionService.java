@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux;
 
 public interface IQuestionService {
 
-    QuestionResponseDTO questionGeneration(String userId, Integer knowledgePointId);
+    QuestionResponseDTO questionGeneration(String userId, String knowledgePointId);
 
     void recordMistakeQuestion(String userId, String questionId);
 
