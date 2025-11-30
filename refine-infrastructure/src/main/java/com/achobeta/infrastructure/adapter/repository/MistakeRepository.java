@@ -35,7 +35,7 @@ public class MistakeRepository implements IMistakeRepository {
     }
 
     @Override
-    public MistakeKnowledgePO findSubjectAndKnowledgeIdById(Integer mistakeQuestionId) {
+    public MistakeKnowledgePO findSubjectAndKnowledgeIdById(String mistakeQuestionId) {
         MistakeKnowledgePO po = mistakeQuestionMapper.findSubjectAndKnowledgeIdById(mistakeQuestionId);
         if (null == po) {
             throw new AppException("可能是数据库一致性问题,mistakeQuestionId:"+mistakeQuestionId);

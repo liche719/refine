@@ -39,7 +39,7 @@ public class QuestionController {
      */
     @GlobalInterception
     @PostMapping("/generation")
-    public Response<QuestionResponseDTO> questionGeneration(@NotNull Integer mistakeQuestionId) {
+    public Response<QuestionResponseDTO> questionGeneration(@NotNull String mistakeQuestionId) {
         String userId = UserContext.getUserId();
         try {
             QuestionResponseDTO responseDTO = questionService.questionGeneration(userId, mistakeQuestionId);

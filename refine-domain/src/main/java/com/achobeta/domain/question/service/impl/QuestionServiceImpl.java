@@ -48,7 +48,7 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
     /**
      * 题目生成
      */
-    public QuestionResponseDTO questionGeneration(String userId, Integer mistakeQuestionId) {
+    public QuestionResponseDTO questionGeneration(String userId, String mistakeQuestionId) {
 
         MistakeKnowledgePO po = mistakeRepository.findSubjectAndKnowledgeIdById(mistakeQuestionId);
         String subject = po.getSubject();
