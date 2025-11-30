@@ -44,6 +44,11 @@ public class MistakeQuestionServiceImpl implements IMistakeQuestionService {
                 return false;
             }
 
+            if (questionEntity.getSubject() == null || questionEntity.getSubject().isEmpty()){
+                log.warn("学科为空，无法保存错题");
+                return false;
+            }
+
             if (questionEntity.getKnowledgePointId() == null || questionEntity.getKnowledgePointId().isEmpty()) {
                 log.warn("知识点id为空，无法保存错题");
                 return false;

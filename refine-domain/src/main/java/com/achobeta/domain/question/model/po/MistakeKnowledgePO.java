@@ -7,5 +7,5 @@ import lombok.Data;
 @Builder
 public class MistakeKnowledgePO {
     private String subject;
-    private Integer knowledgeId;
+    private String knowledgeId;
 }

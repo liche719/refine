@@ -12,7 +12,7 @@ public class KnowledgeRepository implements IKnowledgeRepository {
     private final KnowledgeMapper knowledgeMapper;
 
     @Override
-    public String findKnowledgeNameById(Integer knowledgePointId) {
+    public String findKnowledgeNameById(String knowledgePointId) {
         return knowledgeMapper.findKnowledgeNameById(knowledgePointId);
     }
 
