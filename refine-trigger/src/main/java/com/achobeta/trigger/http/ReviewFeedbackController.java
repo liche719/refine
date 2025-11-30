@@ -162,7 +162,7 @@ public class ReviewFeedbackController {
     @GlobalInterception
     public Response<StatsDTO> getStatistics() {
         String userId = UserContext.getUserId();
-        StatsVO statsVO = null;
+        StatsVO statsVO = new StatsVO();
         try {
             log.info("获取待复习题目统计信息开始");
             statsVO = reviewFeedbackService.getStatistics(userId);
@@ -181,7 +181,7 @@ public class ReviewFeedbackController {
         }else{
             reviewTrendDTOS = statsVO.getReviewTrend().stream().map(reviewTrendVO -> {
                 if(reviewTrendVO == null || reviewTrendVO.getTotal() == 0){
-                    String month = (reviewTrendVO != null) ? reviewTrendVO.getMonth() : "N/A";
+                    String month = (reviewTrendVO == null) ? "N/A" : reviewTrendVO.getMonth();
                     return ReviewTrendDTO.builder()
                             .month(month)
                             .total(0)
