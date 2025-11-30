@@ -29,6 +29,12 @@ public interface AiGenerationService {
 
     // 知识点分析
     @SystemMessage(fromResource = "AnalyzeKnowledge.txt")
-    String knowledgeAnalysis(String questionText);
+    knowledgePoint knowledgeAnalysis(String questionText);
+
+    record knowledgePoint(String subject, String knowledgeName) {
+        public boolean isEmpty() {
+            return subject == null || subject.isEmpty() || knowledgeName == null || knowledgeName.isEmpty();
+        }
+    }
 
 }

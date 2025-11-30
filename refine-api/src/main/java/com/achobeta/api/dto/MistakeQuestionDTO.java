@@ -22,6 +22,6 @@ public class MistakeQuestionDTO {
     // 科目
     private String subject;
     // 知识点id
-    private Integer knowledgePointId;
+    private String knowledgePointId;
 
 }

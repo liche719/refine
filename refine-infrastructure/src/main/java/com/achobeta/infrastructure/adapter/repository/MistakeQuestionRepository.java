@@ -38,9 +38,9 @@ public class MistakeQuestionRepository implements IMistakeQuestionRepository {
             mistakeQuestion.setQuestionId(questionEntity.getQuestionId());
             mistakeQuestion.setQuestionContent(questionEntity.getQuestionText());
             mistakeQuestion.setKnowledgePointId(questionEntity.getKnowledgePointId());
+            mistakeQuestion.setSubject(questionEntity.getSubject());
 
             // 设置默认值
-            mistakeQuestion.setSubject("未分类"); // 默认学科
             mistakeQuestion.setIsCareless(0);
             mistakeQuestion.setIsUnfamiliar(0);
             mistakeQuestion.setIsCalculateErr(0);

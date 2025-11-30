@@ -47,7 +47,7 @@ public class MistakeQuestionEntity {
     /**
      * 知识点归属ID
      */
-    private Integer knowledgePointId;
+    private String knowledgePointId;
 
     /**
      * 学习笔记

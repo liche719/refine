@@ -77,22 +77,23 @@ public class OcrController {
 
             //TODO
             // ai根据向量库（和mysql知识点表里的完全一致）（新建一个表）查询有没有相似知识点，再返回知识点名称
-            String knowledgeName = aiGenerationService.knowledgeAnalysis(questionEntity.getQuestionText());
-            if (knowledgeName == null || knowledgeName.isEmpty()) {
+            AiGenerationService.knowledgePoint knowledgePoint = aiGenerationService.knowledgeAnalysis(questionEntity.getQuestionText());
+            if (knowledgePoint == null || knowledgePoint.isEmpty()) {
                 log.warn("ai生成的知识点为空，请检查ai生成知识点的逻辑");
             }
             String knowledgePointId = UUID.fastUUID().toString();
             //把新知识点录入数据库中
             threadPoolExecutor.execute(() -> {
                 try {
-                    keyPointsMapper.insertNewPoint4MistakeQuestion(userId, knowledgePointId, knowledgeName);
-                    log.info("ai生成知识点录入表成功, knowledgeName:{} 题目id:{}", knowledgeName, questionEntity.getQuestionId());
+                    keyPointsMapper.insertNewPoint4MistakeQuestion(userId, knowledgePointId, knowledgePoint.knowledgeName());
+                    log.info("ai生成知识点录入表成功, knowledgeName:{} 题目id:{}", knowledgePoint, questionEntity.getQuestionId());
                 } catch (Exception e) {
-                    log.error("ai生成知识点录入表失败, knowledgeName:{} 题目id:{}", knowledgeName, questionEntity.getQuestionId(), e);
+                    log.error("ai生成知识点录入表失败, knowledgeName:{} 题目id:{}", knowledgePoint, questionEntity.getQuestionId(), e);
                 }
             });
 
             // 将错题数据保存到数据库中
+            questionEntity.setSubject(knowledgePoint.subject());
             questionEntity.setKnowledgePointId(knowledgePointId);
             boolean saveSuccess = mistakeQuestionService.saveMistakeQuestion(questionEntity);
             if (!saveSuccess) {

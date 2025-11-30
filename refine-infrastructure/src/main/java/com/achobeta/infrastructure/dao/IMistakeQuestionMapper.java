@@ -16,6 +16,6 @@ public interface IMistakeQuestionMapper {
             "VALUES (#{userId}, #{questionId}, #{questionContent}, #{subject}, #{otherReason}, #{knowledgePointId}, #{createTime}, #{updateTime})")
     void insert(MistakePO mistakePO);
 
-    @Select("SELECT subject, knowledge_point_id AS knowledgeId FROM MistakeQuestion WHERE id = #{mistakeQuestionId}")
+    @Select("SELECT subject, knowledge_point_id AS knowledgeId FROM MistakeQuestion WHERE question_id = #{mistakeQuestionId}")
     MistakeKnowledgePO findSubjectAndKnowledgeIdById(String mistakeQuestionId);
 }

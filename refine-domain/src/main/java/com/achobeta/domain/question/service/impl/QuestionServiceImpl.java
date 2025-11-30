@@ -52,7 +52,7 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
 
         MistakeKnowledgePO po = mistakeRepository.findSubjectAndKnowledgeIdById(mistakeQuestionId);
         String subject = po.getSubject();
-        Integer knowledgeId = po.getKnowledgeId();
+        String knowledgeId = po.getKnowledgeId();
         String knowledgePointName = knowledgeRepository.findKnowledgeNameById(knowledgeId);
 
         if (null == subject) {
