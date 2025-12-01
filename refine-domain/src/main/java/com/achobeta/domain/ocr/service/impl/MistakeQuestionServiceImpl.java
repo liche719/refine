@@ -42,16 +42,6 @@ public class MistakeQuestionServiceImpl implements IMistakeQuestionService {
                 return false;
             }
 
-            if (questionEntity.getSubject() == null || questionEntity.getSubject().isEmpty()) {
-                log.warn("学科为空，无法保存错题");
-                return false;
-            }
-
-            if (questionEntity.getKnowledgePointId() == null || questionEntity.getKnowledgePointId().isEmpty()) {
-                log.warn("知识点id为空，无法保存错题");
-                return false;
-            }
-
             // 保存错题数据
             boolean success = mistakeQuestionRepository.save(questionEntity);
 
@@ -73,9 +63,9 @@ public class MistakeQuestionServiceImpl implements IMistakeQuestionService {
     }
 
     @Override
-    public void insertKnowledgePointAndSubject(String questionId, String knowledgePointId, String subject) {
+    public void insertKnowledgePointAndSubject(String userId, String questionId, String knowledgePointId, String subject) {
         try {
-            return mistakeQuestionRepository.insertKnowledgePointAndSubject(questionId, knowledgePointId, subject);
+            mistakeQuestionRepository.insertKnowledgePointAndSubject(userId, questionId, knowledgePointId, subject);
         } catch (Exception e) {
             log.error("插入知识点和学科时发生异常: questionId={}, knowledgePointId={}, subject={}",
                     questionId, knowledgePointId, subject, e);

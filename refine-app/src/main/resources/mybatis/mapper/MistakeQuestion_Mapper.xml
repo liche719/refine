@@ -22,33 +22,34 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, user_id, question_id, question_content, subject, is_careless, is_unfamiliar, is_calculate_err,
+        id
+        , user_id, question_id, question_content, subject, is_careless, is_unfamiliar, is_calculate_err,
         is_time_shortage, other_reason, other_reason_flag, knowledge_point_id, study_note, question_status,
         create_time, update_time
     </sql>
 
-    <insert id="insert" parameterType="com.achobeta.infrastructure.dao.po.MistakeQuestion" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO MistakeQuestion (
-            user_id, question_id, question_content, subject, is_careless, is_unfamiliar, is_calculate_err,
-            is_time_shortage, other_reason, other_reason_flag, knowledge_point_id, study_note, question_status,
-            create_time, update_time
-        ) VALUES (
-            #{userId,jdbcType=VARCHAR},
-            #{questionId,jdbcType=VARCHAR},
-            #{questionContent,jdbcType=LONGVARCHAR},
-            #{subject,jdbcType=VARCHAR},
-            #{isCareless,jdbcType=INTEGER},
-            #{isUnfamiliar,jdbcType=INTEGER},
-            #{isCalculateErr,jdbcType=INTEGER},
-            #{isTimeShortage,jdbcType=INTEGER},
-            #{otherReason,jdbcType=VARCHAR},
-            #{otherReasonFlag,jdbcType=INTEGER},
-            #{knowledgePointId,jdbcType=VARCHAR},
-            #{studyNote,jdbcType=LONGVARCHAR},
-            #{questionStatus,jdbcType=INTEGER},
-            #{createTime,jdbcType=TIMESTAMP},
-            #{updateTime,jdbcType=TIMESTAMP}
-        )
+    <insert id="insert" parameterType="com.achobeta.infrastructure.dao.po.MistakeQuestion" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO MistakeQuestion (user_id, question_id, question_content, subject, is_careless, is_unfamiliar,
+                                     is_calculate_err,
+                                     is_time_shortage, other_reason, other_reason_flag, knowledge_point_id, study_note,
+                                     question_status,
+                                     create_time, update_time)
+        VALUES (#{userId,jdbcType=VARCHAR},
+                #{questionId,jdbcType=VARCHAR},
+                #{questionContent,jdbcType=LONGVARCHAR},
+                #{subject,jdbcType=VARCHAR},
+                #{isCareless,jdbcType=INTEGER},
+                #{isUnfamiliar,jdbcType=INTEGER},
+                #{isCalculateErr,jdbcType=INTEGER},
+                #{isTimeShortage,jdbcType=INTEGER},
+                #{otherReason,jdbcType=VARCHAR},
+                #{otherReasonFlag,jdbcType=INTEGER},
+                #{knowledgePointId,jdbcType=VARCHAR},
+                #{studyNote,jdbcType=LONGVARCHAR},
+                #{questionStatus,jdbcType=INTEGER},
+                #{createTime,jdbcType=TIMESTAMP},
+                #{updateTime,jdbcType=TIMESTAMP})
     </insert>
 
     <select id="selectByQuestionId" parameterType="java.lang.String" resultMap="BaseResultMap">
@@ -75,29 +76,40 @@
 
     <update id="updateMistakeReasons" parameterType="com.achobeta.infrastructure.dao.po.MistakeQuestion">
         UPDATE MistakeQuestion
-        SET
-            is_careless = #{isCareless,jdbcType=INTEGER},
-            is_unfamiliar = #{isUnfamiliar,jdbcType=INTEGER},
-            is_calculate_err = #{isCalculateErr,jdbcType=INTEGER},
-            is_time_shortage = #{isTimeShortage,jdbcType=INTEGER},
-            other_reason = #{otherReason,jdbcType=VARCHAR},
+        SET is_careless       = #{isCareless,jdbcType=INTEGER},
+            is_unfamiliar     = #{isUnfamiliar,jdbcType=INTEGER},
+            is_calculate_err  = #{isCalculateErr,jdbcType=INTEGER},
+            is_time_shortage  = #{isTimeShortage,jdbcType=INTEGER},
+            other_reason      = #{otherReason,jdbcType=VARCHAR},
             other_reason_flag = #{otherReasonFlag,jdbcType=INTEGER},
-            update_time = NOW()
-        WHERE user_id = #{userId,jdbcType=VARCHAR} AND question_id = #{questionId,jdbcType=VARCHAR}
+            update_time       = NOW()
+        WHERE user_id = #{userId,jdbcType=VARCHAR}
+          AND question_id = #{questionId,jdbcType=VARCHAR}
     </update>
 
     <update id="updateOtherReasonText">
         UPDATE MistakeQuestion
         SET other_reason = #{otherReasonText,jdbcType=VARCHAR},
-            update_time = NOW()
-        WHERE user_id = #{userId,jdbcType=VARCHAR} AND question_id = #{questionId,jdbcType=VARCHAR}
+            update_time  = NOW()
+        WHERE user_id = #{userId,jdbcType=VARCHAR}
+          AND question_id = #{questionId,jdbcType=VARCHAR}
     </update>
 
     <update id="updateStudyNote">
         UPDATE MistakeQuestion
-        SET study_note = #{studyNote,jdbcType=LONGVARCHAR},
+        SET study_note  = #{studyNote,jdbcType=LONGVARCHAR},
             update_time = NOW()
-        WHERE user_id = #{userId,jdbcType=VARCHAR} AND question_id = #{questionId,jdbcType=VARCHAR}
+        WHERE user_id = #{userId,jdbcType=VARCHAR}
+          AND question_id = #{questionId,jdbcType=VARCHAR}
     </update>
+
+    <insert id="insertKnowledgePointAndSubject">
+        UPDATE MistakeQuestion
+        SET knowledge_point_id = #{knowledgePointId,jdbcType=VARCHAR},
+            subject            = #{subject,jdbcType=VARCHAR},
+            update_time        = NOW()
+        WHERE user_id = #{userId,jdbcType=VARCHAR}
+          AND question_id = #{questionId,jdbcType=VARCHAR}
+    </insert>
 
 </mapper>

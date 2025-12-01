@@ -74,10 +74,9 @@ public class OcrController {
 
             // 调用OCR服务提取文件中的第一个题目
             QuestionEntity questionEntity = ocrService.extractQuestionContent(userId, file.getBytes(), ft);
-
+            String knowledgePointId = UUID.fastUUID().toString();
             aiExclusiveThreadPool.execute(() -> {
                 AiGenerationService.knowledgePoint knowledgePoint = null;
-                String knowledgePointId = UUID.fastUUID().toString();
                 try {
                     //TODO
                     // ai根据向量库（和mysql知识点表里的完全一致）（新建一个表）查询有没有相似知识点，再返回知识点名称
@@ -85,11 +84,10 @@ public class OcrController {
                     if (knowledgePoint == null || knowledgePoint.isEmpty()) {
                         log.warn("ai生成的知识点为空，请检查ai生成知识点的逻辑");
                     }
-
                     //把新知识点录入数据库中
                     questionEntity.setSubject(knowledgePoint.subject());
                     questionEntity.setKnowledgePointId(knowledgePointId);
-
+                    mistakeQuestionService.insertKnowledgePointAndSubject(userId, questionEntity.getQuestionId(), knowledgePointId, knowledgePoint.subject());
                 } catch (Exception e) {
                     log.error("ai生成知识点失败", e);
                 }

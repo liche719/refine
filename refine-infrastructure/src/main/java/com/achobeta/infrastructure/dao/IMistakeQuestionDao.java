@@ -72,6 +72,12 @@ public interface IMistakeQuestionDao {
      */
     int updateStudyNote(String userId, String questionId, String studyNote);
 
-    void insertKnowledgePointAndSubject(String questionId, String knowledgePointId, String subject);
+    /**
+     * 插入知识点和学科信息
+     * @param questionId 题目ID
+     * @param knowledgePointId 知识点ID
+     * @param subject 学科
+     */
+    void insertKnowledgePointAndSubject(String userId, String questionId, String knowledgePointId, String subject);
 
 }

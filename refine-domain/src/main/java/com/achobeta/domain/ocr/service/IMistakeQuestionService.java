@@ -22,6 +22,6 @@ public interface IMistakeQuestionService {
      *
      * @param questionId 题目ID
      */
-    void insertKnowledgePointAndSubject(String questionId, String knowledgePointId, String subject);
+    void insertKnowledgePointAndSubject(String userId, String questionId, String knowledgePointId, String subject);
 
 }

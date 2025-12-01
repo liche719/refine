@@ -35,5 +35,5 @@ public interface IMistakeQuestionRepository {
      */
     List<QuestionEntity> findByUserId(String userId);
 
-    void insertKnowledgePointAndSubject(String questionId, String knowledgePointId, String subject);
+    void insertKnowledgePointAndSubject(String userId, String questionId, String knowledgePointId, String subject);
 }
