@@ -131,4 +131,9 @@ public class MistakeQuestionRepository implements IMistakeQuestionRepository {
             return List.of();
         }
     }
+
+    @Override
+    public void insertKnowledgePointAndSubject(String questionId, String knowledgePointId, String subject) {
+        mistakeQuestionDao.insertKnowledgePointAndSubject(questionId, knowledgePointId, subject);
+    }
 }

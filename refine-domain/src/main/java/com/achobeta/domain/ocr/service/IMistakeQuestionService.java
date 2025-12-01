@@ -16,4 +16,12 @@ public interface IMistakeQuestionService {
      * @return 是否保存成功
      */
     boolean saveMistakeQuestion(QuestionEntity questionEntity);
+
+    /**
+     * 根据题目ID 插入知识点ID和学科
+     *
+     * @param questionId 题目ID
+     */
+    void insertKnowledgePointAndSubject(String questionId, String knowledgePointId, String subject);
+
 }

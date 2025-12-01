@@ -34,4 +34,6 @@ public interface IMistakeQuestionRepository {
      * @return 题目实体列表
      */
     List<QuestionEntity> findByUserId(String userId);
+
+    void insertKnowledgePointAndSubject(String questionId, String knowledgePointId, String subject);
 }

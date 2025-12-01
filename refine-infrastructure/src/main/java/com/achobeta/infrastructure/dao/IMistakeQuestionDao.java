@@ -71,4 +71,7 @@ public interface IMistakeQuestionDao {
      * @return 影响行数
      */
     int updateStudyNote(String userId, String questionId, String studyNote);
+
+    void insertKnowledgePointAndSubject(String questionId, String knowledgePointId, String subject);
+
 }
