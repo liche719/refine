@@ -13,7 +13,7 @@ public class MistakeQuestionEntity {
     /**
      * 错误题目id
      */
-    private Integer id;
+    private String id;
     /**
      * 错误题目内容
      */
