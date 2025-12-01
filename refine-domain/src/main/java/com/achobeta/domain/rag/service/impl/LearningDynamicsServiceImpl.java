@@ -45,6 +45,7 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
 
             // 2. 构建AI分析提示词
             String analysisPrompt = buildAnalysisPrompt(learningDataSummary);
+            log.debug("构建的AI分析提示词长度: {}", analysisPrompt.length());
 
             // 3. 使用AI分析学习动态
             List<LearningDynamicVO> dynamics = new ArrayList<>();
@@ -52,17 +53,21 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
             
             // 异步执行AI分析任务，解析题目并生成学习动态
             CompletableFuture<Void> aiAnalysis = CompletableFuture.runAsync(() -> {
+                log.info("开始AI分析，userId: {}", userId);
                 aiService.aiChat(analysisPrompt, response -> {
                     try {
+                        log.debug("收到AI响应片段，长度: {}", response != null ? response.length() : 0);
                         // 收集所有响应片段
                         responseBuilder.append(response);
                         
                         // 检查是否收到完整的JSON响应
                         String currentResponse = responseBuilder.toString();
                         if (isCompleteJsonResponse(currentResponse)) {
+                            log.info("检测到完整JSON响应，开始解析");
                             // 解析完整的AI返回的JSON格式学习动态
                             List<LearningDynamicVO> parsedDynamics = parseAIResponse(currentResponse);
                             dynamics.addAll(parsedDynamics);
+                            log.info("成功解析AI响应，获得{}条动态", parsedDynamics.size());
                         }
                     } catch (Exception e) {
                         log.error("解析AI分析结果失败：{}", response, e);
@@ -74,6 +79,7 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
             // 等待AI分析完成，最多等待30秒
             try {
                 aiAnalysis.get(30, TimeUnit.SECONDS);
+                log.info("AI分析完成，获得{}条动态，userId: {}", dynamics.size(), userId);
                 
                 // 如果AI分析没有产生结果，使用基于规则的分析
                 if (dynamics.isEmpty()) {
