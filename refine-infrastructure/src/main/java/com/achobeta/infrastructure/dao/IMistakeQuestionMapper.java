@@ -19,6 +19,7 @@ public interface IMistakeQuestionMapper {
     @Select("SELECT subject, knowledge_point_id AS knowledgeId FROM MistakeQuestion WHERE question_id = #{mistakeQuestionId}")
     MistakeKnowledgePO findSubjectAndKnowledgeIdById(String mistakeQuestionId);
 
-    @Select("SELECT knowledge_point_name AS knowledgeName FROM KnowledgePoint WHERE knowledge_point_id = #{knowledgeId}")
+    @Select("select knowledge_point_name from knowledgePoint " +
+            "where knowledge_point_id = (select knowledge_point_id from MistakeQuestion where question_id = #{questionId})")
     String findKnowledgeNameById(String questionId);
 }

@@ -17,7 +17,7 @@ public interface IReviewQuestionRepository {
             "WHERE user_id = #{userId} AND now()- interval 7 day >= update_time")
     int queryReviewQuestions(@Param("userId") String userId);
 
-    void deleteBatch(@Param("userId") String userId, @Param("questionIds") List<Integer> questionIds);
+    void deleteBatch(@Param("userId") String userId, @Param("questionIds") List<String> questionIds);
 
     List<CountByTypeVO> countBySubject(String userId);
 

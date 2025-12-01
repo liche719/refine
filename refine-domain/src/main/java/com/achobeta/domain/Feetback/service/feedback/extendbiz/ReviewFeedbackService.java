@@ -105,7 +105,7 @@ public class ReviewFeedbackService implements IReviewFeedbackService {
     }
 
     @Override
-    public void deleteBatch(String userId, List<Integer> questionIds) {
+    public void deleteBatch(String userId, List<String> questionIds) {
         repository.deleteBatch(userId, questionIds);
     }
 

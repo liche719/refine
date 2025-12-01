@@ -140,7 +140,7 @@ public class ReviewFeedbackController {
      */
     @DeleteMapping("/deleteBatch")
     @GlobalInterception
-    public Response<String> deleteBatch(@RequestParam List<Integer> questionIds) {
+    public Response<String> deleteBatch(@RequestParam List<String> questionIds) {
         String userId = UserContext.getUserId();
         try {
             log.info("用户删除待复习题目开始，userId:{}", userId);
