@@ -127,27 +127,6 @@ public class DefaultOcrService implements IOcrService {
         questionEntity.setQuestionId(uuid);
         questionEntity.setUserId(userId);
 
-        // 发布用户上传事件，由事件监听器处理向量存储
-        try {
-            UserUploadEvent uploadEvent = new UserUploadEvent(
-                    this,
-                    userId,
-                    uuid,
-                    recognizedText,
-                    null, // subject 暂时为空，可以从AI分析中获取
-                    null  // knowledgePointId 暂时为空，可以从AI分析中获取
-            );
-            eventPublisher.publishEvent(uploadEvent);
-            log.info("用户上传题目事件已发布，userId:{}, questionId:{}", userId, uuid);
-        } catch (Exception e) {
-            // 事件发布失败不应该影响OCR主流程，只记录日志
-            log.error("发布用户上传题目事件时发生异常，userId:{} questionId:{}", userId, uuid, e);
-        }
-
-        // TODO 将题干存储到Redis中，通过uuid可以查询，设置24小时过期时间
-//        String redisKey = "ocr:question:" + uuid;
-//        redissonService.setValue(redisKey, recognizedText, 24 * 60 * 60 * 1000L); // 24小时过期，单位毫秒
-
         return questionEntity;
     }
 }
