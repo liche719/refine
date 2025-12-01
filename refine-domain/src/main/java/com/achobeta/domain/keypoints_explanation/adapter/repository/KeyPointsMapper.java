@@ -3,6 +3,7 @@ package com.achobeta.domain.keypoints_explanation.adapter.repository;
 import cn.hutool.core.date.DateTime;
 import com.achobeta.domain.keypoints_explanation.model.valobj.*;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -70,6 +71,10 @@ public interface KeyPointsMapper {
 
     @Select("delete from knowledgePoint where status = -1")
     void deleteKnowledgeTure();
+
+    @Select("select knowledge_point_id as id, knowledge_point_name as keyPoints from knowledgePoint" +
+            " where user_id = #{userId} and parent_knowledge_point_id = #{knowledgeId} and status = -1")
+    List<KeyPointsVO> getPreDelSonKeyPoints(String knowledgeId, String userId);
     @Insert("insert into knowledgePoint(knowledge_point_id, knowledge_point_name, user_id)" +
             " values(#{knowledgePointId}, #{knowledgePointName}, #{userId})")
     void insertNewPoint4MistakeQuestion(String userId, String knowledgePointId, String knowledgePointName);
