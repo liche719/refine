@@ -1,5 +1,6 @@
 package com.achobeta.domain.rag.service.impl;
 
+import com.achobeta.domain.IRedisService;
 import com.achobeta.domain.rag.service.IVectorService;
 import com.achobeta.domain.rag.service.ILearningDynamicsService;
 import com.achobeta.domain.rag.model.valobj.LearningInsightVO;
@@ -27,6 +28,9 @@ public class LearningAnalysisService {
     @Autowired
     private ILearningDynamicsService learningDynamicsService;
 
+    @Autowired
+    private IRedisService redisService;
+
     /**
      * 用户登录时触发的学习动态分析
      *
@@ -42,10 +46,25 @@ public class LearningAnalysisService {
 
             if (dynamics != null && !dynamics.isEmpty()) {
                 log.info("用户登录学习动态分析完成，userId:{} 动态数量:{}", userId, dynamics.size());
-                
-                // 可以在这里将分析结果存储到缓存或数据库中，供前端查询使用
-                // 例如：存储到Redis中，key为 "user_dynamics:" + userId
-                
+
+                // 将分析结果存储到Redis缓存中，供前端快速查询使用
+                String cacheKey = "user_dynamics:" + userId;
+                try {
+                    // 提取描述信息并缓存
+                    List<String> descriptions = dynamics.stream()
+                            .map(LearningDynamicVO::getDescription)
+                            .filter(desc -> desc != null && !desc.trim().isEmpty())
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                    // 缓存2小时，避免数据过期 (7200秒 = 2小时)
+                    redisService.setValue(cacheKey, descriptions, 7200 * 1000);
+                    log.info("学习动态缓存成功，userId:{} 描述数量:{}", userId, descriptions.size());
+
+                } catch (Exception e) {
+                    log.error("学习动态缓存失败，userId:{}", userId, e);
+                }
+
             } else {
                 log.info("用户登录学习动态分析完成，但未生成有效动态，userId:{}", userId);
             }

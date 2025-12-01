@@ -50,6 +50,7 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
             // 3. 使用AI分析学习动态
             List<LearningDynamicVO> dynamics = new ArrayList<>();
             StringBuilder responseBuilder = new StringBuilder();
+            boolean hasProcessedResponse = false; // 防止重复处理
             
             // 异步执行AI分析任务，解析题目并生成学习动态
             CompletableFuture<Void> aiAnalysis = CompletableFuture.runAsync(() -> {
@@ -60,14 +61,18 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
                         // 收集所有响应片段
                         responseBuilder.append(response);
                         
-                        // 检查是否收到完整的JSON响应
+                        // 检查是否收到完整的JSON响应，并且还没有处理过
                         String currentResponse = responseBuilder.toString();
-                        if (isCompleteJsonResponse(currentResponse)) {
+                        if (!hasProcessedResponse && isCompleteJsonResponse(currentResponse)) {
                             log.info("检测到完整JSON响应，开始解析");
                             // 解析完整的AI返回的JSON格式学习动态
                             List<LearningDynamicVO> parsedDynamics = parseAIResponse(currentResponse);
-                            dynamics.addAll(parsedDynamics);
-                            log.info("成功解析AI响应，获得{}条动态", parsedDynamics.size());
+                            synchronized (dynamics) {
+                                if (dynamics.isEmpty()) { // 确保只添加一次
+                                    dynamics.addAll(parsedDynamics);
+                                    log.info("成功解析AI响应，获得{}条动态", parsedDynamics.size());
+                                }
+                            }
                         }
                     } catch (Exception e) {
                         log.error("解析AI分析结果失败：{}", response, e);
