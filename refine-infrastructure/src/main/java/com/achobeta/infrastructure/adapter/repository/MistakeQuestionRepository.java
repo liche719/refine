@@ -37,6 +37,8 @@ public class MistakeQuestionRepository implements IMistakeQuestionRepository {
             mistakeQuestion.setUserId(questionEntity.getUserId());
             mistakeQuestion.setQuestionId(questionEntity.getQuestionId());
             mistakeQuestion.setQuestionContent(questionEntity.getQuestionText());
+
+            // 空值，由其他异步线程处理
             mistakeQuestion.setKnowledgePointId(questionEntity.getKnowledgePointId());
             mistakeQuestion.setSubject(questionEntity.getSubject());
 
@@ -60,17 +62,17 @@ public class MistakeQuestionRepository implements IMistakeQuestionRepository {
             boolean success = result > 0;
             if (success) {
                 log.info("错题保存成功: userId={}, questionId={}",
-                    questionEntity.getUserId(), questionEntity.getQuestionId());
+                        questionEntity.getUserId(), questionEntity.getQuestionId());
             } else {
                 log.error("错题保存失败: userId={}, questionId={}",
-                    questionEntity.getUserId(), questionEntity.getQuestionId());
+                        questionEntity.getUserId(), questionEntity.getQuestionId());
             }
 
             return success;
         } catch (Exception e) {
             log.error("保存错题数据时发生异常: userId={}, questionId={}",
-                questionEntity != null ? questionEntity.getUserId() : null,
-                questionEntity != null ? questionEntity.getQuestionId() : null, e);
+                    questionEntity != null ? questionEntity.getUserId() : null,
+                    questionEntity != null ? questionEntity.getQuestionId() : null, e);
             return false;
         }
     }
@@ -118,17 +120,22 @@ public class MistakeQuestionRepository implements IMistakeQuestionRepository {
 
             // 转换为领域实体列表
             return mistakeQuestions.stream()
-                .map(mistakeQuestion -> {
-                    QuestionEntity questionEntity = new QuestionEntity();
-                    questionEntity.setUserId(mistakeQuestion.getUserId());
-                    questionEntity.setQuestionId(mistakeQuestion.getQuestionId());
-                    questionEntity.setQuestionText(mistakeQuestion.getQuestionContent());
-                    return questionEntity;
-                })
-                .collect(Collectors.toList());
+                    .map(mistakeQuestion -> {
+                        QuestionEntity questionEntity = new QuestionEntity();
+                        questionEntity.setUserId(mistakeQuestion.getUserId());
+                        questionEntity.setQuestionId(mistakeQuestion.getQuestionId());
+                        questionEntity.setQuestionText(mistakeQuestion.getQuestionContent());
+                        return questionEntity;
+                    })
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("根据用户ID查询错题列表时发生异常: userId={}", userId, e);
             return List.of();
         }
+    }
+
+    @Override
+    public void insertKnowledgePointAndSubject(String userId, String questionId, String knowledgePointId, String subject) {
+        mistakeQuestionDao.insertKnowledgePointAndSubject(userId, questionId, knowledgePointId, subject);
     }
 }

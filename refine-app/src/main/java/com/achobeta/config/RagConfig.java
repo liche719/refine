@@ -136,7 +136,7 @@ public class RagConfig {
                         .build();
 
                 EmbeddingSearchResult<TextSegment> searchResult = embeddingStore.search(searchRequest);
-
+                log.info("RAG检索 - 匹配到 {} 条结果", searchResult.matches().size());
                 // 5. 转换结果为Content列表
                 return searchResult.matches().stream()
                         .map(match -> Content.from(match.embedded()))

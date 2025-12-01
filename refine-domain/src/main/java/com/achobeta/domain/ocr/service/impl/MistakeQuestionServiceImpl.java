@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
 /**
  * @Auth : Malog
  * @Desc : 错题领域服务实现
@@ -44,33 +42,34 @@ public class MistakeQuestionServiceImpl implements IMistakeQuestionService {
                 return false;
             }
 
-            if (questionEntity.getSubject() == null || questionEntity.getSubject().isEmpty()){
-                log.warn("学科为空，无法保存错题");
-                return false;
-            }
-
-            if (questionEntity.getKnowledgePointId() == null || questionEntity.getKnowledgePointId().isEmpty()) {
-                log.warn("知识点id为空，无法保存错题");
-                return false;
-            }
-
             // 保存错题数据
             boolean success = mistakeQuestionRepository.save(questionEntity);
 
             if (success) {
                 log.info("错题保存成功: userId={}, questionId={}",
-                    questionEntity.getUserId(), questionEntity.getQuestionId());
+                        questionEntity.getUserId(), questionEntity.getQuestionId());
             } else {
                 log.error("错题保存失败: userId={}, questionId={}",
-                    questionEntity.getUserId(), questionEntity.getQuestionId());
+                        questionEntity.getUserId(), questionEntity.getQuestionId());
             }
 
             return success;
         } catch (Exception e) {
             log.error("保存错题数据时发生异常: userId={}, questionId={}",
-                questionEntity != null ? questionEntity.getUserId() : null,
-                questionEntity != null ? questionEntity.getQuestionId() : null, e);
+                    questionEntity != null ? questionEntity.getUserId() : null,
+                    questionEntity != null ? questionEntity.getQuestionId() : null, e);
             return false;
         }
     }
+
+    @Override
+    public void insertKnowledgePointAndSubject(String userId, String questionId, String knowledgePointId, String subject) {
+        try {
+            mistakeQuestionRepository.insertKnowledgePointAndSubject(userId, questionId, knowledgePointId, subject);
+        } catch (Exception e) {
+            log.error("插入知识点和学科时发生异常: questionId={}, knowledgePointId={}, subject={}",
+                    questionId, knowledgePointId, subject, e);
+        }
+    }
+
 }

@@ -34,7 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class OcrController {
 
     // 通用异步线程池
-    private final ThreadPoolTaskExecutor threadPoolExecutor;
+    private final ThreadPoolTaskExecutor aiExclusiveThreadPool;
 
     private final KeyPointsMapper keyPointsMapper;
 
@@ -74,16 +74,23 @@ public class OcrController {
 
             // 调用OCR服务提取文件中的第一个题目
             QuestionEntity questionEntity = ocrService.extractQuestionContent(userId, file.getBytes(), ft);
-
-            //TODO
-            // ai根据向量库（和mysql知识点表里的完全一致）（新建一个表）查询有没有相似知识点，再返回知识点名称
-            AiGenerationService.knowledgePoint knowledgePoint = aiGenerationService.knowledgeAnalysis(questionEntity.getQuestionText());
-            if (knowledgePoint == null || knowledgePoint.isEmpty()) {
-                log.warn("ai生成的知识点为空，请检查ai生成知识点的逻辑");
-            }
             String knowledgePointId = UUID.fastUUID().toString();
-            //把新知识点录入数据库中
-            threadPoolExecutor.execute(() -> {
+            aiExclusiveThreadPool.execute(() -> {
+                AiGenerationService.knowledgePoint knowledgePoint = null;
+                try {
+                    //TODO
+                    // ai根据向量库（和mysql知识点表里的完全一致）（新建一个表）查询有没有相似知识点，再返回知识点名称
+                    knowledgePoint = aiGenerationService.knowledgeAnalysis(questionEntity.getQuestionText());
+                    if (knowledgePoint == null || knowledgePoint.isEmpty()) {
+                        log.warn("ai生成的知识点为空，请检查ai生成知识点的逻辑");
+                    }
+                    //把新知识点录入数据库中
+                    questionEntity.setSubject(knowledgePoint.subject());
+                    questionEntity.setKnowledgePointId(knowledgePointId);
+                    mistakeQuestionService.insertKnowledgePointAndSubject(userId, questionEntity.getQuestionId(), knowledgePointId, knowledgePoint.subject());
+                } catch (Exception e) {
+                    log.error("ai生成知识点失败", e);
+                }
                 try {
                     keyPointsMapper.insertNewPoint4MistakeQuestion(userId, knowledgePointId, knowledgePoint.knowledgeName());
                     log.info("ai生成知识点录入表成功, knowledgeName:{} 题目id:{}", knowledgePoint, questionEntity.getQuestionId());
@@ -93,8 +100,6 @@ public class OcrController {
             });
 
             // 将错题数据保存到数据库中
-            questionEntity.setSubject(knowledgePoint.subject());
-            questionEntity.setKnowledgePointId(knowledgePointId);
             boolean saveSuccess = mistakeQuestionService.saveMistakeQuestion(questionEntity);
             if (!saveSuccess) {
                 log.warn("错题保存失败，但继续返回OCR识别结果: userId={}, questionId={}",
