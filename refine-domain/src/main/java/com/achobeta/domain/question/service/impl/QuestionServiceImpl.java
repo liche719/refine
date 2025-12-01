@@ -153,7 +153,13 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
         }
 
         String questionContent = value.getQuestionContent();
-        String chat = "请根据题目:\"" + questionContent + "\"以及正确答案:\"" + correctAnswer + "\"，判断答案:\"" + correctAnswer + "\"是否正确，并给出解析。";
+        String chat = "题目原文：" + questionContent + "。"
+                + "标准答案：" + correctAnswer + "。"
+                + "用户提交的答案：" + userAnswer + "。"
+                + "请严格按以下规则判题：1. 先对比用户答案与标准答案，完全一致（客观题全匹配/主观题核心得分点全中）则判定正确；部分一致（主观题部分得分点命中）则判定部分正确，明确正确与遗漏/错误点；完全不一致则判定错误，给出完整标准答案。"
+                + "再按「题干拆解→考点关联→步骤化解题→答案验证」逻辑撰写详细解析，若用户答案错误/部分正确，需补充错误原因分析。"
+                + "最后总结1-3个核心知识点及关键要点。"
+                + "输出严格遵循以下要求：仅纯文本，分三段式（判题结论与标准答案、详细解析、知识点总结），解析步骤按「第一步、第二步」明确区分，无Markdown、列表符号及无关内容。";
 
         // 将ai流式调用提交到自定义线程池
         String subject = value.getSubject();
