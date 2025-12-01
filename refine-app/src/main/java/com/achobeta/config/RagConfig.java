@@ -100,14 +100,4 @@ public class RagConfig {
         };
     }
 
-    // 注释掉PgVector相关的表操作方法
-    // private void truncateEmbeddingTable() {
-    //     // TODO: 使用Weaviate实现数据清理
-    //     log.warn("RagConfig暂未实现Weaviate数据清理");
-    // }
-
-    // private void deleteAllEmbeddingData() {
-    //     // TODO: 使用Weaviate实现数据删除
-    //     log.warn("RagConfig暂未实现Weaviate数据删除");
-    // }
 }

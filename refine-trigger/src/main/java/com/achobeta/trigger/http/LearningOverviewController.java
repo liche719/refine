@@ -86,14 +86,20 @@ public class LearningOverviewController {
             // 提取描述信息
             result = dynamics.stream()
                     .map(dynamic -> {
-                        log.debug("处理学习动态: type={}, title={}, description={}", 
+                        log.info("处理学习动态: type={}, title={}, description={}", 
                                 dynamic.getType(), dynamic.getTitle(), dynamic.getDescription());
                         return dynamic.getDescription();
                     })
                     .filter(description -> description != null && !description.trim().isEmpty())
+                    .distinct() // 去重，防止重复的描述
                     .collect(java.util.stream.Collectors.toList());
                     
             log.info("最终返回描述数量: {}", result.size());
+            
+            // 打印每个描述用于调试
+            for (int i = 0; i < result.size(); i++) {
+                log.info("描述[{}]: {}", i, result.get(i));
+            }
             
         } catch (Exception e) {
             log.error("getStudyDynamic error", e);
