@@ -88,6 +88,13 @@ public class OcrController {
                     questionEntity.setSubject(knowledgePoint.subject());
                     questionEntity.setKnowledgePointId(knowledgePointId);
                     mistakeQuestionService.insertKnowledgePointAndSubject(userId, questionEntity.getQuestionId(), knowledgePointId, knowledgePoint.subject());
+
+                    // 将错题数据保存到数据库中
+                    boolean saveSuccess = mistakeQuestionService.saveMistakeQuestion(questionEntity);
+                    if (!saveSuccess) {
+                        log.warn("错题保存失败，但继续返回OCR识别结果: userId={}, questionId={}",
+                                userId, questionEntity.getQuestionId());
+                    }
                 } catch (Exception e) {
                     log.error("ai生成知识点失败", e);
                 }
@@ -98,13 +105,6 @@ public class OcrController {
                     log.error("ai生成知识点录入表失败, knowledgeName:{} 题目id:{}", knowledgePoint, questionEntity.getQuestionId(), e);
                 }
             });
-
-            // 将错题数据保存到数据库中
-            boolean saveSuccess = mistakeQuestionService.saveMistakeQuestion(questionEntity);
-            if (!saveSuccess) {
-                log.warn("错题保存失败，但继续返回OCR识别结果: userId={}, questionId={}",
-                        userId, questionEntity.getQuestionId());
-            }
 
             // 将题目信息保存到Redis中，用于后续对话查询
             boolean redisSaveSuccess = questionRedisRepository.saveQuestion(questionEntity);
