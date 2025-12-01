@@ -96,15 +96,15 @@ public class QuestionController {
      */
     @GlobalInterception
     @GetMapping("/{question_id}/knowledge")
-    public Response<String> getQuestionKnowledge(@PathVariable String questionId) {
+    public Response<String> getQuestionKnowledge(@PathVariable String question_id) {
         String userId = UserContext.getUserId();
         String questionKnowledge = null;
         try {
-            log.info("用户 {} 获取题目所属知识点，题目id: {}", userId, questionId);
-            questionKnowledge = questionService.getQuestionKnowledge(questionId);
+            log.info("用户 {} 获取题目所属知识点，题目id: {}", userId, question_id);
+            questionKnowledge = questionService.getQuestionKnowledge(question_id);
 
         }catch (Exception e) {
-            log.error("用户 {} 获取题目所属知识点失败，题目id: {}", userId, questionId, e);
+            log.error("用户 {} 获取题目所属知识点失败，题目id: {}", userId, question_id, e);
             return Response.CUSTOMIZE_ERROR(GlobalServiceStatusCode.GET_KNOWLEDGE_POINT_DESC_FAIL);
         }
         return Response.SYSTEM_SUCCESS(questionKnowledge);
