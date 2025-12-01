@@ -2,14 +2,20 @@ package com.achobeta.trigger.http;
 
 import com.achobeta.api.dto.AiSolveRequestDTO;
 import com.achobeta.domain.ai.service.IAiService;
+import com.achobeta.types.annotation.GlobalInterception;
+import com.achobeta.types.common.UserContext;
+import com.achobeta.types.event.UserMistakeEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -27,10 +33,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AiSolveController {
 
     private final IAiService aiService;
+    private final ApplicationEventPublisher eventPublisher;
 
+    @GlobalInterception
     @PostMapping("stream")
     public SseEmitter stream(@Valid @RequestBody AiSolveRequestDTO requestDTO) {
         String question = requestDTO.getQuestion();
+        String userId = UserContext.getUserId();
+        String sessionId = UUID.randomUUID().toString();
+        
+        // 记录用户求助AI的行为
+        publishMistakeEvent(userId, question, sessionId);
+        
         // 设置超时时间为5分钟
         SseEmitter emitter = new SseEmitter(300000L);
         
@@ -121,5 +135,28 @@ public class AiSolveController {
         return emitter;
     }
 
+    /**
+     * 发布用户错误行为事件
+     */
+    private void publishMistakeEvent(String userId, String question, String sessionId) {
+        try {
+            UserMistakeEvent mistakeEvent = UserMistakeEvent.builder()
+                    .userId(userId)
+                    .mistakeType(UserMistakeEvent.MistakeType.AI_HELP_REQUEST)
+                    .questionContent(question)
+                    .mistakeDescription("用户向AI求助解题，表明遇到了不会的问题")
+                    .subject("AI答疑") // 设置科目
+                    .eventTime(LocalDateTime.now())
+                    .sessionId(sessionId)
+                    .contextInfo("AI答疑接口调用")
+                    .build();
+            
+            log.info("发布用户错误行为事件，userId: {}, sessionId: {}", userId, sessionId);
+            eventPublisher.publishEvent(mistakeEvent);
+            
+        } catch (Exception e) {
+            log.error("发布用户错误行为事件失败，userId: {}", userId, e);
+        }
+    }
 
 }
