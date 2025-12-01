@@ -13,10 +13,10 @@ public interface ITrickyKnowledgeRepository {
      * @param userId
      * @return
      */
-    @Select("select m.knowledge_point_id, k.knowledge_desc from MistakeQuestion m" +
+    @Select("select m.knowledge_point_id as knowledgeId, k.knowledge_point_name as knowledgeName from MistakeQuestion m" +
             " join knowledgePoint k on m.knowledge_point_id = k.knowledge_point_id " +
             "where m.user_id = #{userId} and question_status = 0 and m.create_time >= now() - interval 14 day " +
-            "group by m.knowledge_point_id, k.knowledge_desc " +
+            "group by m.knowledge_point_id, k.knowledge_point_name " +
             "having count(m.knowledge_point_id) >= 3")
     List<TrickyKnowledgePointVO> getTrickyKnowledgePoints(String userId);
 
