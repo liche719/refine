@@ -30,7 +30,7 @@ public interface IReviewFeedbackService {
      * @param userId
      * @param questionIds
      */
-    void deleteBatch(String userId, List<Integer> questionIds);
+    void deleteBatch(String userId, List<String> questionIds);
 
     /**
      * 获取用户待复习题目统计信息
