@@ -5,12 +5,14 @@ import com.achobeta.domain.question.service.impl.QuestionServiceImpl;
 import com.achobeta.types.Response;
 import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.UserContext;
+import com.achobeta.types.enums.GlobalServiceStatusCode;
 import com.achobeta.types.exception.AppException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -90,6 +92,25 @@ public class QuestionController {
             log.error("用户 {} 记录错题失败，题目id: {}", userId, questionId, e);
             throw new AppException(e.getMessage());
         }
+    }
+
+    /**
+     * 调用接口回显题目所属知识点
+     */
+    @GlobalInterception
+    @GetMapping("/{question_id}/knowledge")
+    public Response<String> getQuestionKnowledge(@NotNull String questionId) {
+        String userId = UserContext.getUserId();
+        String questionKnowledge = null;
+        try {
+            log.info("用户 {} 获取题目所属知识点，题目id: {}", userId, questionId);
+            questionKnowledge = questionService.getQuestionKnowledge(questionId);
+
+        }catch (Exception e) {
+            log.error("用户 {} 获取题目所属知识点失败，题目id: {}", userId, questionId, e);
+            return Response.CUSTOMIZE_ERROR(GlobalServiceStatusCode.GET_KNOWLEDGE_POINT_DESC_FAIL);
+        }
+        return Response.SYSTEM_SUCCESS(questionKnowledge);
     }
 
 

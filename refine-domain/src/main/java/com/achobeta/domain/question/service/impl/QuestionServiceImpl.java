@@ -181,6 +181,11 @@ public class QuestionServiceImpl extends AbstractPostProcessor<QuestionResponseD
 
     }
 
+    @Override
+    public String getQuestionKnowledge(String questionId) {
+        return mistakeRepository.findKnowledgeNameById(questionId);
+    }
+
     private void autoRecord(String userId, String questionId, String answer, String correctAnswer) {
         // 错误则异步录入错题，不阻塞主线程
         if (!correctAnswer.equalsIgnoreCase(answer.trim())) {

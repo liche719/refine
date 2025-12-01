@@ -18,4 +18,6 @@ public interface IMistakeRepository {
     MistakeQuestionDTO getValue(String s);
 
     void remove(String s);
+
+    String findKnowledgeNameById(String questionId);
 }

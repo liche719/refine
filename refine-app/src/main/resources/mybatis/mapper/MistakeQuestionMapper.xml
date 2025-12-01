@@ -4,7 +4,7 @@
 
     <select id="selectByCondition"
             resultType="com.achobeta.domain.Feetback.model.entity.MistakeQuestionEntity">
-        select m.id, question_content, update_time , subject, k.knowledge_desc, is_calculate_err, is_careless, is_time_shortage, is_unfamiliar, other_reason
+        select m.question_id as id, question_content, update_time , subject, k.knowledge_desc, is_calculate_err, is_careless, is_time_shortage, is_unfamiliar, other_reason
         from MistakeQuestion m join knowledgePoint k on m.knowledge_point_id = k.knowledge_point_id
         <where>
         m.user_id = #{userId}

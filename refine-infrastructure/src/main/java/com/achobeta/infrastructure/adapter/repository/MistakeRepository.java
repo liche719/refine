@@ -64,5 +64,10 @@ public class MistakeRepository implements IMistakeRepository {
         redis.remove(s);
     }
 
+    @Override
+    public String findKnowledgeNameById(String questionId) {
+        return mistakeQuestionMapper.findKnowledgeNameById(questionId);
+    }
+
 
 }
