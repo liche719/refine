@@ -13,15 +13,15 @@ public interface IUserOverviewRepository {
             "where user_id = #{userId} and create_time >= subdate(now(), 14) and question_status = 0 " +
             "group by knowledge_point_id " +
             "having count(knowledge_point_id) >= 3")
-    int getHardQuestions(String userId);
+    Integer getHardQuestions(String userId);
 
     @Select("select count(id) from MistakeQuestion " +
             "where user_id = #{userId}")
-    int getQuestionsNum(String userId);
+    Integer getQuestionsNum(String userId);
 
     @Select("select count(id) from MistakeQuestion " +
             "where user_id = #{userId} and question_status = 1")
-    int getHardQuestionsNum(String userId);
+    Integer getHardQuestionsNum(String userId);
 
     @Update("update UserData set hard_questions = #{hardQuestions}, " +
                                 "questions_num = #{questionsNum}, " +

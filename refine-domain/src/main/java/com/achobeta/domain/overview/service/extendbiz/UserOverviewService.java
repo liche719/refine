@@ -19,11 +19,14 @@ public class UserOverviewService {
         List<String> userIds = userOverviewRepository.getUserIds();
         for (String userId : userIds) {
             //查询用户易错知识点数
-            int hardQuestions = userOverviewRepository.getHardQuestions(userId);
+            Integer count = userOverviewRepository.getHardQuestions(userId);
+            int hardQuestions = count != null ? count : 0;
             //查询用户总错题数
-            int questionsNum = userOverviewRepository.getQuestionsNum(userId);
+            count = userOverviewRepository.getQuestionsNum(userId);
+            int questionsNum = count != null ? count : 0;
             //查询用户已掌握错题数
-            int hardQuestionsNum = userOverviewRepository.getHardQuestionsNum(userId);
+            count = userOverviewRepository.getHardQuestionsNum(userId);
+            int hardQuestionsNum = count != null ? count : 0;
 
             double reviewRate = questionsNum == 0 ? 0 : hardQuestionsNum * 1.0 / questionsNum;
 
