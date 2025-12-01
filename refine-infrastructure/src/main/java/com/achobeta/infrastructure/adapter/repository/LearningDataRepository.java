@@ -3,14 +3,17 @@ package com.achobeta.infrastructure.adapter.repository;
 import com.achobeta.domain.rag.adapter.port.ILearningDataRepository;
 import com.achobeta.domain.rag.model.entity.LearningVectorEntity;
 import com.achobeta.domain.rag.model.valobj.LearningStatisticsVO;
-import com.achobeta.infrastructure.dao.vector.IVectorDao;
-import com.achobeta.infrastructure.dao.po.LearningVector;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.weaviate.client.WeaviateClient;
+import io.weaviate.client.base.Result;
+import io.weaviate.client.v1.graphql.model.GraphQLResponse;
+import io.weaviate.client.v1.graphql.query.fields.Field;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,7 +27,12 @@ import java.util.stream.Collectors;
 public class LearningDataRepository implements ILearningDataRepository {
 
     @Autowired
-    private IVectorDao vectorDao;
+    private WeaviateClient weaviateClient;
+
+    @Autowired
+    private String weaviateClassName;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public List<LearningVectorEntity> getUserRecentLearningData(String userId, int days) {
@@ -41,21 +49,15 @@ public class LearningDataRepository implements ILearningDataRepository {
                 return Collections.emptyList();
             }
             
-            // 从数据库查询用户最近N天的学习数据
-            List<LearningVector> vectors = vectorDao.getUserRecentLearningData(userId, days);
+            // 使用Weaviate查询用户最近N天的学习数据
+            List<Map<String, Object>> rawData = queryUserDataWithTimeFilter(userId, days);
             
-            if (CollectionUtils.isEmpty(vectors)) {
-                log.info("用户最近{}天无学习数据，userId:{}", days, userId);
-                return Collections.emptyList();
-            }
-            
-            // 转换为领域实体
-            List<LearningVectorEntity> result = vectors.stream()
-                    .map(this::convertToEntity)
+            // 转换为LearningVectorEntity
+            return rawData.stream()
+                    .map(this::convertToLearningVectorEntity)
+                    .filter(Objects::nonNull)
+                    .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt())) // 按时间倒序
                     .collect(Collectors.toList());
-            
-            log.info("成功获取用户学习向量数据，userId:{}, 数据量:{}", userId, result.size());
-            return result;
             
         } catch (Exception e) {
             log.error("获取用户学习向量数据失败，userId:{}, days:{}", userId, days, e);
@@ -78,11 +80,10 @@ public class LearningDataRepository implements ILearningDataRepository {
                 return null;
             }
             
-            // 从数据库查询统计数据
-            Map<String, Object> statisticsMap = vectorDao.getUserLearningStatistics(userId, days);
+            // 使用Weaviate查询用户学习统计数据
+            List<Map<String, Object>> rawData = queryUserDataWithTimeFilter(userId, days);
             
-            if (statisticsMap == null || statisticsMap.isEmpty()) {
-                log.info("用户最近{}天无学习统计数据，userId:{}", days, userId);
+            if (rawData.isEmpty()) {
                 return LearningStatisticsVO.builder()
                         .totalActivities(0)
                         .subjectsCount(0)
@@ -91,11 +92,70 @@ public class LearningDataRepository implements ILearningDataRepository {
                         .build();
             }
             
-            // 转换为统计VO
-            LearningStatisticsVO result = convertToStatisticsVO(statisticsMap);
+            // 计算统计数据
+            int totalActivities = rawData.size();
             
-            log.info("成功获取用户学习统计数据，userId:{}, 总活动次数:{}", userId, result.getTotalActivities());
-            return result;
+            Set<String> subjects = rawData.stream()
+                    .map(data -> (String) data.get("subject"))
+                    .filter(Objects::nonNull)
+                    .filter(s -> !s.trim().isEmpty())
+                    .collect(Collectors.toSet());
+            
+            Set<String> actionTypes = rawData.stream()
+                    .map(data -> (String) data.get("actionType"))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            
+            Set<String> activeDates = rawData.stream()
+                    .map(data -> (String) data.get("createdAt"))
+                    .filter(Objects::nonNull)
+                    .map(dateStr -> {
+                        try {
+                            LocalDateTime dateTime = LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                            return dateTime.toLocalDate().toString();
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            
+            LocalDateTime firstActivity = rawData.stream()
+                    .map(data -> (String) data.get("createdAt"))
+                    .filter(Objects::nonNull)
+                    .map(dateStr -> {
+                        try {
+                            return LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .min(LocalDateTime::compareTo)
+                    .orElse(null);
+            
+            LocalDateTime lastActivity = rawData.stream()
+                    .map(data -> (String) data.get("createdAt"))
+                    .filter(Objects::nonNull)
+                    .map(dateStr -> {
+                        try {
+                            return LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .max(LocalDateTime::compareTo)
+                    .orElse(null);
+            
+            return LearningStatisticsVO.builder()
+                    .totalActivities(totalActivities)
+                    .subjectsCount(subjects.size())
+                    .activeDays(activeDates.size())
+                    .actionTypesCount(actionTypes.size())
+                    .firstActivity(firstActivity)
+                    .lastActivity(lastActivity)
+                    .build();
             
         } catch (Exception e) {
             log.error("获取用户学习统计数据失败，userId:{}, days:{}", userId, days, e);
@@ -118,15 +178,43 @@ public class LearningDataRepository implements ILearningDataRepository {
                 return Collections.emptyList();
             }
             
-            // 从数据库查询按科目分组的学习数据
-            List<Map<String, Object>> result = vectorDao.getUserLearningDataBySubject(userId, days);
+            // 使用Weaviate查询用户学习数据
+            List<Map<String, Object>> rawData = queryUserDataWithTimeFilter(userId, days);
             
-            if (CollectionUtils.isEmpty(result)) {
-                log.info("用户最近{}天无按科目分组的学习数据，userId:{}", days, userId);
+            if (rawData.isEmpty()) {
                 return Collections.emptyList();
             }
             
-            log.info("成功获取用户按科目分组学习数据，userId:{}, 科目数量:{}", userId, result.size());
+            // 按科目分组统计
+            Map<String, List<Map<String, Object>>> subjectGroups = rawData.stream()
+                    .filter(data -> data.get("subject") != null && !data.get("subject").toString().trim().isEmpty())
+                    .collect(Collectors.groupingBy(data -> data.get("subject").toString()));
+            
+            // 转换为结果格式
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (Map.Entry<String, List<Map<String, Object>>> entry : subjectGroups.entrySet()) {
+                String subject = entry.getKey();
+                List<Map<String, Object>> subjectData = entry.getValue();
+                
+                Set<String> actionTypes = subjectData.stream()
+                        .map(data -> (String) data.get("actionType"))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+                
+                Map<String, Object> subjectStat = new HashMap<>();
+                subjectStat.put("subject", subject);
+                subjectStat.put("activity_count", subjectData.size());
+                subjectStat.put("action_list", String.join(",", actionTypes));
+                result.add(subjectStat);
+            }
+            
+            // 按活动数量降序排序
+            result.sort((a, b) -> {
+                Integer countA = (Integer) a.get("activity_count");
+                Integer countB = (Integer) b.get("activity_count");
+                return countB.compareTo(countA);
+            });
+            
             return result;
             
         } catch (Exception e) {
@@ -150,15 +238,44 @@ public class LearningDataRepository implements ILearningDataRepository {
                 return Collections.emptyList();
             }
             
-            // 从数据库查询按行为类型分组的学习数据
-            List<Map<String, Object>> result = vectorDao.getUserLearningDataByActionType(userId, days);
+            // 使用Weaviate查询用户学习数据
+            List<Map<String, Object>> rawData = queryUserDataWithTimeFilter(userId, days);
             
-            if (CollectionUtils.isEmpty(result)) {
-                log.info("用户最近{}天无按行为类型分组的学习数据，userId:{}", days, userId);
+            if (rawData.isEmpty()) {
                 return Collections.emptyList();
             }
             
-            log.info("成功获取用户按行为类型分组学习数据，userId:{}, 行为类型数量:{}", userId, result.size());
+            // 按行为类型分组统计
+            Map<String, List<Map<String, Object>>> actionGroups = rawData.stream()
+                    .filter(data -> data.get("actionType") != null)
+                    .collect(Collectors.groupingBy(data -> data.get("actionType").toString()));
+            
+            // 转换为结果格式
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (Map.Entry<String, List<Map<String, Object>>> entry : actionGroups.entrySet()) {
+                String actionType = entry.getKey();
+                List<Map<String, Object>> actionData = entry.getValue();
+                
+                Set<String> subjects = actionData.stream()
+                        .map(data -> (String) data.get("subject"))
+                        .filter(Objects::nonNull)
+                        .filter(s -> !s.trim().isEmpty())
+                        .collect(Collectors.toSet());
+                
+                Map<String, Object> actionStat = new HashMap<>();
+                actionStat.put("action_type", actionType);
+                actionStat.put("activity_count", actionData.size());
+                actionStat.put("subjects_count", subjects.size());
+                result.add(actionStat);
+            }
+            
+            // 按活动数量降序排序
+            result.sort((a, b) -> {
+                Integer countA = (Integer) a.get("activity_count");
+                Integer countB = (Integer) b.get("activity_count");
+                return countB.compareTo(countA);
+            });
+            
             return result;
             
         } catch (Exception e) {
@@ -168,26 +285,143 @@ public class LearningDataRepository implements ILearningDataRepository {
     }
 
     /**
-     * 将数据库PO转换为领域实体
+     * 查询用户指定时间范围内的学习数据
      */
-    private LearningVectorEntity convertToEntity(LearningVector vector) {
-        if (vector == null) {
+    private List<Map<String, Object>> queryUserDataWithTimeFilter(String userId, int days) {
+        try {
+            // 计算时间范围
+            LocalDateTime endTime = LocalDateTime.now();
+            LocalDateTime startTime = endTime.minusDays(days);
+            
+            Field[] fields = {
+                    Field.builder().name("userId").build(),
+                    Field.builder().name("questionId").build(),
+                    Field.builder().name("questionContent").build(),
+                    Field.builder().name("actionType").build(),
+                    Field.builder().name("subject").build(),
+                    Field.builder().name("knowledgePointId").build(),
+                    Field.builder().name("createdAt").build()
+            };
+
+            io.weaviate.client.v1.filters.WhereFilter whereFilter = io.weaviate.client.v1.filters.WhereFilter.builder()
+                    .operator(io.weaviate.client.v1.filters.Operator.And)
+                    .operands(new io.weaviate.client.v1.filters.WhereFilter[]{
+                            io.weaviate.client.v1.filters.WhereFilter.builder()
+                                    .path(new String[]{"userId"})
+                                    .operator(io.weaviate.client.v1.filters.Operator.Equal)
+                                    .valueText(userId)
+                                    .build(),
+                            io.weaviate.client.v1.filters.WhereFilter.builder()
+                                    .path(new String[]{"createdAt"})
+                                    .operator(io.weaviate.client.v1.filters.Operator.GreaterThanEqual)
+                                    .valueText(startTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                                    .build()
+                    })
+                    .build();
+
+            Result<GraphQLResponse> result = weaviateClient.graphQL().get()
+                    .withClassName(weaviateClassName)
+                    .withFields(fields)
+                    .withWhere(whereFilter)
+                    .withLimit(1000)
+                    .run();
+
+            if (result.hasErrors()) {
+                log.error("查询用户学习数据失败: {}", result.getError().getMessages());
+                return Collections.emptyList();
+            }
+
+            return parseQueryResults(result.getResult());
+
+        } catch (Exception e) {
+            log.error("查询用户学习数据失败，userId:{} days:{}", userId, days, e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 解析Weaviate查询结果
+     */
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> parseQueryResults(GraphQLResponse response) {
+        try {
+            if (response == null || response.getData() == null) {
+                return Collections.emptyList();
+            }
+
+            // 安全地转换getData()的结果
+            Object dataObj = response.getData();
+            if (!(dataObj instanceof Map)) {
+                log.warn("Weaviate查询结果数据格式不正确，期望Map类型，实际类型: {}", dataObj.getClass().getSimpleName());
+                return Collections.emptyList();
+            }
+
+            Map<String, Object> data = (Map<String, Object>) dataObj;
+            Map<String, Object> get = (Map<String, Object>) data.get("Get");
+            if (get == null) {
+                return Collections.emptyList();
+            }
+
+            List<Map<String, Object>> objects = (List<Map<String, Object>>) get.get(weaviateClassName);
+            if (objects == null) {
+                return Collections.emptyList();
+            }
+
+            return objects;
+
+        } catch (Exception e) {
+            log.error("解析Weaviate查询结果失败", e);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 将Weaviate查询结果转换为LearningVectorEntity
+     */
+    private LearningVectorEntity convertToLearningVectorEntity(Map<String, Object> data) {
+        try {
+            if (data == null) {
+                return null;
+            }
+
+            LocalDateTime createdAt = null;
+            String createdAtStr = (String) data.get("createdAt");
+            if (createdAtStr != null) {
+                try {
+                    createdAt = LocalDateTime.parse(createdAtStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                } catch (Exception e) {
+                    log.warn("解析创建时间失败: {}", createdAtStr);
+                }
+            }
+
+            Integer knowledgePointId = null;
+            Object kpId = data.get("knowledgePointId");
+            if (kpId != null) {
+                if (kpId instanceof Number) {
+                    knowledgePointId = ((Number) kpId).intValue();
+                } else {
+                    try {
+                        knowledgePointId = Integer.parseInt(kpId.toString());
+                    } catch (NumberFormatException e) {
+                        log.warn("解析知识点ID失败: {}", kpId);
+                    }
+                }
+            }
+
+            return LearningVectorEntity.builder()
+                    .userId((String) data.get("userId"))
+                    .questionId((String) data.get("questionId"))
+                    .questionContent((String) data.get("questionContent"))
+                    .actionType((String) data.get("actionType"))
+                    .subject((String) data.get("subject"))
+                    .knowledgePointId(knowledgePointId)
+                    .createdAt(createdAt)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("转换LearningVectorEntity失败", e);
             return null;
         }
-        
-        return LearningVectorEntity.builder()
-                .id(vector.getId())
-                .userId(vector.getUserId())
-                .questionId(vector.getQuestionId())
-                .actionType(vector.getActionType())
-                .questionContent(vector.getQuestionContent())
-                .subject(vector.getSubject())
-                .knowledgePointId(vector.getKnowledgePointId())
-                .embedding(vector.getEmbedding())
-                .metadata(vector.getMetadata())
-                .createdAt(vector.getCreatedAt())
-                .updatedAt(vector.getUpdatedAt())
-                .build();
     }
 
     /**

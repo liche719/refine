@@ -7,10 +7,12 @@ import com.achobeta.domain.ocr.adapter.port.IOcrPort;
 import com.achobeta.domain.ocr.model.entity.QuestionEntity;
 import com.achobeta.domain.ocr.service.IOcrService;
 import com.achobeta.domain.rag.service.IVectorService;
-import com.achobeta.types.enums.ActionType;
+import com.achobeta.domain.user.event.UserUploadEvent;
 import com.achobeta.types.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -29,6 +31,9 @@ public class DefaultOcrService implements IOcrService {
     private final IFilePreprocessPort filePreprocessPort;
     private final IOcrPort ocrPort;
     private final IAiService aiService;
+    private final ApplicationEventPublisher eventPublisher;
+    
+    @Qualifier("weaviateVectorRepository")
     private final IVectorService vectorService;
 
     /**
@@ -122,26 +127,21 @@ public class DefaultOcrService implements IOcrService {
         questionEntity.setQuestionId(uuid);
         questionEntity.setUserId(userId);
 
-        // 存储学习行为向量到向量数据库
+        // 发布用户上传事件，由事件监听器处理向量存储
         try {
-            // 调用向量服务存储学习向量，行为类型为"upload"表示用户上传题目
-            boolean vectorStored = vectorService.storeLearningVector(
+            UserUploadEvent uploadEvent = new UserUploadEvent(
+                    this,
                     userId,
                     uuid,
                     recognizedText,
-                    ActionType.UPLOAD.getActionType(),
-                    null,
-                    null
+                    null, // subject 暂时为空，可以从AI分析中获取
+                    null  // knowledgePointId 暂时为空，可以从AI分析中获取
             );
-
-            if (vectorStored) {
-                log.info("成功存储题目向量到向量数据库，userId:{} questionId:{}", userId, uuid);
-            } else {
-                log.warn("存储题目向量到向量数据库失败，但不影响OCR主流程，userId:{} questionId:{}", userId, uuid);
-            }
+            eventPublisher.publishEvent(uploadEvent);
+            log.info("用户上传题目事件已发布，userId:{}, questionId:{}", userId, uuid);
         } catch (Exception e) {
-            // 向量存储失败不应该影响OCR主流程，只记录日志
-            log.error("存储题目向量到向量数据库时发生异常，userId:{} questionId:{}", userId, uuid, e);
+            // 事件发布失败不应该影响OCR主流程，只记录日志
+            log.error("发布用户上传题目事件时发生异常，userId:{} questionId:{}", userId, uuid, e);
         }
 
         // TODO 将题干存储到Redis中，通过uuid可以查询，设置24小时过期时间
