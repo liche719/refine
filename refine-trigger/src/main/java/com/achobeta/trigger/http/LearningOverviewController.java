@@ -48,10 +48,10 @@ public class LearningOverviewController {
             return Response.CUSTOMIZE_ERROR(REQUEST_NOT_VALID);
         }
         return Response.SYSTEM_SUCCESS(StudyOverviewDTO.builder()
-                .questionsNum(vo.getQuestionsNum())
-                .reviewRate(vo.getReviewRate())
-                .hardQuestions(vo.getHardQuestions())
-                .studyTime(vo.getStudyTime())
+                .questionsNum(vo.getQuestions_num())
+                .reviewRate(vo.getReview_rate())
+                .hardQuestions(vo.getHard_questions())
+                .studyTime(vo.getStudy_time())
                 .build());
 
     }

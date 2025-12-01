@@ -27,12 +27,12 @@ public class LearningOverviewService implements ILearningOverviewService{
     @Override
     public StudyOverviewVO getOverview(String userId) {
         StudyOverviewVO vo = repository.queryStudyOverview(userId);
-        if(vo == null || vo.getQuestionsNum() == 0){
+        if(vo == null || vo.getQuestions_num() == 0){
             vo = StudyOverviewVO.builder()
-                    .questionsNum(0)
-                    .reviewRate(0.0)
-                    .hardQuestions(0)
-                    .studyTime(0)
+                    .questions_num(0)
+                    .review_rate(0.0)
+                    .hard_questions(0)
+                    .study_time(0)
                     .build();
         }
         return vo;
