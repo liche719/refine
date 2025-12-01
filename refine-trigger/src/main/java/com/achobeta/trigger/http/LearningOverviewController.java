@@ -35,9 +35,11 @@ import static com.achobeta.types.enums.GlobalServiceStatusCode.*;
 public class LearningOverviewController {
     private final ILearningOverviewService service;
     private final ILearningDynamicsService learningDynamicsService;
+    private final IRedisService redisService;
 
     /**
      * 获取学习概览
+     *
      * @return 学习概览
      */
     @GetMapping("/get_overview")
@@ -62,49 +64,89 @@ public class LearningOverviewController {
 
     /**
      * 获取学习动态
+     *
      * @return 学习动态描述列表
      */
     @GetMapping("/get_study_dynamic")
     @GlobalInterception
-    public Response<List<String>> getStudyDynamic(){
+    public Response<List<String>> getStudyDynamic() {
         String userId = UserContext.getUserId();
         List<String> result = null;
         try {
             log.info("用户获取学习动态，userId:{}", userId);
+
+            // 优先从缓存获取数据
+            String cacheKey = "user_dynamics:" + userId;
+            log.info("尝试从缓存获取数据，cacheKey: {}", cacheKey);
             
-            // 获取学习动态数据
-            List<com.achobeta.domain.rag.model.valobj.LearningDynamicVO> dynamics = 
+            Object cachedData = redisService.getValue(cacheKey);
+            log.info("缓存查询结果: {}", cachedData != null ? "有数据" : "无数据");
+
+            if (cachedData != null) {
+                log.info("从缓存获取学习动态，userId: {}, 数据类型: {}", userId, cachedData.getClass().getSimpleName());
+                try {
+                    if (cachedData instanceof List) {
+                        result = (List<String>) cachedData;
+                        log.info("缓存命中，返回{}条学习动态描述", result.size());
+                        return Response.SYSTEM_SUCCESS(result);
+                    } else if (cachedData instanceof String) {
+                        // 如果是字符串，尝试解析为JSON
+                        String jsonStr = (String) cachedData;
+                        log.info("缓存数据为字符串，尝试解析JSON: {}", jsonStr);
+                        // 这里可以添加JSON解析逻辑
+                    } else {
+                        log.warn("缓存数据类型不匹配，期望List，实际: {}, 数据内容: {}", 
+                                cachedData.getClass().getSimpleName(), cachedData);
+                    }
+                } catch (Exception e) {
+                    log.error("处理缓存数据失败", e);
+                }
+            }
+
+            log.info("缓存未命中，实时分析学习动态，userId: {}", userId);
+
+            // 缓存未命中，实时获取学习动态数据
+            List<com.achobeta.domain.rag.model.valobj.LearningDynamicVO> dynamics =
                     learningDynamicsService.analyzeUserLearningDynamics(userId);
-            
+
             log.info("获取到学习动态数量: {}", dynamics != null ? dynamics.size() : 0);
-            
+
             if (dynamics == null || dynamics.isEmpty()) {
                 log.warn("未获取到学习动态数据，userId: {}", userId);
                 return Response.SYSTEM_SUCCESS(java.util.Collections.emptyList());
             }
-            
+
             // 提取描述信息
             result = dynamics.stream()
                     .map(dynamic -> {
-                        log.info("处理学习动态: type={}, title={}, description={}", 
+                        log.debug("处理学习动态: type={}, title={}, description={}",
                                 dynamic.getType(), dynamic.getTitle(), dynamic.getDescription());
                         return dynamic.getDescription();
                     })
                     .filter(description -> description != null && !description.trim().isEmpty())
                     .distinct() // 去重，防止重复的描述
                     .collect(java.util.stream.Collectors.toList());
-                    
+
             log.info("最终返回描述数量: {}", result.size());
-            
-            // 打印每个描述用于调试
-            for (int i = 0; i < result.size(); i++) {
-                log.info("描述[{}]: {}", i, result.get(i));
+
+            // 将结果缓存起来，缓存30分钟 (1800秒 = 30分钟)
+            try {
+                log.info("准备缓存学习动态结果，cacheKey: {}, 数据: {}", cacheKey, result);
+                redisService.setValue(cacheKey, result, 1800 * 1000);
+                log.info("学习动态结果已缓存，userId: {}, 缓存时间: 30分钟", userId);
+                
+                // 验证缓存是否成功
+                Object verifyCache = redisService.getValue(cacheKey);
+                log.info("缓存验证结果: {}", verifyCache != null ? "缓存成功" : "缓存失败");
+            } catch (Exception e) {
+                log.error("缓存学习动态结果失败，userId: {}", userId, e);
             }
-            
+
         } catch (Exception e) {
             log.error("getStudyDynamic error", e);
             return Response.CUSTOMIZE_ERROR(GET_STUDY_DYNAMIC_FAIL);
         }
         return Response.SYSTEM_SUCCESS(result);
     }
+
 }
