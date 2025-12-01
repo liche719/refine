@@ -13,6 +13,7 @@ import com.achobeta.types.annotation.GlobalInterception;
 import com.achobeta.types.common.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class LearningAnalysisController {
     private LearningAnalysisService learningAnalysisService;
 
     @Autowired
+    @Qualifier("weaviateVectorRepository")
     private IVectorService vectorService;
 
     /**

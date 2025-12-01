@@ -7,6 +7,7 @@ import com.achobeta.domain.rag.model.valobj.LearningDynamicVO;
 import com.achobeta.domain.ai.service.IAiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class LearningAnalysisService {
 
     @Autowired
+    @Qualifier("weaviateVectorRepository")
     private IVectorService vectorService;
 
     @Autowired
@@ -38,7 +40,15 @@ public class LearningAnalysisService {
             // 分析用户最近7天的学习动态
             List<LearningDynamicVO> dynamics = learningDynamicsService.analyzeUserLearningDynamics(userId);
 
-            log.info("用户登录学习动态分析完成，userId:{} 动态数量:{}", userId, dynamics.size());
+            if (dynamics != null && !dynamics.isEmpty()) {
+                log.info("用户登录学习动态分析完成，userId:{} 动态数量:{}", userId, dynamics.size());
+                
+                // 可以在这里将分析结果存储到缓存或数据库中，供前端查询使用
+                // 例如：存储到Redis中，key为 "user_dynamics:" + userId
+                
+            } else {
+                log.info("用户登录学习动态分析完成，但未生成有效动态，userId:{}", userId);
+            }
 
         } catch (Exception e) {
             log.error("用户登录学习动态分析失败，userId:{}", userId, e);

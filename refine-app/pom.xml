@@ -113,10 +113,10 @@
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j</artifactId>
         </dependency>
-        <!--向量数据库-->
+        <!-- Weaviate客户端 -->
         <dependency>
-            <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-pgvector</artifactId>
+            <groupId>io.weaviate</groupId>
+            <artifactId>client</artifactId>
         </dependency>
 
         <!-- 工程模块；启动依赖 trigger->domain, infrastructure-->

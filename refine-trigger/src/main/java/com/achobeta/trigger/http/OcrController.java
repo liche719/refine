@@ -75,8 +75,6 @@ public class OcrController {
             // 调用OCR服务提取文件中的第一个题目
             QuestionEntity questionEntity = ocrService.extractQuestionContent(userId, file.getBytes(), ft);
 
-            //TODO
-            // ai根据向量库（和mysql知识点表里的完全一致）（新建一个表）查询有没有相似知识点，再返回知识点名称
             AiGenerationService.knowledgePoint knowledgePoint = aiGenerationService.knowledgeAnalysis(questionEntity.getQuestionText());
             if (knowledgePoint == null || knowledgePoint.isEmpty()) {
                 log.warn("ai生成的知识点为空，请检查ai生成知识点的逻辑");
