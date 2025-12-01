@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -47,15 +48,24 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
 
             // 3. 使用AI分析学习动态
             List<LearningDynamicVO> dynamics = new ArrayList<>();
+            StringBuilder responseBuilder = new StringBuilder();
+            
             // 异步执行AI分析任务，解析题目并生成学习动态
             CompletableFuture<Void> aiAnalysis = CompletableFuture.runAsync(() -> {
                 aiService.aiChat(analysisPrompt, response -> {
                     try {
-                        // 解析AI返回的JSON格式学习动态
-                        List<LearningDynamicVO> parsedDynamics = parseAIResponse(response);
-                        dynamics.addAll(parsedDynamics);
+                        // 收集所有响应片段
+                        responseBuilder.append(response);
+                        
+                        // 检查是否收到完整的JSON响应
+                        String currentResponse = responseBuilder.toString();
+                        if (isCompleteJsonResponse(currentResponse)) {
+                            // 解析完整的AI返回的JSON格式学习动态
+                            List<LearningDynamicVO> parsedDynamics = parseAIResponse(currentResponse);
+                            dynamics.addAll(parsedDynamics);
+                        }
                     } catch (Exception e) {
-                        log.error("解析AI分析结果失败", e);
+                        log.error("解析AI分析结果失败：{}", response, e);
                     }
                 });
             });
@@ -64,9 +74,17 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
             // 等待AI分析完成，最多等待30秒
             try {
                 aiAnalysis.get(30, TimeUnit.SECONDS);
+                
+                // 如果AI分析没有产生结果，使用基于规则的分析
+                if (dynamics.isEmpty()) {
+                    log.warn("AI分析未产生结果，使用基于规则的分析，userId:{}", userId);
+                    return generateRuleBasedDynamics(userId);
+                }
+            } catch (TimeoutException e) {
+                log.error("AI分析超时，userId:{}", userId, e);
+                return generateRuleBasedDynamics(userId);
             } catch (Exception e) {
-                log.error("AI分析超时或失败", e);
-                // 如果AI分析失败，返回基于规则的分析结果
+                log.error("AI分析失败，userId:{}", userId, e);
                 return generateRuleBasedDynamics(userId);
             }
             // 4. 限制返回最多3条动态
@@ -163,17 +181,26 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
                 学习数据：
                 %s
                 
-                请按照以下JSON格式返回分析结果，每条动态都要有明确的类型、标题、描述和建议：
+                **重要要求：请严格按照以下JSON格式返回分析结果，不要添加任何额外的文字说明，只返回纯JSON数组：**
                 
                 [
                   {
-                    "type": "progress|weakness|achievement",
+                    "type": "progress",
                     "title": "动态标题",
                     "description": "详细描述",
                     "subject": "相关科目",
-                    "priority": 1-5,
+                    "priority": 3,
                     "suggestion": "建议行动",
-                    "relatedQuestionCount": 数量
+                    "relatedQuestionCount": 5
+                  },
+                  {
+                    "type": "weakness",
+                    "title": "另一个动态标题",
+                    "description": "另一个详细描述",
+                    "subject": "另一个科目",
+                    "priority": 4,
+                    "suggestion": "另一个建议行动",
+                    "relatedQuestionCount": 2
                   }
                 ]
                 
@@ -181,6 +208,13 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
                 - progress: 学习进步，如某科目练习增加、错误率下降等
                 - weakness: 发现薄弱点，如某科目错误较多、学习频率低等
                 - achievement: 学习成就，如连续学习天数、完成学习目标等
+                
+                **注意：**
+                1. 必须返回有效的JSON数组格式
+                2. priority必须是1-5之间的整数
+                3. relatedQuestionCount必须是非负整数
+                4. 所有字符串字段不能为null
+                5. 不要在JSON前后添加任何解释文字
                 
                 请确保返回的是有效的JSON格式，优先级高的动态排在前面。
                 """, learningDataSummary);
@@ -191,8 +225,16 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
      */
     private List<LearningDynamicVO> parseAIResponse(String aiResponse) {
         try {
+            log.debug("开始解析AI响应，响应长度: {}", aiResponse != null ? aiResponse.length() : 0);
+            
+            if (aiResponse == null || aiResponse.trim().isEmpty()) {
+                log.warn("AI响应为空，返回空列表");
+                return Collections.emptyList();
+            }
+            
             // 提取JSON部分（AI可能返回额外的文本）
             String jsonPart = extractJsonFromResponse(aiResponse);
+            log.debug("提取的JSON部分: {}", jsonPart.length() > 500 ? jsonPart.substring(0, 500) + "..." : jsonPart);
 
             // 解析JSON
             List<Map<String, Object>> dynamicMaps = objectMapper.readValue(
@@ -201,38 +243,125 @@ public class LearningDynamicsServiceImpl implements ILearningDynamicsService {
 
             List<LearningDynamicVO> dynamics = new ArrayList<>();
             for (Map<String, Object> map : dynamicMaps) {
-                LearningDynamicVO dynamic = LearningDynamicVO.builder()
-                        .type(map.get("type").toString())
-                        .title(map.get("title").toString())
-                        .description(map.get("description").toString())
-                        .subject(map.get("subject") != null ? map.get("subject").toString() : null)
-                        .priority(Integer.parseInt(map.get("priority").toString()))
-                        .suggestion(map.get("suggestion") != null ? map.get("suggestion").toString() : null)
-                        .relatedQuestionCount(map.get("relatedQuestionCount") != null ?
-                                Integer.parseInt(map.get("relatedQuestionCount").toString()) : 0)
-                        .build();
-                dynamics.add(dynamic);
+                try {
+                    LearningDynamicVO dynamic = LearningDynamicVO.builder()
+                            .type(getStringValue(map, "type"))
+                            .title(getStringValue(map, "title"))
+                            .description(getStringValue(map, "description"))
+                         .subject(getStringValue(map, "subject"))
+                            .priority(getIntValue(map, "priority", 3))
+                            .suggestion(getStringValue(map, "suggestion"))
+                            .relatedQuestionCount(getIntValue(map, "relatedQuestionCount", 0))
+                            .build();
+                    dynamics.add(dynamic);
+                    log.debug("成功解析学习动态: type={}, title={}", dynamic.getType(), dynamic.getTitle());
+                } catch (Exception e) {
+                    log.warn("解析单个学习动态失败，跳过该项: {}", map, e);
+                }
             }
 
+            log.info("成功解析AI响应，获得{}条学习动态", dynamics.size());
             return dynamics;
 
         } catch (Exception e) {
-            log.error("解析AI分析结果失败：{}", aiResponse, e);
+            log.error("解析AI分析结果失败，响应内容: {}", 
+                      aiResponse != null && aiResponse.length() > 200 ? 
+                      aiResponse.substring(0, 200) + "..." : aiResponse, e);
             return Collections.emptyList();
         }
+    }
+    
+    /**
+     * 安全获取字符串值
+     */
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : null;
+    }
+    
+    /**
+     * 安全获取整数值
+     */
+    private int getIntValue(Map<String, Object> map, String key, int defaultValue) {
+        Object value = map.get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            if (value instanceof Number) {
+                return ((Number) value).intValue();
+            }
+            return Integer.parseInt(value.toString());
+        } catch (NumberFormatException e) {
+            log.warn("无法解析整数值: key={}, value={}, 使用默认值: {}", key, value, defaultValue);
+            return defaultValue;
+        }
+    }
+
+    /**
+     * 检查响应是否包含完整的JSON
+     */
+    private boolean isCompleteJsonResponse(String response) {
+        if (response == null || response.trim().isEmpty()) {
+            return false;
+        }
+        
+        String trimmed = response.trim();
+        
+        // 检查是否包含JSON数组的开始和结束标记
+        int startIndex = trimmed.indexOf('[');
+        int endIndex = trimmed.lastIndexOf(']');
+        
+        if (startIndex == -1 || endIndex == -1 || endIndex <= startIndex) {
+            return false;
+        }
+        
+        // 简单的括号匹配检查
+        int openBrackets = 0;
+        int closeBrackets = 0;
+        
+        for (char c : trimmed.toCharArray()) {
+            if (c == '[') openBrackets++;
+            if (c == ']') closeBrackets++;
+        }
+        
+        return openBrackets == closeBrackets && openBrackets > 0;
     }
 
     /**
      * 从AI响应中提取JSON部分
      */
     private String extractJsonFromResponse(String response) {
+        if (response == null || response.trim().isEmpty()) {
+            throw new IllegalArgumentException("AI响应为空");
+        }
+        
+        String trimmed = response.trim();
+        log.debug("尝试从响应中提取JSON，响应长度: {}", trimmed.length());
+        
         // 查找JSON数组的开始和结束
-        int start = response.indexOf('[');
-        int end = response.lastIndexOf(']');
+        int start = trimmed.indexOf('[');
+        int end = trimmed.lastIndexOf(']');
 
         if (start != -1 && end != -1 && end > start) {
-            return response.substring(start, end + 1);
+            String jsonPart = trimmed.substring(start, end + 1);
+            log.debug("成功提取JSON部分，长度: {}", jsonPart.length());
+            return jsonPart;
         }
+        
+        // 如果没有找到完整的JSON数组，尝试查找JSON对象
+        start = trimmed.indexOf('{');
+        end = trimmed.lastIndexOf('}');
+        
+        if (start != -1 && end != -1 && end > start) {
+            // 包装单个对象为数组
+            String jsonPart = "[" + trimmed.substring(start, end + 1) + "]";
+            log.debug("找到JSON对象，包装为数组，长度: {}", jsonPart.length());
+            return jsonPart;
+        }
+        
+        log.error("无法从AI响应中提取有效的JSON，响应内容: {}", 
+                  trimmed.length() > 200 ? trimmed.substring(0, 200) + "..." : trimmed);
         throw new IllegalArgumentException("无法从AI响应中提取有效的JSON");
     }
 

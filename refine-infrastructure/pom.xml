@@ -11,6 +11,10 @@
     <artifactId>refine-infrastructure</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>io.weaviate</groupId>
+            <artifactId>client</artifactId>
+        </dependency>
         <!-- PDFBox -->
         <dependency>
             <groupId>org.apache.pdfbox</groupId>

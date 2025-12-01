@@ -76,11 +76,11 @@
                 <artifactId>postgresql</artifactId>
                 <version>42.7.1</version>
             </dependency>
-            <!-- pgvector Java客户端 -->
+            <!-- Weaviate Java客户端 -->
             <dependency>
-                <groupId>com.pgvector</groupId>
-                <artifactId>pgvector</artifactId>
-                <version>0.1.4</version>
+                <groupId>io.weaviate</groupId>
+                <artifactId>client</artifactId>
+                <version>4.8.0</version>
             </dependency>
             <!-- LangChain4j 嵌入模型 -->
             <dependency>
@@ -181,7 +181,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.9</version>
+                <version>3.12.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -235,14 +235,6 @@
                 <artifactId>langchain4j-reactor</artifactId>
                 <version>${langchain4j.version}</version>
             </dependency>
-            <!--向量数据库-->
-            <dependency>
-                <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-pgvector</artifactId>
-                <version>${langchain4j.version}</version>
-            </dependency>
-
-
             <!-- 工程模块 -->
             <dependency>
                 <groupId>com.achobeta</groupId>

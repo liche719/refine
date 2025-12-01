@@ -125,13 +125,15 @@ redis:
       ping-interval: 60000
       keep-alive: true
 
-pgvector:
+# Weaviate 向量数据库配置
+weaviate:
   config:
-    host: ${PGVECTOR_IP:postgres}
-    port: 5432
-    database: postgres
-    user: root
-    password: 123456
+    host: ${WEAVIATE_HOST:fmamdtzprxs1hi3olvplxg.c0.asia-southeast1.gcp.weaviate.cloud}
+    port: ${WEAVIATE_PORT:443}
+    scheme: ${WEAVIATE_SCHEME:https}
+    api-key: ${WEAVIATE_API_KEY:YWtxam9aYkxzbFBkdWlCdV9IOThJWHdHdGNHSUplTE9VeERtSWk4a216emN3Z3pXVnUzNVZKSG9JeEFZPV92MjAw}  # Weaviate Cloud API Key
+    timeout: 30000  # 连接超时时间（毫秒）
+    class-name: LearningVector  # Weaviate中的类名
 
 # MyBatis 配置【如需使用记得打开】
 mybatis:
