@@ -13,17 +13,17 @@ public class StudyOverviewVO {
     /**
      *累计错题数量
      */
-    private int questionsNum;
+    private int questions_num;
     /**
      * 复习巩固率（百分比）
      */
-    private double reviewRate;
+    private double review_rate;
     /**
      * 易错知识点数量
      */
-    private int hardQuestions;
+    private int hard_questions;
     /**
      * 累计学习时长（小时）
      */
-    private int studyTime;
+    private int study_time;
 }
